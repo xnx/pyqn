@@ -1,4 +1,4 @@
-from quantity import Quantity
+from pyqn.quantity import Quantity
 
 q1 = Quantity(name='E1', value=4.2e-19, units='J', sd=1.e-20)
 q2 = Quantity(name='E2', value=3.7e-19, units='J', sd=1.5e-20)
@@ -13,4 +13,13 @@ q1.convert_units_to('eV')
 print q1, q1.sd
 
 print q3-q2
-print q4-q1
+#print q4-q1
+
+print '----'
+
+ss = ['E1 = 1.342(7)D-03 J', '2309.32(400)', '-1.23443(9)e+05 meV/T',
+      'r = +1.032(23)e-6', 'charlotte=-232.434(90) mmHg-1.A',
+      '100466(7) nJ-1', 'emma =34.5e-2', '4.002602(2)']
+for s in ss:
+    p = Quantity.parse(s)
+    print '"%s"' % s, p, p.sd

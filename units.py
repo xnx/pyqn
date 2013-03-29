@@ -29,7 +29,8 @@ class Units(object):
         elif type(units) == list:
             self.atom_units = copy.deepcopy(units)
         else:
-            raise TypeError
+            raise TypeError('Attempt to initialize Units object with'
+                            ' argument units of type %s' % type(units))
         # also get the dimensions of the units
         self.dims = self.get_dims()
 

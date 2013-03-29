@@ -5,9 +5,21 @@
 # Department of Physics and Astronomy, University College London
 # christian.hill@ucl.ac.uk
 
+import re
 import math
 from symbol import Symbol
 from units import Units, UnitsError
+
+class QuantityError(Exception):
+    """
+    An Exception class for errors that might occur whilst manipulating
+    Quantity objects.
+
+    """
+    def __init__(self, error_str):
+        self.error_str = error_str
+    def __str__(self):
+        return self.error_str
 
 class Quantity(Symbol):
     """
@@ -32,7 +44,10 @@ class Quantity(Symbol):
         Symbol.__init__(self, name, latex, html, definition)
         self.value = value
         self.sd = sd
-        self.units = Units(units)
+        if units is None:
+            self.units = Units([])
+        else:
+            self.units = Units(units)
 
     def __str__(self):
         """ A simple string representation of the Quantity. """
@@ -134,3 +149,42 @@ class Quantity(Symbol):
             units = self.units * other.units
             return Quantity(value=value, units=units, sd=sd)
 
+    @classmethod
+    def parse(self, s_quantity, name=None, units=None, sd=None,
+              definition=None):
+        s_quantity = s_quantity.strip()
+        if '=' in s_quantity:
+            fields = s_quantity.split('=')
+            s_name = fields[0].strip()
+            if s_name:
+                name = s_name
+            s_quantity = fields[1].strip()
+        fields = s_quantity.split(' ')
+        s_valsd = fields[0]
+        if len(fields) == 2:
+            units = Units(fields[1])
+        # force lower case, and replace Fortran-style 'D'/'d' exponents
+        s_valsd = s_valsd.lower()
+        s_valsd = s_valsd.replace('d','e')
+        if 'e' in s_valsd:
+            s_mantsd, s_exp = s_valsd.split('e')
+            exp = int(s_exp)
+        else:
+            s_mantsd = s_valsd
+            exp = 0
+        patt = '([+-]?\d*\.?\d*)\(?(\d+)?\)?'
+        m = re.match(patt, s_mantsd)
+        if not m:
+            raise QuantityError('Failed to parse string into quantity:\n'\
+                                '%s' % s_mantsd)
+        s_mantissa, s_sd = m.groups()
+        mantissa = float(s_mantissa)
+        value = mantissa * 10**exp
+        sd = None
+        if s_sd:
+            if '.' in s_mantissa:
+                ndp = len(s_mantissa) - s_mantissa.index('.') - 1
+            else:
+                ndp = 0
+            sd = float(s_sd) * 10**(exp-ndp)
+        return Quantity(name=name, value=value, units=units, sd=sd)

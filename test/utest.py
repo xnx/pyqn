@@ -1,4 +1,4 @@
-from units import Units
+from pyqn.units import Units
 
 u1 = Units('m.s-1')
 u2 = Units('cm.hr-1/m')

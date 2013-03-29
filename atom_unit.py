@@ -98,7 +98,7 @@ class AtomUnit(object):
         try:
             base_unit = base_unit_stems[stem]
         except:
-            raise UnitsError("Unrecognised unit: %s" % unit_atom)
+            raise UnitsError("Unrecognised unit: %s" % s_unit_atom)
 
         # if there is an exponent, determine what it is (default is 1)
         exponent = 1
