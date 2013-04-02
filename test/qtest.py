@@ -23,3 +23,4 @@ ss = ['E1 = 1.342(7)D-03 J', '2309.32(400)', '-1.23443(9)e+05 meV/T',
 for s in ss:
     p = Quantity.parse(s)
     print '"%s"' % s, p, p.sd
+    print 'as_str():', p.as_str()

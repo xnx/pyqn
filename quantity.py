@@ -57,6 +57,73 @@ class Quantity(Symbol):
         else:
             return '%s %s' % (self.value, self.units)
 
+    def value_as_str(self, b_sd, nsd_digits=2, small=1.e-3, large=1.e5):
+        """
+        Return a string representation of the parameter and its
+        standard deviation in the conventional format used in
+        the spectroscopic literature:
+        Examples:
+        0.04857623(71) for 4.857623e-2 +/- 7.1e-7
+        -0.412(40) for -0.412 +/- 0.04
+        1.7324(38)e7 for 17324000 +/- 380
+        
+        Notes:
+        This routine has not been rigorously tested, because I wrote
+        it at 1am. Therefore, it would be a good idea to output the
+        raw parameter values and standard deviations somewhere as
+        well as using the output from this routine...
+        
+        Arguments:
+        nsd_digits: the number of digits in the standard deviation
+            (the default is 2)
+        small: parameter values smaller than small are output in
+            scientific notation (<mantissa>e<power>)
+        large: parameter values larger than large are output in
+            scientific notation (<mantissa>e-<power>)
+        
+        """
+        N,sd = self.value, self.sd
+        
+        if sd is None:
+            return str(N)
+
+        absN = abs(N)
+        if (absN < small or absN > large) and absN != 0.:
+            # scientific notation
+            power = int(math.floor(math.log(absN, 10)))
+            N *= pow(10, -power)
+            sd *= pow(10, -power)
+            dp = int(-math.log(sd,10))+nsd_digits
+            if dp < 0:
+                dp = 0
+            sd_digits = int(round(sd * pow(10, dp)))
+            fmt = "%." + str(dp) + "f(" + str(sd_digits) + ")e%d"
+            return fmt % (N, power)
+        else:
+            # regular floating point notation
+            dp = int(-math.log(sd, 10)) + nsd_digits
+            if dp < 0:
+                dp = 0
+            sd_digits = int(round(sd * pow(10, dp)))
+            fmt = "%." + str(dp) + "f(" + str(sd_digits) + ')'
+
+        return fmt % N
+
+    def as_str(self, b_name=True, b_sd=True, b_units=True):
+        """
+        Output the Quantity object as a string, optionally with name,
+        standard deviation and units.
+
+        """
+
+        s = []
+        if b_name and self.name:
+            s.append('%s = ' % self.name)
+        s.append(self.value_as_str(b_sd))
+        if b_units and self.units.has_units():
+            s.append(' %s' % str(self.units))
+        return ''.join(s)
+
     def convert_units_to(self, new_units):
         """
         Convert the Quantity from one set of units to an equivalent set,

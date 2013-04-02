@@ -34,6 +34,11 @@ class Units(object):
         # also get the dimensions of the units
         self.dims = self.get_dims()
 
+    def has_units(self):
+        if self.atom_units:
+            return True
+        return False
+
     def get_dims(self):
         """
         Return a Dimensions object representing the dimensions of this
