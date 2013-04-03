@@ -84,7 +84,7 @@ class Quantity(Symbol):
         """
         N,sd = self.value, self.sd
         
-        if sd is None:
+        if not sd:
             return str(N)
 
         absN = abs(N)
