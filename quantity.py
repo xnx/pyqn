@@ -57,7 +57,7 @@ class Quantity(Symbol):
         else:
             return '%s %s' % (self.value, self.units)
 
-    def value_as_str(self, b_sd, nsd_digits=2, small=1.e-3, large=1.e5):
+    def value_as_str(self, nsd_digits=2, small=1.e-3, large=1.e5):
         """
         Return a string representation of the parameter and its
         standard deviation in the conventional format used in
@@ -82,7 +82,7 @@ class Quantity(Symbol):
             scientific notation (<mantissa>e-<power>)
         
         """
-        N,sd = self.value, self.sd
+        N, sd = self.value, self.sd
         
         if not sd:
             return str(N)
@@ -119,7 +119,10 @@ class Quantity(Symbol):
         s = []
         if b_name and self.name:
             s.append('%s = ' % self.name)
-        s.append(self.value_as_str(b_sd))
+        if b_sd:
+            s.append(self.value_as_str(b_sd))
+        else:
+            s.append(str(self.value))
         if b_units and self.units.has_units():
             s.append(' %s' % str(self.units))
         return ''.join(s)

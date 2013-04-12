@@ -11,6 +11,23 @@ print A.units.get_dims(), B.units.get_dims(), C.units.get_dims()
 D = B/A; D.name = 'D = B/A'
 print A.as_str(), B.as_str(), D.as_str()
 print A.units.get_dims(), B.units.get_dims(), D.units.get_dims()
+
+DeltaH = Quantity.parse('DeltaH = 47.15(4) kJ.mol-1')
+T = Quantity(name='T', units='K', value=298., sd=0.5)
+DeltaS = DeltaH / T
+DeltaS.convert_units_to('J.K-1.mol-1')
+print DeltaS.as_str()
+print DeltaS.units.get_dims()
+DeltaS2 = Quantity.parse('DeltaS2 = -75.24(25) J.K-1.mol-1')
+DeltaS3 = DeltaS + DeltaS2
+print DeltaS3
+print DeltaS3.as_str()
+
+g = Quantity.parse('g = 9.818(7) m.s-2')
+print g.as_str()
+print g.as_str(b_sd=False)
+print g.as_str(b_name=False, b_sd=False)
+
 sys.exit(0)
 
 q1 = Quantity(name='E1', value=4.2e-19, units='J', sd=1.e-20)
