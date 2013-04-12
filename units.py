@@ -105,6 +105,7 @@ class Units(object):
                 # this prefix and BaseUnit is already in the AtomUnits
                 # of the first operand: update its exponent in the product
                 product.atom_units[i].exponent += other_atom_unit.exponent
+                product.atom_units[i].dims *= other_atom_unit.dims
                 if product.atom_units[i].exponent == 0:
                     # this AtomUnit has cancelled:
                     del product.atom_units[i]
