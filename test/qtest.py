@@ -24,6 +24,7 @@ print DeltaS3
 print DeltaS3.as_str()
 
 g = Quantity.parse('g = 9.818(7) m.s-2')
+print g
 print g.as_str()
 print g.as_str(b_sd=False)
 print g.as_str(b_name=False, b_sd=False)
