@@ -123,6 +123,7 @@ class Units(object):
                 # this prefix and BaseUnit is already in the AtomUnits
                 # of the first operand: update its exponent in the ratio
                 ratio.atom_units[i].exponent -= other_atom_unit.exponent
+                ratio.atom_units[i].dims /= other_atom_unit.dims
                 if ratio.atom_units[i].exponent == 0:
                     # this AtomUnit has cancelled:
                     del ratio.atom_units[i]

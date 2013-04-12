@@ -2,11 +2,15 @@ import sys
 from pyqn.quantity import Quantity
 
 
-A = Quantity.parse('A = 12.3 m2')
-B = Quantity.parse('B = 2.1 m')
+A = Quantity.parse('A = 12.3(4) m2')
+B = Quantity.parse('B = 2.10(5) m')
 C = B*A; C.name = 'C = B*A'
 print A,B,C
 print A.units.get_dims(), B.units.get_dims(), C.units.get_dims()
+
+D = B/A; D.name = 'D = B/A'
+print A.as_str(), B.as_str(), D.as_str()
+print A.units.get_dims(), B.units.get_dims(), D.units.get_dims()
 sys.exit(0)
 
 q1 = Quantity(name='E1', value=4.2e-19, units='J', sd=1.e-20)

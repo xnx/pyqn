@@ -216,6 +216,35 @@ class Quantity(Symbol):
             units = self.units * other.units
             return Quantity(value=value, units=units, sd=sd)
 
+    def __div__(self, other):
+        """
+        Divide this quantity by a number or another quantity. Errors are
+        propagated, but assumed to be uncorrelated.
+
+        """
+
+        if self.value is None:
+            raise ValueError
+        if type(other) in (int, float):
+            if self.sd is None:
+                sd = None
+            else:
+                sd = abs(other) / self.sd
+            return Quantity(value=self.value/other, units=self.unit, sd=sd)
+        else:
+            if type(other) != Quantity:
+                raise TypeError
+            if other.value is None:
+                raise ValueError
+            value = self.value / other.value
+            if not self.sd or not other.sd:
+                sd = None
+            else:
+                sd = value * math.hypot(self.sd/self.value,
+                                        other.sd/other.value)
+            units = self.units / other.units
+            return Quantity(value=value, units=units, sd=sd)
+
     @classmethod
     def parse(self, s_quantity, name=None, units=None, sd=None,
               definition=None):
