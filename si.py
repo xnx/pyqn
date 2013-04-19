@@ -1,11 +1,27 @@
 # -*- coding: utf-8 -*-
-
-# Christian Hill
-# v0.2 21/11/2012
-# v0.1 28/11/2011
+# si.py
+# A class representing the SI prefixes (SIPrefix) and a list of the SI
+# base units (si_unit_stems): length (L), mass (M), time (T), temperature
+# (Theta), amount of substance (Q), current (C) and luminous intensity (I).
 #
-# Metadata relating to SI units and their prefixes
-
+# Copyright (C) 2012 Christian Hill
+# Department of Physics and Astronomy, University College London
+# christian.hill@ucl.ac.uk
+#
+# This file is part of PyQn
+#
+# PyQn is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# PyQn is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with PyQn.  If not, see <http://www.gnu.org/licenses/>
 
 class SIPrefix(object):
     """ A little class describing SI prefixes. """
