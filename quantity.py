@@ -143,7 +143,7 @@ class Quantity(Symbol):
             s.append(' %s' % str(self.units))
         return ''.join(s)
 
-    def convert_units_to(self, new_units):
+    def convert_units_to(self, new_units, force=None):
         """
         Convert the Quantity from one set of units to an equivalent set,
         complaining loudly if the two sets of units do not have the same
@@ -154,12 +154,8 @@ class Quantity(Symbol):
         if self.value is None:
             return
         to_units = Units(new_units)
-        try:
-            assert to_units.get_dims() == self.units.get_dims()
-        except AssertionError:
-            raise UnitsError('Can\'t convert between units with different'
-                  ' dimensions')
-        fac = self.units.conversion(to_units)
+        fac = self.units.conversion(to_units, force)
+
         self.value *= fac
         if self.sd is not None:
             self.sd *= fac

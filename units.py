@@ -23,6 +23,7 @@
 
 import copy
 from dimensions import Dimensions
+from dimensions import d_length, d_energy, d_time
 from atom_unit import AtomUnit, UnitsError, feq
 
 class Units(object):
@@ -172,16 +173,48 @@ class Units(object):
             fac *= atom_unit.si_fac
         return fac
 
-    def conversion(self, other):
+    def conversion(self, other, force=None):
         """
         Return the factor required to convert this Units to
-        another. Their dimensions have to match, of course.
+        another. Their dimensions have to match, unless force is set
+        to allow special cases:
+        force='spec':   spectroscopic units: conversions between [L-1],
+        [M,L2,T-2], [T-1] are allowed (i.e. cm-1, s-1, and J can be
+        interconverted through factors of h, hc).
  
         """
 
         if self.get_dims() != other.get_dims():
+            if force == 'spec':
+                return self.spec_conversion(other)
             raise UnitsError('Failure in units conversion: units %s[%s] and'
                              ' %s[%s] have different dimensions'
                            % (self, self.get_dims(), other, other.get_dims()))
         return self.to_si() / other.to_si()
+
+    def spec_conversion(self, other):
+        h = 6.62606896e-34
+        c = 299792458.
+        d_wavenumber = d_length**-1
+        d_frequency = d_time**-1
+        from_dims = self.get_dims()
+        to_dims = other.get_dims()
+        fac = self.to_si()
+        if from_dims == d_wavenumber:
+            fac *= h*c
+        elif from_dims == d_frequency:
+            fac *= h
+        elif from_dims != d_energy:
+            raise UnitsError('Failure in conversion of spectroscopic units:'
+                ' I only recognise from-units of wavenumber, energy and'
+                ' frequency but got %s' % self.units)
+        if to_dims == d_wavenumber:
+            fac /= h*c
+        elif to_dims == d_frequency:
+            fac /= h
+        elif to_dims != d_energy:
+            raise UnitsError('Failure in conversion of spectroscopic units:'
+                ' I only recognise to-units of wavenumber, energy and'
+                ' frequency but got %s' % other.units)
+        return fac / other.to_si()
 

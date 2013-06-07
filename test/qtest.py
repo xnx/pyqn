@@ -29,7 +29,7 @@ print g.as_str()
 print g.as_str(b_sd=False)
 print g.as_str(b_name=False, b_sd=False)
 
-sys.exit(0)
+#sys.exit(0)
 
 q1 = Quantity(name='E1', value=4.2e-19, units='J', sd=1.e-20)
 q2 = Quantity(name='E2', value=3.7e-19, units='J', sd=1.5e-20)
@@ -55,3 +55,15 @@ for s in ss:
     p = Quantity.parse(s)
     print '"%s"' % s, p, p.sd
     print 'as_str():', p.as_str()
+
+
+w= Quantity(name='nu', value=2000., units='cm-1')
+print w
+w.convert_units_to('MHz', force='spec')
+print w
+w.convert_units_to('eV', force='spec')
+print w
+w.convert_units_to('J', force='spec')
+print w
+w.convert_units_to('m-1', force='spec')
+print w
