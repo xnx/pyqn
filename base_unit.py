@@ -87,7 +87,7 @@ BaseUnit('deg', 'degree', 'angle', 0.017453292519943295, '', 'deg',
 BaseUnit('rad', 'radian', 'angle', 1., '', 'rad', d_dimensionless),
 BaseUnit('arcmin', 'arcminute', 'angle', 2.908882086657216e-4, '', 'arcmin',
          d_dimensionless),
-# NB we can't allow as for arcseconds because of ambiguity with attoseconds
+# NB we can't allow 'as' for arcseconds because of ambiguity with attoseconds
 BaseUnit('asec', 'arcsecond', 'angle', 4.84813681109536e-6, '', 'asec',
          d_dimensionless),
 BaseUnit('sr', 'steradian', 'solid angle', 1., '', 'sr', d_dimensionless),

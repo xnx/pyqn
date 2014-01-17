@@ -23,7 +23,7 @@
 
 import copy
 from dimensions import Dimensions
-from dimensions import d_length, d_energy, d_time
+from dimensions import d_dimensionless, d_length, d_energy, d_time
 from atom_unit import AtomUnit, UnitsError, feq
 
 class Units(object):
@@ -127,9 +127,19 @@ class Units(object):
                     # this AtomUnit has cancelled:
                     del product.atom_units[i]
         return product
+    def __rmul__(self, other):
+        if type(other) == str:
+            other = Units(other)
+        elif other == 1:
+            other = Units('1')
+        return self.__mul__(other)
 
     def __div__(self, other):
         """ Return the ratio of this Units divided by another. """
+        if type(other) == str:
+            other = Units(other)
+        elif other == 1:
+            other = Units('1')
         ratio = Units(self.atom_units)
         for other_atom_unit in other.atom_units:
             i = ratio._find_atom(other_atom_unit)
@@ -145,6 +155,12 @@ class Units(object):
                     # this AtomUnit has cancelled:
                     del ratio.atom_units[i]
         return ratio
+    def __rdiv__(self, other):
+        if type(other) == str:
+            other = Units(other)
+        elif other == 1:
+            other = Units('1')
+        return other.__div__(self)
  
     def __str__(self):
         """ String representation of this Units. """
@@ -154,6 +170,8 @@ class Units(object):
         """ Test for equality with another Units object. """
         if other is None:
             return False
+        elif other == 1:
+            return self.get_dims() == d_dimensionless
         if self.get_dims() != other.get_dims():
         # obviously the units aren't the same if they have different dimensions
             return False
@@ -183,6 +201,9 @@ class Units(object):
         interconverted through factors of h, hc).
  
         """
+
+        if type(other) == str:
+            other = Units(other)
 
         if self.get_dims() != other.get_dims():
             if force == 'spec':
