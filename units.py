@@ -239,3 +239,5 @@ class Units(object):
                 ' frequency but got %s' % other.units)
         return fac / other.to_si()
 
+def convert(from_units, to_units):
+    return Units(from_units).conversion(to_units)
