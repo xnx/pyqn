@@ -2,7 +2,7 @@
 # units.py
 # A class representing the units of a physical quantity.
 #
-# Copyright (C) 2012 Christian Hill
+# Copyright (C) 2012-2015 Christian Hill
 # Department of Physics and Astronomy, University College London
 # christian.hill@ucl.ac.uk
 #
@@ -41,7 +41,7 @@ class Units(object):
 
         if type(units) == Units:
             self.__init__(units.atom_units)
-        elif type(units) == str:
+        elif type(units) in (str, unicode):
             self.__init__(self.parse(units).atom_units)
         elif type(units) == list:
             self.atom_units = copy.deepcopy(units)

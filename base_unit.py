@@ -3,7 +3,7 @@
 # A class representing a "base unit", identified as a single unit with no
 # prefix or exponent, such as 'g', 'hr', 'bar', 's'.
 #
-# Copyright (C) 2012 Christian Hill
+# Copyright (C) 2012-2015 Christian Hill
 # Department of Physics and Astronomy, University College London
 # christian.hill@ucl.ac.uk
 #
@@ -77,6 +77,13 @@ BaseUnit('Pa', 'pascal', 'pressure', 1., '', 'Pa', d_pressure),
 BaseUnit('C', 'coulomb', 'charge', 1., '', 'C', d_charge),
 BaseUnit('A', 'amp', 'current', 1., '', 'A', Dimensions(C=1)),
 BaseUnit('V', 'volt', 'voltage', 1., '', 'V', d_voltage),
+BaseUnit(u'Ω', 'ohm', 'electric resistance', 1, '', r'\Omega',
+         d_voltage / d_current),
+BaseUnit('F', 'farad', 'capacitance', 1., '', 'F', d_charge / d_voltage),
+BaseUnit('Wb', 'weber', 'magnetic flux', 1, '', 'Wb', d_magnetic_flux),
+BaseUnit('H', 'henry', 'inductance', 1, '', 'H', d_magnetic_flux / d_current),
+BaseUnit('S', 'siemens', 'electric conductance', 1, '', 'S',
+         d_current / d_voltage),
 BaseUnit('T', 'tesla', 'magnetic field strength', 1., '', 'T',
          d_magfield_strength),
 BaseUnit('Hz', 'hertz', 'cyclic frequency', 1., '', 'Hz', d_time**-1),
@@ -141,6 +148,40 @@ BaseUnit('D', 'debye', 'electric dipole moment', 1.e-21/299792458., '', 'D',
 BaseUnit('hbar', 'hbar', 'angular momentum', 1.05457148e-34, '', '\hbar',
          Dimensions(L=2, M=1, T=-1)),
 BaseUnit('e', 'electron charge', 'charge', 1.602176565e-19, '', 'e', d_charge),
+
+# Astronomical units
+BaseUnit('AU', 'astronomical unit', 'length', 1.495978707e11, '', 'AU',
+         d_length),
+BaseUnit('pc', 'parsec', 'length', 3.085677637634e16, '', 'pc', d_length),
+BaseUnit('ly', 'light-year', 'length', 9.4607304725808e15, '', 'ly', d_length),
+
+# Some Imperial units
+# NB we can't use 'in' for inch because of a clash with min
+BaseUnit('inch', 'inch', 'length', 0.0254, '', 'in', d_length),
+BaseUnit('ft', 'foot', 'length', .3048, '', 'ft', d_length),
+# NB we can't use 'yd' for yard because of a clash with yd (yoctodays!)
+BaseUnit('yard', 'yard', 'length', .9144, '', 'yd', d_length),
+BaseUnit('furlong', 'furlong', 'length', 201.168, '', 'furlong', d_length),
+BaseUnit('mi', 'mile', 'length', 1609.344, '', 'mi', d_length),
+BaseUnit('gal', 'Imperial (UK) gallon', 'volume', 4.54609e-3, '', 'gal',
+         d_volume),
+BaseUnit('pt', 'Imperial (UK) pint', 'volume', 5.6826125e-4, '', 'pt',
+         d_volume),
+BaseUnit('USgal', 'US liquid gallon', 'volume', 3.785411783e-3, '', 'USgal',
+         d_volume),
+BaseUnit('USpt', 'US liquid pint', 'volume', 4.73176472875e-4, '', 'USpt',
+         d_volume),
+BaseUnit('st', 'stone', 'mass', 6.35029318, '', 'st', d_mass),
+BaseUnit('lb', 'pound', 'mass', 0.45359237, '', 'lb', d_mass),
+BaseUnit('oz', 'ounce', 'mass', 0.028349523125, '', 'oz', d_mass),
+
+# Maritime units
+BaseUnit('NM', 'nautical mile', 'length', 1852., '', 'NM', d_length),
+BaseUnit('kn', 'knot', 'speed', 1852., '', 'kn', d_length/d_time),
+
+# Townsends will have to wait because of a silly clash with teradays...
+#BaseUnit('Td', 'townsend', 'reduced electric field', 1.e-21, '', 'Td',
+#         d_voltage * d_area)
 
 ]
 

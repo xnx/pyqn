@@ -95,7 +95,9 @@ d_mass = Dimensions(M=1)
 d_energy = Dimensions(M=1, L=2, T=-2)
 d_force = d_mass * d_length / d_time**2
 d_pressure = d_force / d_area
-d_charge = Dimensions(C=1) * Dimensions(T=1)
+d_current = Dimensions(C=1)
+d_charge = d_current * Dimensions(T=1)
 d_voltage = d_energy / d_charge     # 1 V = 1 J/C
-d_magfield_strength = d_voltage * d_time / d_area   # 1 T = 1 Vs/m^2
+d_magfield_strength = d_voltage * d_time / d_area   # 1 T = 1 V.s/m^2
+d_magnetic_flux = d_voltage * d_time    # 1 Wb = 1 V.s
 
