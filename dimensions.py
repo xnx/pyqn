@@ -100,4 +100,3 @@ d_charge = d_current * Dimensions(T=1)
 d_voltage = d_energy / d_charge     # 1 V = 1 J/C
 d_magfield_strength = d_voltage * d_time / d_area   # 1 T = 1 V.s/m^2
 d_magnetic_flux = d_voltage * d_time    # 1 Wb = 1 V.s
-

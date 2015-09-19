@@ -19,13 +19,14 @@ class ConflictsCheck(unittest.TestCase):
 
     def test_units_conflicts(self):
         seen_units = []
-        for base_unit in base_units:
-            prefixes = ['']; prefixes.extend(si_prefixes)
-            for si_prefix in prefixes:
-                this_unit = '%s%s' % (si_prefix, base_unit.stem)
-                self.assertEqual(this_unit in seen_units, False,
-                    'Clash with unit: %s' % this_unit)
-                seen_units.append(this_unit)
+        for base_unit_group in base_units:
+            for base_unit in base_unit_group[1]:
+                prefixes = ['']; prefixes.extend(si_prefixes)
+                for si_prefix in prefixes:
+                    this_unit = '%s%s' % (si_prefix, base_unit.stem)
+                    self.assertEqual(this_unit in seen_units, False,
+                        'Clash with unit: %s' % this_unit)
+                    seen_units.append(this_unit)
 
 if __name__ == '__main__':
     unittest.main()
