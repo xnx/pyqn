@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 # dimensions.py
 # A class representing the dimensions of a physical quantity's units, in
 # terms of powers of length (L), mass (M), time (T), temperature (Theta),
 # amount of substance (Q), current (C) and luminous intensity (I).
 #
-# Copyright (C) 2012 Christian Hill
+# Copyright (C) 2012-2016 Christian Hill
 # Department of Physics and Astronomy, University College London
 # christian.hill@ucl.ac.uk
 #
@@ -40,7 +39,7 @@ class Dimensions(object):
             if not kwargs:
                 self.dims = dims
             else:
-                print 'bad initialisation of Dimensions object'
+                print('bad initialisation of Dimensions object')
                 sys.exit(1)
         else:
             # initialize by keyword arguments
@@ -53,7 +52,7 @@ class Dimensions(object):
             new_dims.append(dim + other.dims[i])
         return Dimensions(tuple(new_dims))
 
-    def __div__(self, other):
+    def __truediv__(self, other):
         new_dims = []
         for i, dim in enumerate(self.dims):
             new_dims.append(dim - other.dims[i])

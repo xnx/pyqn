@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 # quantity.py
 # A class representing physical quantity, with name, units and uncertainty.
 #
-# Copyright (C) 2012 Christian Hill
+# Copyright (C) 2012-2016 Christian Hill
 # Department of Physics and Astronomy, University College London
 # christian.hill@ucl.ac.uk
 #
@@ -23,8 +22,8 @@
 
 import re
 import math
-from symbol import Symbol
-from units import Units, UnitsError
+from .symbol import Symbol
+from .units import Units, UnitsError
 
 class QuantityError(Exception):
     """
@@ -231,7 +230,7 @@ class Quantity(Symbol):
             units = self.units * other.units
             return Quantity(value=value, units=units, sd=sd)
 
-    def __div__(self, other):
+    def __truediv__(self, other):
         """
         Divide this quantity by a number or another quantity. Errors are
         propagated, but assumed to be uncorrelated.

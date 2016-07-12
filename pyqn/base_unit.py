@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
 # base_unit.py
 # A class representing a "base unit", identified as a single unit with no
 # prefix or exponent, such as 'g', 'hr', 'bar', 's'.
 #
-# Copyright (C) 2012-2015 Christian Hill
+# Copyright (C) 2012-2016 Christian Hill
 # Department of Physics and Astronomy, University College London
 # christian.hill@ucl.ac.uk
 #
@@ -22,7 +21,7 @@
 # You should have received a copy of the GNU General Public License
 # along with PyQn.  If not, see <http://www.gnu.org/licenses/>
 
-from dimensions import *
+from .dimensions import *
 
 class BaseUnit(object):
     """
@@ -83,7 +82,7 @@ BaseUnit('W', 'watt', 'power', 1., '', 'W', d_energy / d_time),
 BaseUnit('Pa', 'pascal', 'pressure', 1., '', 'Pa', d_pressure),
 BaseUnit('C', 'coulomb', 'charge', 1., '', 'C', d_charge),
 BaseUnit('V', 'volt', 'voltage', 1., '', 'V', d_voltage),
-BaseUnit(u'Ω', 'ohm', 'electric resistance', 1, '', r'\Omega',
+BaseUnit('Ω', 'ohm', 'electric resistance', 1, '', r'\Omega',
          d_voltage / d_current),
 BaseUnit('F', 'farad', 'capacitance', 1., '', 'F', d_charge / d_voltage),
 BaseUnit('Wb', 'weber', 'magnetic flux', 1, '', 'Wb', d_magnetic_flux),
@@ -137,15 +136,15 @@ BaseUnit('Ry', 'rydberg', 'energy', 13.60569253 * 1.602176487e-19, '', 'Ry',
 ]),
 
 ('Non-SI mass units', [
-BaseUnit('u', 'atomic mass unit', 'mass', 1.660538921e-27, '', 'u', d_mass),
-BaseUnit('amu', 'atomic mass unit', 'mass', 1.660538921e-27, '', 'amu', d_mass),
+BaseUnit('u', 'atomic mass unit', 'mass', 1.660538921e-27, '', '', d_mass),
+BaseUnit('amu', 'atomic mass unit', 'mass', 1.660538921e-27, '', 'am', d_mass),
 BaseUnit('Da', 'dalton', 'mass', 1.660538921e-27, '', 'Da', d_mass),
 BaseUnit('m_e', 'electron mass', 'mass', 9.10938291e-31, '', 'm_e', d_mass),
 ]),
 
 ('Non-SI units of length, area and volume', [
 # Non-SI length units
-BaseUnit(u'Å', 'angstrom', 'length', 1.e-10, '', '\AA', d_length),
+BaseUnit('Å', 'angstrom', 'length', 1.e-10, '', '\AA', d_length),
 BaseUnit('a0', 'bohr', 'length', 5.2917721092e-11, '', 'a_0', d_length),
 # Non-SI area units
 BaseUnit('b', 'barn', 'area', 1.e-28, '', 'b', d_area),
@@ -200,7 +199,9 @@ BaseUnit('ftn', 'fortnight', 'time', 1.2096e6, '', 'ftn', d_time),
 
 ('Miscellaneous units', [
 BaseUnit('Td', 'townsend', 'reduced electric field', 1.e-21, '', 'Td',
-         d_voltage * d_area)
+         d_voltage * d_area),
+BaseUnit('Jy', 'jansky', 'spectral flux density', 1.e-26, '', 'Jy',
+         d_energy / d_area)     # W.m-2.s-1
 ]),
 )
 

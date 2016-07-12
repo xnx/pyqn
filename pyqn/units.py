@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 # units.py
 # A class representing the units of a physical quantity.
 #
-# Copyright (C) 2012-2015 Christian Hill
+# Copyright (C) 2012-2016 Christian Hill
 # Department of Physics and Astronomy, University College London
 # christian.hill@ucl.ac.uk
 #
@@ -22,9 +21,9 @@
 # along with PyQn.  If not, see <http://www.gnu.org/licenses/>
 
 import copy
-from dimensions import Dimensions
-from dimensions import d_dimensionless, d_length, d_energy, d_time
-from atom_unit import AtomUnit, UnitsError, feq
+from .dimensions import Dimensions
+from .dimensions import d_dimensionless, d_length, d_energy, d_time
+from .atom_unit import AtomUnit, UnitsError, feq
 
 class Units(object):
     """
@@ -39,11 +38,11 @@ class Units(object):
 
         """
 
-        if type(units) == Units:
+        if type(units) is Units:
             self.__init__(units.atom_units)
-        elif type(units) in (str, unicode):
+        elif type(units) is str:
             self.__init__(self.parse(units).atom_units)
-        elif type(units) == list:
+        elif type(units) is list:
             self.atom_units = copy.deepcopy(units)
         else:
             raise TypeError('Attempt to initialize Units object with'
@@ -134,7 +133,7 @@ class Units(object):
             other = Units('1')
         return self.__mul__(other)
 
-    def __div__(self, other):
+    def __truediv__(self, other):
         """ Return the ratio of this Units divided by another. """
         if type(other) == str:
             other = Units(other)
@@ -160,11 +159,11 @@ class Units(object):
             other = Units(other)
         elif other == 1:
             other = Units('1')
-        return other.__div__(self)
+        return other.__truediv__(self)
  
     def __str__(self):
         """ String representation of this Units. """
-        return u'.'.join([unicode(atom_unit) for atom_unit in self.atom_units])
+        return '.'.join([str(atom_unit) for atom_unit in self.atom_units])
 
     def __eq__(self, other):
         """ Test for equality with another Units object. """

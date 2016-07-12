@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # atom_unit.py
 # A class for, and attributes used in the parsing of a single "atom unit"
 # identified by a base unit, SI-prefix and exponent, such as 'kg', 's-1',
@@ -26,20 +25,20 @@
 import sys
 from pyparsing import Word, Group, Literal, Suppress, ParseException, oneOf,\
                       Optional
-from si import si_prefixes
-from base_unit import BaseUnit, base_unit_stems
-from dimensions import Dimensions
+from .si import si_prefixes
+from .base_unit import BaseUnit, base_unit_stems
+from .dimensions import Dimensions
 
 # pyparsing stuff for parsing unit strings:
-caps = u'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+caps = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 lowers = caps.lower()
-letters = u'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0'
-digits = u'123456789'
+letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0'
+digits = '123456789'
 exponent = Word(digits + '-')
-prefix = oneOf(si_prefixes.keys())
-ustem = Word(letters + u'Å' + u'Ω')
-uatom = (Group( u'1' | (Optional(prefix) + ustem)) + Optional(exponent))\
-            | (Group( u'1' | ustem) + Optional(exponent))
+prefix = oneOf(list(si_prefixes.keys()))
+ustem = Word(letters + 'Å' + 'Ω')
+uatom = (Group( '1' | (Optional(prefix) + ustem)) + Optional(exponent))\
+            | (Group( '1' | ustem) + Optional(exponent))
 
 # floating point equality and its negation, to some suitable tolerance
 def feq(f1, f2, tol=1.e-10):
@@ -79,7 +78,7 @@ class AtomUnit(object):
             try:
                 self.si_prefix = si_prefixes[prefix]
             except KeyError:
-                raise UnitsError(u'Invalid or unsupported SI prefix: %s'
+                raise UnitsError('Invalid or unsupported SI prefix: %s'
                                                         % prefix)
             self.si_fac = self.si_prefix.fac
         # now calculate the factor relating this AtomUnit to its
@@ -98,7 +97,7 @@ class AtomUnit(object):
             uatom_data = uatom.parseString(s_unit_atom)
         except ParseException:
             raise
-            raise UnitsError(u'Invalid unit atom syntax: %s' % s_unit_atom)
+            raise UnitsError('Invalid unit atom syntax: %s' % s_unit_atom)
 
         # uatom_data comes back as (([prefix], <stem>), [exponent])
         if len(uatom_data[0]) == 1:
@@ -128,17 +127,15 @@ class AtomUnit(object):
         """ Return the current AtomUnit raised to a specified power. """
         return AtomUnit(self.prefix, self.base_unit, self.exponent * power)
 
-    def __unicode__(self):
+    def __str__(self):
         """ String representation of this AtomUnit. """
-        s = u''
+        s = ''
         if self.prefix:
             s = self.prefix
-        s_exponent = u''
+        s_exponent = ''
         if self.exponent != 1:
-            s_exponent = unicode(self.exponent)
-        return ''.join([s, unicode(self.base_unit), s_exponent])
-    def __str__(self):
-        return unicode(self).encode('utf-8')
+            s_exponent = str(self.exponent)
+        return ''.join([s, str(self.base_unit), s_exponent])
 
     def prefix_base_eq(self, other):
         """

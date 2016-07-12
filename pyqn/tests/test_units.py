@@ -1,10 +1,12 @@
-# -*- coding: utf-8 -*-
 # test_units.py
-# Version 0.1a
+#
+# Copyright (C) 2012-2016 Christian Hill
+#
+# Version 1.0
 # Unit tests for the Units class.
 
 import unittest
-from units import Units
+from ..units import Units
 
 class UnitsCheck(unittest.TestCase):
     """Unit tests for the Units class."""
@@ -27,8 +29,8 @@ class UnitsCheck(unittest.TestCase):
         self.assertFalse(u3_over_u4.has_units())
 
     def test_unicode_units(self):
-        u1 = Units(u'kΩ')
-        self.assertEqual(unicode(u1), u'kΩ')
+        u1 = Units('kΩ')
+        self.assertEqual(str(u1), 'kΩ')
 
 if __name__ == '__main__':
     unittest.main()

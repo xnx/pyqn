@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
 # symbol.py
 # A class representing a symbol (perhaps the label for a physical quantity
 # represented as a Quantity object) with a name in text,  LaTeX and HTML.
 #
-# Copyright (C) 2012 Christian Hill
+# Copyright (C) 2012-2016 Christian Hill
 # Department of Physics and Astronomy, University College London
 # christian.hill@ucl.ac.uk
 #

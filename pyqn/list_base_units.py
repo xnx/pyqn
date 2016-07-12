@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 # list_base_units.py
-from __future__ import print_function
 import sys
 from base_unit import base_units
 
@@ -12,21 +10,21 @@ def list_units_text():
         print('{0:6s} {1:30s} {2:20s}'.format('Unit', 'Name', 'Dimensions'))
         print('{0:6s} {1:30s} {2:20s}'.format('----', '----', '----------'))
         for base_unit in base_unit_group:
-            print(u'{0:6s} {1:30s} {2:20s}'.format(unicode(base_unit.stem),
+            print('{0:6s} {1:30s} {2:20s}'.format(unicode(base_unit.stem),
                 base_unit.name, base_unit.dims))
 
 def list_units_html():
     for group_name, base_unit_group in base_units:
-        print(u'<h4>{0}</h4>'.format(group_name))
-        print(u'<table class="my-table">')
-        print(u'<tr><th>Unit</th><th>Name</th><th>Dimensions</th></tr>')
+        print('<h4>{0}</h4>'.format(group_name))
+        print('<table class="my-table">')
+        print('<tr><th>Unit</th><th>Name</th><th>Dimensions</th></tr>')
         for base_unit in base_unit_group:
             # NB we need to encode('utf-8') to pipe in that encoding to the
             # shell, e.g. to create a file
-            print(u'<tr><td>{0:s}</td><td>{1:s}</td><td>{2:s}</td><td></tr>'
+            print('<tr><td>{0:s}</td><td>{1:s}</td><td>{2:s}</td><td></tr>'
                     .format(unicode(base_unit.stem), base_unit.name,
                             base_unit.dims).encode('utf-8'))
-        print(u'</table>')
+        print('</table>')
     
 
 try:
