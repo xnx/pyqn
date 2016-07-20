@@ -190,6 +190,18 @@ class Units(object):
             fac *= atom_unit.si_fac
         return fac
 
+    @property
+    def html(self):
+        h = []
+        n = len(self.atom_units)
+        for i,atom_unit in enumerate(self.atom_units):
+            h.extend([atom_unit.prefix or '', atom_unit.base_unit.stem])
+            if atom_unit.exponent != 1:
+                h.append('<sup>{:d}</sup>'.format(atom_unit.exponent))
+            if i < n-1:
+                h.append(' ')
+        return ''.join(h)
+
     def conversion(self, other, force=None):
         """
         Return the factor required to convert this Units to

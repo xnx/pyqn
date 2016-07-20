@@ -32,5 +32,11 @@ class UnitsCheck(unittest.TestCase):
         u1 = Units('kΩ')
         self.assertEqual(str(u1), 'kΩ')
 
+    def test_html(self):
+        u1 = Units('m.s-1')
+        self.assertEqual(u1.html, 'm s<sup>-1</sup>')
+        u2 = Units('μs.J/m3')
+        self.assertEqual(u2.html, 'μs J m<sup>-3</sup>')
+
 if __name__ == '__main__':
     unittest.main()
