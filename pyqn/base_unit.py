@@ -157,6 +157,7 @@ BaseUnit('min', 'minute', 'time', 60., '', 'min', d_time),
 BaseUnit('hr', 'hour', 'time', 3600., '', 'hr', d_time),
 BaseUnit('h', 'hour', 'time', 3600., '', 'h', d_time),
 BaseUnit('dy', 'day', 'time', 86400., '', 'd', d_time),
+BaseUnit('yr', 'year', 'time', 31557600., '', 'yr', d_time),
 ]),
 
 ('Astronomical units', [
