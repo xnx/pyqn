@@ -162,7 +162,7 @@ class Quantity(Symbol):
         self.units = to_units
         return
 
-    def draw_val_from_dist(self, shape=None):
+    def draw_from_dist(self, shape=None):
         """
         Return a value or number array of values drawn from the normal
         distribution described by this Quantity's mean and standard
@@ -261,7 +261,7 @@ class Quantity(Symbol):
                 sd = None
             else:
                 sd = abs(other) / self.sd
-            return Quantity(value=self.value/other, units=self.unit, sd=sd)
+            return Quantity(value=self.value/other, units=self.units, sd=sd)
         else:
             if type(other) != Quantity:
                 raise TypeError
@@ -275,6 +275,9 @@ class Quantity(Symbol):
                                         other.sd/other.value)
             units = self.units / other.units
             return Quantity(value=value, units=units, sd=sd)
+
+    def __rtruediv__(self, other):
+        return self.__truediv__(other)
 
     @classmethod
     def parse(self, s_quantity, name=None, units=None, sd=None,

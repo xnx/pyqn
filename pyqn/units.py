@@ -202,7 +202,7 @@ class Units(object):
                 h.append(' ')
         return ''.join(h)
 
-    def conversion(self, other, force=None):
+    def conversion(self, other, force=None, strict=False):
         """
         Return the factor required to convert this Units to
         another. Their dimensions have to match, unless force is set
@@ -216,7 +216,8 @@ class Units(object):
         if type(other) == str:
             other = Units(other)
 
-        if self.get_dims() != other.get_dims():
+        self_dims, other_dims = self.get_dims(), other.get_dims()
+        if self_dims != other_dims:
             if force == 'spec':
                 return self.spec_conversion(other)
             raise UnitsError('Failure in units conversion: units %s[%s] and'
