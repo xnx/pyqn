@@ -220,6 +220,8 @@ class Units(object):
         if self_dims != other_dims:
             if force == 'spec':
                 return self.spec_conversion(other)
+            if force == 'mol':
+                return self.mol_conversion(other)
             raise UnitsError('Failure in units conversion: units %s[%s] and'
                              ' %s[%s] have different dimensions'
                            % (self, self.get_dims(), other, other.get_dims()))
