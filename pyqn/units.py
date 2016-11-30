@@ -222,6 +222,8 @@ class Units(object):
                 return self.spec_conversion(other)
             if force == 'mol':
                 return self.mol_conversion(other)
+            if forse == 'kbt':
+                return self.kbt_conversion(other)
             raise UnitsError('Failure in units conversion: units %s[%s] and'
                              ' %s[%s] have different dimensions'
                            % (self, self.get_dims(), other, other.get_dims()))
@@ -238,9 +240,9 @@ class Units(object):
                              'different in quantity dimensions between %s and %s'
                              % from_dims, to_dims)
         elif from_dims.dims[4] > to_dims.dims[4]:
-            fac = fac*a_number*(from_dims.dims[4]-to_dims.dims[4])
+            fac = fac/(a_number**(from_dims.dims[4]-to_dims.dims[4]))
         else:
-            fac = fac/(a_number*(to_dims.dims[4]-from_dims.dims[4]))
+            fac = fac*(a_number**(to_dims.dims[4]-from_dims.dims[4]))
         return fac/other.to_si()
         
     def spec_conversion(self, other):

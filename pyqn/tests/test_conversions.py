@@ -29,7 +29,7 @@ class UnitsConversionCheck(unittest.TestCase):
 
         with self.assertRaises(UnitsError) as cm:
             u1.conversion(u2, strict=True)
-        self.assertAlmostEqual(u1.conversion(u2), 1.6605389209999998e-21)
+        self.assertAlmostEqual(u1.conversion(u2,force='mol'), 1.6605389209999998e-21)
 
     def test_multiplication_conversion(self):
         u1 = Units('mm2')
