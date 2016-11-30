@@ -227,6 +227,22 @@ class Units(object):
                            % (self, self.get_dims(), other, other.get_dims()))
         return self.to_si() / other.to_si()
 
+    def mol_conversion(self, other):
+        a_number = 6.022140857e23   #avogadro's number
+        from_dims = self.get_dims() #original unit dimensions
+        to_dims = other.get_dims()  #desired unit dimensions
+        fac = self.to_si()          #factor needed to conver to SI units
+        
+        if from_dims.dims[4] == to_dims.dims[4]:
+            raise UnitsError('Failure in conversion of spectroscopic units: no '
+                             'different in quantity dimensions between %s and %s'
+                             % from_dims, to_dims)
+        elif from_dims.dims[4] > to_dims.dims[4]:
+            fac = fac*a_number*(from_dims.dims[4]-to_dims.dims[4])
+        else:
+            fac = fac/(a_number*(to_dims.dims[4]-from_dims.dims[4]))
+        return fac/other.to_si()
+        
     def spec_conversion(self, other):
         h = 6.62606896e-34
         c = 299792458.
