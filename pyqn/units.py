@@ -22,7 +22,7 @@
 
 import copy
 from .dimensions import Dimensions
-from .dimensions import d_dimensionless, d_length, d_energy, d_time
+from .dimensions import d_dimensionless, d_length, d_energy, d_time, d_temperature
 from .atom_unit import AtomUnit, UnitsError, feq
 
 class Units(object):
@@ -222,12 +222,27 @@ class Units(object):
                 return self.spec_conversion(other)
             if force == 'mol':
                 return self.mol_conversion(other)
-            if forse == 'kbt':
+            if force == 'kbt':
                 return self.kbt_conversion(other)
             raise UnitsError('Failure in units conversion: units %s[%s] and'
                              ' %s[%s] have different dimensions'
                            % (self, self.get_dims(), other, other.get_dims()))
         return self.to_si() / other.to_si()
+    
+    def kbt_conversion(self, other):
+        kb = 1.38064852e-23
+        from_dims = self.get_dims()
+        to_dims = other.get_dims()
+        fac = self.to_si()
+        
+        if from_dims == d_energy and to_dims == d_temperature:
+            fac = fac/kb
+        elif from_dims == d_temperature and to_dims == d_energy:
+            fac = fac*kb
+        else:
+            raise UnitsError('Failure in conversion of units: was expecting to '
+                             'covert between energy and temperature')
+        return fac/other.to_si()
 
     def mol_conversion(self, other):
         a_number = 6.022140857e23   #avogadro's number
@@ -236,7 +251,7 @@ class Units(object):
         fac = self.to_si()          #factor needed to conver to SI units
         
         if from_dims.dims[4] == to_dims.dims[4]:
-            raise UnitsError('Failure in conversion of spectroscopic units: no '
+            raise UnitsError('Failure in conversion of units: no '
                              'different in quantity dimensions between %s and %s'
                              % from_dims, to_dims)
         elif from_dims.dims[4] > to_dims.dims[4]:

@@ -30,6 +30,12 @@ class UnitsConversionCheck(unittest.TestCase):
         with self.assertRaises(UnitsError) as cm:
             u1.conversion(u2, strict=True)
         self.assertAlmostEqual(u1.conversion(u2,force='mol'), 1.6605389209999998e-21)
+    
+    def test_kbt_units_conversion(self):
+        u1 = Units('K')
+        u2 = Units('J')
+        
+        self.assertAlmostEqual(u1.conversion(u2,force='kbt'),1.38064852e-23)
 
     def test_multiplication_conversion(self):
         u1 = Units('mm2')
