@@ -41,7 +41,16 @@ class UnitsConversionCheck(unittest.TestCase):
         u1 = Units('mm2')
         u2 = Units('g/m2')
         u3 = u1 * u2
-        self.assertAlmostEqual(u3.si_fac, 1.e-6)
+        self.assertAlmostEqual(u3.to_si(), 1.e-9)
+        self.assertEqual(u3.dims()=='M')
+    
+    def test_division_conversion(self):
+        u1 = Units('eV.mm')
+        u2 = Units('K.cm')
+        u3 = u1 / u2
+        
+        %self.assertAlmostEqual(u3.to_si(),)
+        
 
 if __name__ == '__main__':
     unittest.main()
