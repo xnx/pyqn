@@ -28,6 +28,17 @@ class UnitsCheck(unittest.TestCase):
         u3_over_u4 = u3 / u4
         self.assertFalse(u3_over_u4.has_units())
 
+    def test_units_algebra_dimensions(self):
+        u1 = Units('m')
+        u2 = Units('m.s-1')
+        u3 = u1 * u2
+        u4 = Units('m2.s-1')
+        self.assertEqual(u3.dims, u4.dims)
+
+        u3 = u1 / u2
+        u4 = Units('s')
+        self.assertEqual(u3.dims, u4.dims)
+
     def test_unicode_units(self):
         u1 = Units('kΩ')
         self.assertEqual(str(u1), 'kΩ')

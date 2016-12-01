@@ -137,6 +137,9 @@ class AtomUnit(object):
             s_exponent = str(self.exponent)
         return ''.join([s, str(self.base_unit), s_exponent])
 
+    def __repr__(self):
+        return str(self)
+
     def prefix_base_eq(self, other):
         """
         Compare two AtomUnits and return true if they have the same BaseUnit

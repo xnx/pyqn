@@ -125,6 +125,7 @@ class Units(object):
                 if product.atom_units[i].exponent == 0:
                     # this AtomUnit has cancelled:
                     del product.atom_units[i]
+        product.dims = product.get_dims()
         return product
     def __rmul__(self, other):
         if type(other) == str:
@@ -153,6 +154,7 @@ class Units(object):
                 if ratio.atom_units[i].exponent == 0:
                     # this AtomUnit has cancelled:
                     del ratio.atom_units[i]
+        ratio.dims = ratio.get_dims()
         return ratio
     def __rdiv__(self, other):
         if type(other) == str:

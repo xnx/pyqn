@@ -76,6 +76,9 @@ class Dimensions(object):
             return '[dimensionless]'
         return '.'.join(s_dims)
 
+    def __repr__(self):
+        return str(self.dims)
+
     def __eq__(self, other):
         for i, dim in enumerate(self.dims):
             if other.dims[i] != dim:
