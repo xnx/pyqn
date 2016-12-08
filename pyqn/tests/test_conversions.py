@@ -42,14 +42,19 @@ class UnitsConversionCheck(unittest.TestCase):
         u2 = Units('g/m2')
         u3 = u1 * u2
         self.assertAlmostEqual(u3.to_si(), 1.e-9)
-        self.assertEqual(u3.dims()=='M')
+        self.assertTupleEqual(u3.get_dims().dims,(0, 1, 0, 0, 0, 0, 0))
+        
+        u4 = Units('J/s')
+        u5 = u4 * u2
+        self.assertAlmostEqual(u5.to_si(), 1.e-3)
+        self.assertEqual(u5.get_dims().dims,(0,2,-3,0,0,0,0))
     
     def test_division_conversion(self):
         u1 = Units('eV.mm')
         u2 = Units('K.cm')
         u3 = u1 / u2
-        
-        %self.assertAlmostEqual(u3.to_si(),)
+        self.assertEqual(u3.get_dims().dims,(2,1,-2,-1,0,0,0))
+        self.assertAlmostEqual(u3.to_si(),1.6*10**(-20))
         
 
 if __name__ == '__main__':
