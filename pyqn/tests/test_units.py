@@ -28,6 +28,23 @@ class UnitsCheck(unittest.TestCase):
         u3_over_u4 = u3 / u4
         self.assertFalse(u3_over_u4.has_units())
 
+    def test_units_multiplication(self):
+        u1 = Units('m.s-1')
+        u2 = u1 * 1
+        self.assertEqual(u2, u1)
+        self.assertNotEqual(id(u1), id(u2)) 
+        u2 = 1 * u1
+        self.assertEqual(u2, u1)
+        self.assertNotEqual(id(u1), id(u2)) 
+
+        u1 = Units('m.s-1')
+        u2 = Units('J')
+        self.assertEqual('kg.m.s-1' * u1, u2)
+
+        u1 = Units('m.s-1')
+        u2 = Units('J')
+        self.assertEqual(u1 * 'kg.m.s-1', u2)
+
     def test_units_algebra_dimensions(self):
         u1 = Units('m')
         u2 = Units('m.s-1')

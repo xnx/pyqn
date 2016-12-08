@@ -111,6 +111,13 @@ class Units(object):
 
     def __mul__(self, other):
         """ Return the product of this Units object with another. """
+
+        if other == 1:
+            return copy.deepcopy(self)
+
+        if type(other) == str:
+            other = Units(other)
+
         product = Units(self.atom_units)
         for other_atom_unit in other.atom_units:
             i = product._find_atom(other_atom_unit)
@@ -166,6 +173,8 @@ class Units(object):
     def __str__(self):
         """ String representation of this Units. """
         return '.'.join([str(atom_unit) for atom_unit in self.atom_units])
+
+    __repr__ = __str__
 
     def __eq__(self, other):
         """ Test for equality with another Units object. """
