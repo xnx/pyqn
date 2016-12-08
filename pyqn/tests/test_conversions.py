@@ -52,9 +52,14 @@ class UnitsConversionCheck(unittest.TestCase):
     def test_division_conversion(self):
         u1 = Units('eV.mm')
         u2 = Units('K.cm')
+        
         u3 = u1 / u2
         self.assertEqual(u3.get_dims().dims,(2,1,-2,-1,0,0,0))
         self.assertAlmostEqual(u3.to_si(),1.6*10**(-20))
+        
+        u4 = Units('s-1')
+        #u5 = u2 / (2*u4)
+        #self.asserEqual(u5.get_dims().dims,(1,0,2,1,0,0,0))
         
 
 if __name__ == '__main__':
