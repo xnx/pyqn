@@ -217,17 +217,20 @@ class Units(object):
 
         if type(other) == str:
             other = Units(other)
+            
+        conversion_method = {
+                             'spec': self.spec_conversion,
+                             'mol': self.mol_conversion,
+                             'kbt': self.kbt_conversion
+                             }
 
         self_dims, other_dims = self.get_dims(), other.get_dims()
         if self_dims != other_dims:
-            if force == 'spec':
-                return self.spec_conversion(other)
-            if force == 'mol':
-                return self.mol_conversion(other)
-            if force == 'kbt':
-                return self.kbt_conversion(other)
-            raise UnitsError('Failure in units conversion: units %s[%s] and'
-                             ' %s[%s] have different dimensions'
+            try:
+                return conversion_method[force]
+            except KeyError:
+                raise UnitsError('Failure in units conversion: units %s[%s] and'
+                                 ' %s[%s] have different dimensions'
                            % (self, self.get_dims(), other, other.get_dims()))
         return self.to_si() / other.to_si()
     

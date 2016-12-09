@@ -1,8 +1,10 @@
 import unittest
 from ..quantity import Quantity, QuantityError
+from ..dimensions import Dimensions
 
-class QuantityManipulations(unittest.testCase):
+class QuantityManipulations(unittest.TestCase):
     def test_quantity_init(self):
+        pass
         
     def test_quantity_multiplication(self):
         q1 = Quantity(value=22.4,units='m/s')
@@ -10,7 +12,7 @@ class QuantityManipulations(unittest.testCase):
         
         q3 = q1*q2
         self.assertAlmostEqual(q3.value,44.8)
-        self.asserEqual(q3.units,'m')
+        self.assertEqual(q3.units.dims.dims,(1,0,0,0,0,0,0))
         
         #q4 = 2*q2 want to be able to do this
     
@@ -20,11 +22,13 @@ class QuantityManipulations(unittest.testCase):
         
         q3 = q1/q2
         self.assertAlmostEqual(q3.value,7.8)
-        self.assertEqual(q3.units,'J.s-1')
+        self.assertEqual(q3.units.dims,Dimensions(M=1,L=2,T=-3))
     
     def test_quantity_addition(self):
-    
+        pass
+        
     def test_quantity_subtraction(self):
+        pass
         
 if __name__ == '__main__':
     unittest.main()
