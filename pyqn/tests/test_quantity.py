@@ -1,6 +1,6 @@
 import unittest
 from ..quantity import Quantity, QuantityError
-from ..dimensions import Dimensions
+from ..dimensions import Dimensions, d_energy
 
 class QuantityManipulations(unittest.TestCase):
     def test_quantity_init(self):
@@ -23,6 +23,8 @@ class QuantityManipulations(unittest.TestCase):
         q3 = q1/q2
         self.assertAlmostEqual(q3.value,7.8)
         self.assertEqual(q3.units.dims,Dimensions(M=1,L=2,T=-3))
+        
+        
     
     def test_quantity_addition(self):
         pass
