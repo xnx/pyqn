@@ -69,7 +69,12 @@ class UnitsCheck(unittest.TestCase):
         
         u4 = Units('s-1')
         u5 = u2 / ('eV'*u4)
-        self.assertEqual(u5.get_dims(),Dimensions(T=1,Theta=1,L=1)/d_energy)        
+        self.assertEqual(u5.get_dims(),Dimensions(T=1,Theta=1,L=1)/d_energy)      
+    
+    def test_units_power(self):
+        u1 = Units('J.m')
+        u2 = u1 ** 2
+        self.assertEqual(u2.get_dims(),Dimensions(M=2,L=6,T=-4))
         
     def test_units_algebra_dimensions(self):
         u1 = Units('m')

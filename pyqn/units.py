@@ -163,6 +163,7 @@ class Units(object):
                     del ratio.atom_units[i]
         ratio.dims = ratio.get_dims()
         return ratio
+        
     def __rdiv__(self, other):
         if type(other) == str:
             other = Units(other)
@@ -170,6 +171,17 @@ class Units(object):
             other = Units('1')
         return other.__truediv__(self)
  
+    def __pow__(self, power):
+        result = Units(self.atom_units)
+        if power == 0:
+            raise UnitsError('Failure to raise units to power 0, enter power that is non-zero')
+        elif power ==1:
+            return self
+        elif isinstance(power,(int,float)):
+            for i in range(1,power):
+                result *= self
+            return result
+        
     def __str__(self):
         """ String representation of this Units. """
         return '.'.join([str(atom_unit) for atom_unit in self.atom_units])
