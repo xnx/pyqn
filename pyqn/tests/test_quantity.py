@@ -44,7 +44,16 @@ class QuantityManipulations(unittest.TestCase):
             q4 = q1 + q3
         
     def test_quantity_subtraction(self):
-        pass
+        q1 = Quantity(value = 20.5, units = 'J')
+        q2 = Quantity(value = 30.7, units = 'kg.m2.s-2')
+        q3 = Quantity(value = 5.1, units = 'K')
+        
+        q4 = q1-q2
+        self.assertEqual(q4.value,-10.2)
+        self.assertEqual(q4.units.dims,Dimensions(M=1,L=2,T=-2))
+        
+        with self.assertRaises(UnitsError) as cm:
+            q4 = q1 - q3
         
 if __name__ == '__main__':
     unittest.main()
