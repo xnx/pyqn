@@ -236,7 +236,7 @@ class Units(object):
         self_dims, other_dims = self.get_dims(), other.get_dims()
         if self_dims != other_dims:
             try:
-                return conversion_method[force]
+                return conversion_method[force](other)
             except KeyError:
                 raise UnitsError('Failure in units conversion: units %s[%s] and'
                                  ' %s[%s] have different dimensions'
