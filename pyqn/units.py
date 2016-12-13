@@ -172,10 +172,13 @@ class Units(object):
         return other.__truediv__(self)
  
     def __pow__(self, power):
-        result_atom_units = []
-        for atom_unit in self.atom_units:
-            result_atom_units.append(atom_unit**power)
-        return Units(result_atom_units)
+        if power == 0:
+            return self
+        else:
+            result_atom_units = []
+            for atom_unit in self.atom_units:
+                result_atom_units.append(atom_unit**power)
+            return Units(result_atom_units)
         
     def __str__(self):
         """ String representation of this Units. """

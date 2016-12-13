@@ -54,6 +54,21 @@ class QuantityManipulations(unittest.TestCase):
         
         with self.assertRaises(UnitsError) as cm:
             q4 = q1 - q3
+    
+    def test_quantity_exponent(self):
+        q1 = Quantity(value = 1.2, units = 'J')
+        q2 = Quantity(value = -5, units = 's')
+        
+        q3 = q1**4
+        q4 = q2**-1
+        self.assertEqual(q3.value,2.0736)
+        self.assertEqual(q3.units.dims,Dimensions(M=4,L=8,T=-8))
+        self.assertEqual(q4.value, -0.2)
+        self.assertEqual(q4.units.dims,Dimensions(T=-1))
+        
+        q5 = q1**0
+        self.assertEqual(q5.value,1)
+        self.assertEqual(q1.units.dims,q5.units.dims)
         
 if __name__ == '__main__':
     unittest.main()

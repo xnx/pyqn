@@ -280,6 +280,10 @@ class Quantity(Symbol):
 
     def __rtruediv__(self, other):
         return self.__truediv__(other)
+    
+    def __pow__(self, power):
+        return Quantity(value = self.value**power, 
+                        units = self.units**power)
 
     @classmethod
     def parse(self, s_quantity, name=None, units=None, sd=None,
