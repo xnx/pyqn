@@ -23,11 +23,21 @@ class QuantityManipulations(unittest.TestCase):
         q3 = q1/q2
         self.assertAlmostEqual(q3.value,7.8)
         self.assertEqual(q3.units.dims,Dimensions(M=1,L=2,T=-3))
-        
+        q3 = q2/q1
+        self.assertAlmostEqual(q3.value,0.128)
+        self.assertEqual(q3.units.dims,Dimensions(M=-1,L=-2,T=3))
         
     
     def test_quantity_addition(self):
-        pass
+        q1 = Quantity(value = 20.5, units = 'J')
+        q2 = Quantity(value = 30.7, units = 'kg.m2.s-2')
+        q3 = Quantity(value = 5.1, units = 'K')
+        
+        q4 = q1+q2
+        self.assertEqual(q4.value,51.2)
+        self.assertEqual(q4.units.dims,Dimensions(M=1,L=2,T=-2))
+        
+        self.assertRaises(UnitsError, Quantity, q1+q3)
         
     def test_quantity_subtraction(self):
         pass
