@@ -72,6 +72,8 @@ class Quantity(Symbol):
             return '%s = %s %s' % (self.name, self.value, self.units)
         else:
             return '%s %s' % (self.value, self.units)
+            
+    __repr__ = __str__
 
     def value_as_str(self, nsd_digits=2, small=1.e-3, large=1.e5):
         """
