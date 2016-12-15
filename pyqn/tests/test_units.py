@@ -82,6 +82,9 @@ class UnitsCheck(unittest.TestCase):
         u4 = u1 ** (-2)
         self.assertEqual(u4.get_dims(),Dimensions(M=-2,L=-6,T=4))
         
+        u5 = u1 ** 0
+        self.assertEqual(u5.get_dims(),Dimensions())
+        
     def test_units_algebra_dimensions(self):
         u1 = Units('m')
         u2 = Units('m.s-1')
