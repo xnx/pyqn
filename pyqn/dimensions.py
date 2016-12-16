@@ -89,6 +89,8 @@ class Dimensions(object):
         return not self.__eq__(other)
 
 d_dimensionless = Dimensions()
+d_quantity = Dimensions(Q=1)
+d_frequency = Dimensions(T=-1)
 d_length = Dimensions(L=1)
 d_area = d_length**2
 d_volume = d_length**3
