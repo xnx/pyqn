@@ -286,6 +286,8 @@ class Units(object):
         c = 299792458.
         d_wavenumber = d_length**-1
         d_frequency = d_time**-1
+        d_wavelength = d_length
+        
         from_dims = self.get_dims()
         to_dims = other.get_dims()
         fac = self.to_si()
@@ -293,18 +295,22 @@ class Units(object):
             fac *= h*c
         elif from_dims == d_frequency:
             fac *= h
+        elif from_dims == d_wavelength:
+            fac /= h*c
         elif from_dims != d_energy:
             raise UnitsError('Failure in conversion of spectroscopic units:'
                 ' I only recognise from-units of wavenumber, energy and'
-                ' frequency but got %s' % self.units)
+                ' frequency')
         if to_dims == d_wavenumber:
             fac /= h*c
         elif to_dims == d_frequency:
             fac /= h
+        elif to_dims == d_wavelength:
+            fac *= h*c
         elif to_dims != d_energy:
             raise UnitsError('Failure in conversion of spectroscopic units:'
                 ' I only recognise to-units of wavenumber, energy and'
-                ' frequency but got %s' % other.units)
+                ' frequency')
         return fac / other.to_si()
 
 def convert(from_units, to_units):

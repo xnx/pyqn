@@ -36,6 +36,12 @@ class UnitsConversionCheck(unittest.TestCase):
         u2 = Units('J')
         
         self.assertAlmostEqual(u1.conversion(u2,force='kbt'),1.38064852e-23)
+    
+    def test_spec_conversions(self):
+        u1 = Units('J')
+        u2 = Units('m')
+        
+        self.assertAlmostEqual(u1.conversion(u2,force='spec'),1.9864e-25)
  
 if __name__ == '__main__':
     unittest.main()
