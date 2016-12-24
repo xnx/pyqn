@@ -68,7 +68,13 @@ class QuantityManipulations(unittest.TestCase):
         
         q5 = q1**0
         self.assertEqual(q5.value,1)
-        self.assertEqual(q1.units.dims,q5.units.dims)
+        self.assertNotEqual(q1.units.dims,q5.units.dims)
+    
+    def test_quantity_conversion(self):
+        #q1 = Quantity(value = 200, units = 'J')
+        #q2 = q1.convert_units_to('eV')
+        #self.assertAlmostEqual(q2.value,1.2483019242e+21,places=2)
+        pass
         
 if __name__ == '__main__':
     unittest.main()

@@ -158,11 +158,14 @@ class Quantity(Symbol):
         to_units = Units(new_units)
         fac = self.units.conversion(to_units, force)
 
-        self.value *= fac
+#        self.value *= fac
+#        if self.sd is not None:
+#            self.sd *= fac
+#        self.units = to_units
         if self.sd is not None:
-            self.sd *= fac
-        self.units = to_units
-        return
+            return Quantity(value = self.value*fac, units = new_units, sd = self.sd*fac)
+        else:
+            return Quantity(value = self.value*fac, units = new_units)
 
     def draw_from_dist(self, shape=None):
         """
