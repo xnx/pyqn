@@ -29,14 +29,20 @@ class UnitsConversionCheck(unittest.TestCase):
 
         with self.assertRaises(UnitsError) as cm:
             u1.conversion(u2, strict=True)
-        self.assertAlmostEqual(u1.conversion(u2), 1.6605389209999998e-21)
-
-    def test_multiplication_conversion(self):
-        u1 = Units('mm2')
-        u2 = Units('g/m2')
-        u3 = u1 * u2
-        self.assertAlmostEqual(u3.si_fac, 1.e-6)
-
+        self.assertAlmostEqual(u1.conversion(u2,force='mol'), 1.660e-21)
+    
+    def test_kbt_units_conversion(self):
+        u1 = Units('K')
+        u2 = Units('J')
+        
+        self.assertAlmostEqual(u1.conversion(u2,force='kbt'),1.38064852e-23)
+    
+    def test_spec_conversions(self):
+        u1 = Units('J')
+        u2 = Units('m')
+        
+        self.assertAlmostEqual(u1.conversion(u2,force='spec'),1.9864e-25)
+ 
 if __name__ == '__main__':
     unittest.main()
 

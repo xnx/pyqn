@@ -72,6 +72,8 @@ class Quantity(Symbol):
             return '%s = %s %s' % (self.name, self.value, self.units)
         else:
             return '%s %s' % (self.value, self.units)
+            
+    __repr__ = __str__
 
     def value_as_str(self, nsd_digits=2, small=1.e-3, large=1.e5):
         """
@@ -156,11 +158,14 @@ class Quantity(Symbol):
         to_units = Units(new_units)
         fac = self.units.conversion(to_units, force)
 
-        self.value *= fac
+#        self.value *= fac
+#        if self.sd is not None:
+#            self.sd *= fac
+#        self.units = to_units
         if self.sd is not None:
-            self.sd *= fac
-        self.units = to_units
-        return
+            return Quantity(value = self.value*fac, units = new_units, sd = self.sd*fac)
+        else:
+            return Quantity(value = self.value*fac, units = new_units)
 
     def draw_from_dist(self, shape=None):
         """
@@ -278,6 +283,10 @@ class Quantity(Symbol):
 
     def __rtruediv__(self, other):
         return self.__truediv__(other)
+    
+    def __pow__(self, power):
+        return Quantity(value = self.value**power, 
+                        units = self.units**power)
 
     @classmethod
     def parse(self, s_quantity, name=None, units=None, sd=None,

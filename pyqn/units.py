@@ -22,7 +22,7 @@
 
 import copy
 from .dimensions import Dimensions
-from .dimensions import d_dimensionless, d_length, d_energy, d_time
+from .dimensions import d_dimensionless, d_length, d_energy, d_time, d_temperature
 from .atom_unit import AtomUnit, UnitsError, feq
 
 class Units(object):
@@ -163,6 +163,7 @@ class Units(object):
                     del ratio.atom_units[i]
         ratio.dims = ratio.get_dims()
         return ratio
+        
     def __rdiv__(self, other):
         if type(other) == str:
             other = Units(other)
@@ -170,6 +171,12 @@ class Units(object):
             other = Units('1')
         return other.__truediv__(self)
  
+    def __pow__(self, power):
+        result_atom_units = []
+        for atom_unit in self.atom_units:
+            result_atom_units.append(atom_unit**power)
+        return Units(result_atom_units)
+        
     def __str__(self):
         """ String representation of this Units. """
         return '.'.join([str(atom_unit) for atom_unit in self.atom_units])
@@ -226,21 +233,61 @@ class Units(object):
 
         if type(other) == str:
             other = Units(other)
+            
+        conversion_method = {
+                             'spec': self.spec_conversion,
+                             'mol': self.mol_conversion,
+                             'kbt': self.kbt_conversion
+                             }
 
         self_dims, other_dims = self.get_dims(), other.get_dims()
         if self_dims != other_dims:
-            if force == 'spec':
-                return self.spec_conversion(other)
-            raise UnitsError('Failure in units conversion: units %s[%s] and'
-                             ' %s[%s] have different dimensions'
+            try:
+                return conversion_method[force](other)
+            except KeyError:
+                raise UnitsError('Failure in units conversion: units %s[%s] and'
+                                 ' %s[%s] have different dimensions'
                            % (self, self.get_dims(), other, other.get_dims()))
         return self.to_si() / other.to_si()
+    
+    def kbt_conversion(self, other):
+        kb = 1.38064852e-23
+        from_dims = self.get_dims()
+        to_dims = other.get_dims()
+        fac = self.to_si()
+        
+        if from_dims == d_energy and to_dims == d_temperature:
+            fac = fac/kb
+        elif from_dims == d_temperature and to_dims == d_energy:
+            fac = fac*kb
+        else:
+            raise UnitsError('Failure in conversion of units: was expecting to '
+                             'covert between energy and temperature')
+        return fac/other.to_si()
 
+    def mol_conversion(self, other):
+        a_number = 6.022140857e23   #avogadro's number
+        from_dims = self.get_dims() #original unit dimensions
+        to_dims = other.get_dims()  #desired unit dimensions
+        fac = self.to_si()          #factor needed to conver to SI units
+        
+        if from_dims.dims[4] == to_dims.dims[4]:
+            raise UnitsError('Failure in conversion of units: no '
+                             'different in quantity dimensions between %s and %s'
+                             % from_dims, to_dims)
+        elif from_dims.dims[4] > to_dims.dims[4]:
+            fac = fac/(a_number**(from_dims.dims[4]-to_dims.dims[4]))
+        else:
+            fac = fac*(a_number**(to_dims.dims[4]-from_dims.dims[4]))
+        return fac/other.to_si()
+        
     def spec_conversion(self, other):
         h = 6.62606896e-34
         c = 299792458.
         d_wavenumber = d_length**-1
         d_frequency = d_time**-1
+        d_wavelength = d_length
+        
         from_dims = self.get_dims()
         to_dims = other.get_dims()
         fac = self.to_si()
@@ -248,6 +295,8 @@ class Units(object):
             fac *= h*c
         elif from_dims == d_frequency:
             fac *= h
+        elif from_dims == d_wavelength:
+            fac /= h*c
         elif from_dims != d_energy:
             raise UnitsError('Failure in conversion of spectroscopic units:'
                 ' I only recognise from-units of wavenumber, energy and'
@@ -256,6 +305,8 @@ class Units(object):
             fac /= h*c
         elif to_dims == d_frequency:
             fac /= h
+        elif to_dims == d_wavelength:
+            fac *= h*c
         elif to_dims != d_energy:
             raise UnitsError('Failure in conversion of spectroscopic units:'
                 ' I only recognise to-units of wavenumber, energy and'
