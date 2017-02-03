@@ -251,7 +251,7 @@ class Units(object):
         elif from_dims != d_energy:
             raise UnitsError('Failure in conversion of spectroscopic units:'
                 ' I only recognise from-units of wavenumber, energy and'
-                ' frequency but got %s' % self.units)
+                ' frequency but got %s' % str(self))
         if to_dims == d_wavenumber:
             fac /= h*c
         elif to_dims == d_frequency:
@@ -259,7 +259,7 @@ class Units(object):
         elif to_dims != d_energy:
             raise UnitsError('Failure in conversion of spectroscopic units:'
                 ' I only recognise to-units of wavenumber, energy and'
-                ' frequency but got %s' % other.units)
+                ' frequency but got %s' % str(other))
         return fac / other.to_si()
 
 def convert(from_units, to_units):
