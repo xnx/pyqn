@@ -327,3 +327,14 @@ class Quantity(Symbol):
                 ndp = 0
             sd = float(s_sd) * 10**(exp-ndp)
         return Quantity(name=name, value=value, units=units, sd=sd)
+
+    @property
+    def html_str(self):
+        html_chunks = []
+        if self.name:
+            html_chunks.append('{:s} ='.format(self.name))
+        html_chunks.append('{:}'.format(self.value))
+        if self.sd:
+            html_chunks.append('± {:}'.format(self.sd))
+        html_chunks.append(self.units.html)
+        return ' '.join(html_chunks)

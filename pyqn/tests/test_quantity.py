@@ -76,5 +76,16 @@ class QuantityManipulations(unittest.TestCase):
         #self.assertAlmostEqual(q2.value,1.2483019242e+21,places=2)
         pass
         
+    def test_quantity_html(self):
+        q1 = Quantity(name = 'E', value = 1.2, units = 'J')
+        q2 = Quantity(value = -5, units = 's', sd = 0.3)
+        q3 = Quantity(value = 30.7, units = 'kg.m2.s-2')
+        q4 = Quantity(value = 22.4,units = 'm/s')
+        
+        self.assertEqual(q1.html_str, 'E = 1.2 J')
+        self.assertEqual(q2.html_str, '-5 ± 0.3 s')
+        self.assertEqual(q3.html_str, '30.7 kg m<sup>2</sup> s<sup>-2</sup>')
+        self.assertEqual(q4.html_str, '22.4 m s<sup>-1</sup>')
+    
 if __name__ == '__main__':
     unittest.main()
