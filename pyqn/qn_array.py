@@ -11,12 +11,6 @@ class qnArrayError(Exception):
 class qnArray(Symbol):
     def __init__(self, name=None, latex=None, html=None, values=None, units=None, sd=None, definition=None):
         Symbol.__init__(self, name, latex, html, definition)
-        #if type(values)==list:
-        #    self.values = np.array(values)
-        #elif type(values)==numpy.ndarray:
-        #    self.values = values
-        #else:
-        #    raise qnArrayError
         self.nparr = np.array([])
         self.units = units
         self.values = values
