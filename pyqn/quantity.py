@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 # quantity.py
 # A class representing physical quantity, with name, units and uncertainty.
 #

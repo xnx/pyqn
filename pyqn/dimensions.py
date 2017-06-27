@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 # dimensions.py
 # A class representing the dimensions of a physical quantity's units, in
 # terms of powers of length (L), mass (M), time (T), temperature (Theta),
@@ -24,7 +27,7 @@
 
 class Dimensions(object):
     # these are the abbreviations for Length, Mass, Time, Temperature,
-    # Quantity (amount of substance), Current, and Luminous Intensity:
+    # Quantity (amount of substance), Current, and Luminous Intensity
     dim_names = ['L', 'M', 'T', 'Theta', 'Q', 'C', 'I']
     dim_desc = ['length', 'mass', 'time', 'temperature', 'amount',
                 'current', 'luminous intensity']
