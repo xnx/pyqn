@@ -25,9 +25,5 @@ class qnArray(Symbol):
             
     def __mul__(self, other):
         return self.nparr * other
-
-    def values(self):
-        return self.values
-    
-    def units(self):
-        return self.units
+    def __truediv__(self, other):
+        return self.nparr / other
