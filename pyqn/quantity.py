@@ -271,8 +271,8 @@ class Quantity(Symbol):
                 sd = abs(other) / self.sd
             return Quantity(value=self.value/other, units=self.units, sd=sd)
         else:
-            if type(other) != Quantity:
-                raise TypeError
+            #if type(other) != Quantity:
+            #    raise TypeError
             if other.value is None:
                 raise ValueError
             value = self.value / other.value
