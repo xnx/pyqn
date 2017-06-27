@@ -242,7 +242,7 @@ class Quantity(Symbol):
                 sd = abs(other) * self.sd
             return Quantity(value=self.value*other, units=self.unit, sd=sd)
         else:
-            if type(other) != Quantity:
+            if (type(other) is not Quantity) and (type(other) is not qnArray):
                 raise TypeError
             if other.value is None:
                 raise ValueError
