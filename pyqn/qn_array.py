@@ -13,7 +13,14 @@ class qnArray(Symbol):
         Symbol.__init__(self, name, latex, html, definition)
         self.nparr = np.array([])
         self.units = units
-        self.values = values
+        if len(values) is not 0:
+            if type(values) is list or type(values) is np.ndarray:
+                if type(values[0]) is not str:
+                    self.values = values
+                else:
+                    raise qnArrayError("Values must be numbers")
+            else:
+                raise qnArrayError("Values only an array/list of values")
         for v in values:
             self.nparr = np.append(self.nparr, Quantity(value=v, units = units))
             
