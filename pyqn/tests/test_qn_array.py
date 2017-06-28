@@ -1,27 +1,28 @@
 import unittest
-from ..qn_array import qnArray
+from ..qn_array import qnArray, qnArrayError
 from ..quantity import Quantity
 import numpy as np
 
 class qnArrayTest(unittest.TestCase):
     def test_qnarray_init(self):
-        qnarr1 = qnArray(values = [1,2,3,4,5], units = 'm')
-        self.assertEqual(qnarr1.values = [1,2,3,4,5])
-        self.assertEqual(qnarr1.units = 'm')
-        self.assertEqual(qnarr1.nparr = np.array([Quantity(value=1,units='m'),
-                                                  Quantity(value=2,units='m'),
-                                                  Quantity(value=3,units='m'),
-                                                  Quantity(value=4,units='m'),
-                                                  Quantity(value=5,units='m')])
+        a1 = [1,2,3,4,5]
+        qnarr1 = qnArray(values = a1, units = 'm')
+        for i in range(len(a1)):
+            self.assertEqual(qnarr1.values[i], a1[i])
+            self.assertEqual(qnarr1.nparr[i], Quantity(value=a1[i], units='m'))
+        self.assertEqual(qnarr1.units, 'm')
         
-        qnarr2 = qnArray(values = np.array([-5,-10], units = 'J')
-        self.assertEqual(qnarr2.values = [-5,-10])
-        self.assertEqual(qnarr2.units = 'J')
-        self.assertEqual(qnarr2.nparr = np.array([Quantity(value=-5,units='J'),
-												  Quantity(value=-10,units='J')])
+        a2 = [-5,-10]
+        qnarr2 = qnArray(values = np.array(a2), units = 'J')
+        for i in range(len(a2)):
+            self.assertEqual(qnarr2.values[i], a2[i])
+            self.assertEqual(qnarr2.nparr[i], Quantity(value=a2[i], units='J'))
+        self.assertEqual(qnarr2.units, 'J')
         
-        with self.assertRaises(SOMETHINGERROR) as e1:
+        with self.assertRaises(qnArrayError) as e1:
             qnarr = qnArray(values = "string")
-        with self.assertRaises(SOMETHINGERROR) as e2:
+        with self.assertRaises(qnArrayError) as e2:
             qnarr = qnArray(values = ["a", "b", "c"])
             
+if __name__ == '__main__':
+    unittest.main()
