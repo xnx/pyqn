@@ -185,6 +185,12 @@ class Quantity(Symbol):
                              ' deviation.'.format(self.name))
 
         return np.random.normal(loc=self.value, scale=self.sd, size=shape)
+        
+    def __eq__(self, other):
+        if (self.value == other.value) and (self.units == other.units):
+            return True
+        else:
+            return False
 
     def __add__(self, other):
         """
