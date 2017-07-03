@@ -31,15 +31,15 @@ class qnArrayTest(unittest.TestCase):
         result1 = qnarr1*q1
         self.assertEqual(result1.units_str, 'm.s')
         for i in range(len(a1)):
-            self.assertEqual(result1.values[i], 2*a1[i])
+            self.assertEqual(result1.nparr[i], 2*a1[i])
             
-        #a2 = [5,10]
-        #qnarr2 = qnArray(values = np.array(a2), units = 'J')
-        #q2 = Quantity(value=0.2, units = 'm-1')
-        #result2 = qnarr2*q2
-        #self.assertEqual(result2.units, 'J.m-1')
-        #for i in range(len(result2)):
-        #    self.assertEqual(result2.values[i], 0.2*a2[i])
+        a2 = [5,10]
+        qnarr2 = qnArray(values = np.array(a2), units = 'J')
+        q2 = Quantity(value=0.2, units = 'm-1')
+        result2 = qnarr2*q2
+        self.assertEqual(result2.units_str, 'J.m-1')
+        for i in range(len(a2)):
+            self.assertEqual(result2.nparr[i], 0.2*a2[i])
             
 if __name__ == '__main__':
     unittest.main()
