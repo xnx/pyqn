@@ -42,8 +42,11 @@ class qnArrayTest(unittest.TestCase):
             
         with self.assertRaises(qnArrayError) as e1:
             result = qnarr1*2
+        with self.assertRaises(qnArrayError) as e2:
             result = qnarr1*"str"
+        with self.assertRaises(qnArrayError) as e3:
             result = qnarr1*np.array([1,2,3])
+        with self.assertRaises(qnArrayError) as e4:
             result = qnarr1*qnarr2
             
     def test_qnarray_div(self):
@@ -55,10 +58,21 @@ class qnArrayTest(unittest.TestCase):
         for i in range(len(a1)):
             self.assertEqual(result1.nparr[i], a1[i]/2)
             
+        a2 = [5,10]
+        qnarr2 = qnArray(values = np.array(a2), units = 'J')
+        q2 = Quantity(value=0.2, units = 'm-1')
+        result2 = qnarr2/q2
+        self.assertEqual(result2.units_str, 'J.m')
+        for i in range(len(a2)):
+            self.assertEqual(result2.nparr[i], a2[i]/0.2)
+            
         with self.assertRaises(qnArrayError) as e1:
             result = qnarr1/2
+        with self.assertRaises(qnArrayError) as e2:
             result = qnarr1/"str"
+        with self.assertRaises(qnArrayError) as e3:
             result = qnarr1/np.array([1,2,3])
+        with self.assertRaises(qnArrayError) as e4:
             result = qnarr1/qnarr2
             
 if __name__ == '__main__':
