@@ -41,5 +41,14 @@ class qnArrayTest(unittest.TestCase):
         for i in range(len(a2)):
             self.assertEqual(result2.nparr[i], 0.2*a2[i])
             
+    def test_qnarray_div(self):
+        a1 = [-1,-2,-3,-4,-5]
+        qnarr1 = qnArray(values = a1, units = 'm')
+        q1 = Quantity(value = 2, units = 's')
+        result1 = qnarr1/q1
+        self.assertEqual(result1.units_str, 'm.s-1')
+        for i in range(len(a1)):
+            self.assertEqual(result1.nparr[i], a1[i]/2)
+            
 if __name__ == '__main__':
     unittest.main()
