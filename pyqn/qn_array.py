@@ -39,11 +39,13 @@ class qnArray(Symbol):
             
     def __mul__(self, other):
         if type(other) is not Quantity:
-            raise qnArrayError("qnArrays can obly be multiplied by Quantity objects")
+            raise qnArrayError("qnArrays can only be multiplied by Quantity objects")
         return qnArray(values = self.nparr*other.value, units = self.units*other.units)
         
     def __truediv__(self, other):
-        return self.nparr / other
+        if type(other) is not Quantity:
+            raise qnArrayError("qnArrays can only be divided by Quantity objects")
+        return qnArray(values = self.nparr/other.value, units = self.units/other.units)
         
     @property
     def units_str(self):
