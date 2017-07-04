@@ -35,10 +35,6 @@ class qnArrayTwo(np.ndarray):
         if obj is None: return
         self.info = getattr(obj, 'info', None)
 
-    #def __mul__(self, other):
-    #    if type(other) is not Quantity:
-    #        raise qnArrayTwoError("Multiplication operation can be done only using Quantity objects")
-        
     def __add__(self, other):
         """ Function for adding a Quantity value to all values in 
         qnArrayTwo or adding another anArrayTwo to the current array
@@ -147,3 +143,10 @@ class qnArrayTwo(np.ndarray):
     #        return True
     #    else:
     #        return False
+
+    @property
+    def html_str(self):
+        html_chunks = []
+        for i in range(len(self)):
+            html_chunks.append(Quantity(value=self[i],units = self.units, sd = self.sd[i]).html_str)
+        return ', '.join(html_chunks)
