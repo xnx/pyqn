@@ -26,6 +26,8 @@ class qnArrayTwo(np.ndarray):
             if len(sd) != len(input_array):
                 raise qnArrayTwoError("Standard deviation array must be of the same length as values array")
             obj.sd = sd
+        else:
+            obj.sd = np.zeros(len(input_array))
             
         return obj
 
@@ -45,16 +47,20 @@ class qnArrayTwo(np.ndarray):
             if len(other) != len(self):
                 raise qnArrayTwoError("Inconsistent array lengths")
             v = []
+            sd_arr = []
             for i in range(len(self)):
-                temp_q = Quantity(value = self[i], units = self.units) + Quantity(value = other[i], units = other.units)
+                temp_q = Quantity(value = self[i], units = self.units, sd = self.sd[i]) + Quantity(value = other[i], units = other.units, sd = other.sd[i])
                 v.append(temp_q.value)
-            return qnArrayTwo(v, units = temp_q.units)
+                sd_arr.append(temp_q.sd)
+            return qnArrayTwo(v, units = temp_q.units, sd = sd_arr)
         if type(other) is Quantity:
             v = []
+            sd_arr = []
             for i in range(len(self)):
-                temp_q = Quantity(value=self[i], units=self.units) + other
+                temp_q = Quantity(value=self[i], units=self.units, sd = self.sd[i]) + other
                 v.append(temp_q.value)
-            return qnArrayTwo(v, units = temp_q.units)
+                sd_arr.append(temp_q.sd)
+            return qnArrayTwo(v, units = temp_q.units, sd = sd_arr)
         else:
             raise qnArrayTwoError("Can only add two qnArray objects or a qnArray with Quantity")
 
@@ -63,17 +69,21 @@ class qnArrayTwo(np.ndarray):
             if len(other) != len(self):
                 raise qnArrayTwoError("Inconsistent array lengths")
             v = []
+            sd_arr = []
             for i in range(len(self)):
-                temp_q = Quantity(value = self[i], units = self.units) - Quantity(value = other[i], units = other.units)
+                temp_q = Quantity(value = self[i], units = self.units, sd = self.sd[i]) - Quantity(value = other[i], units = other.units, sd = other.sd[i])
                 v.append(temp_q.value)
-            return qnArrayTwo(v, units = temp_q.units)
+                sd_arr.append(temp_q.sd)
+            return qnArrayTwo(v, units = temp_q.units, sd = sd_arr)
 
         if type(other) is Quantity:
             v = []
+            sd_arr = []
             for i in range(len(self)):
-                temp_q = Quantity(value=self[i], units=self.units) - other
+                temp_q = Quantity(value=self[i], units=self.units, sd = self.sd[i]) - other
                 v.append(temp_q.value)
-            return qnArrayTwo(v, units = temp_q.units)
+                sd_arr.append(temp_q.sd)
+            return qnArrayTwo(v, units = temp_q.units, sd = sd_arr)
         else:
             raise qnArrayTwoError("Can only subtract two qnArray objects or a qnArray with Quantity")
 
@@ -82,17 +92,21 @@ class qnArrayTwo(np.ndarray):
             if len(other) != len(self):
                 raise qnArrayTwoError("Inconsistent array lengths")
             v = []
+            sd_arr = []
             for i in range(len(self)):
-                temp_q = Quantity(value = self[i], units = self.units) * Quantity(value = other[i], units = other.units)
+                temp_q = Quantity(value = self[i], units = self.units, sd = self.sd[i]) * Quantity(value = other[i], units = other.units, sd = other.sd[i])
                 v.append(temp_q.value)
-            return qnArrayTwo(v, units = temp_q.units)
+                sd_arr.append(temp_q.sd)
+            return qnArrayTwo(v, units = temp_q.units, sd = sd_arr)
 
         if type(other) is Quantity:
             v = []
+            sd_arr = []
             for i in range(len(self)):
-                temp_q = Quantity(value=self[i], units=self.units) * other
+                temp_q = Quantity(value=self[i], units=self.units, sd = self.sd[i]) * other
                 v.append(temp_q.value)
-            return qnArrayTwo(v, units = temp_q.units)
+                sd_arr.append(temp_q.sd)
+            return qnArrayTwo(v, units = temp_q.units, sd = sd_arr)
         else:
             raise qnArrayTwoError("Can only multiply two qnArray objects or a qnArray with Quantity")
 
@@ -101,16 +115,20 @@ class qnArrayTwo(np.ndarray):
             if len(other) != len(self):
                 raise qnArrayTwoError("Inconsistent array lengths")
             v = []
+            sd_arr = []
             for i in range(len(self)):
-                temp_q = Quantity(value = self[i], units = self.units) / Quantity(value = other[i], units = other.units)
+                temp_q = Quantity(value = self[i], units = self.units, sd = self.sd[i]) / Quantity(value = other[i], units = other.units, sd = other.sd[i])
                 v.append(temp_q.value)
-            return qnArrayTwo(v, units = temp_q.units)
+                sd_arr.append(temp_q.sd)
+            return qnArrayTwo(v, units = temp_q.units, sd = sd_arr)
 
         if type(other) is Quantity:
             v = []
+            sd_arr = []
             for i in range(len(self)):
-                temp_q = Quantity(value=self[i], units=self.units) / other
+                temp_q = Quantity(value=self[i], units=self.units, sd = self.sd[i]) / other
                 v.append(temp_q.value)
-            return qnArrayTwo(v, units = temp_q.units)
+                sd_arr.append(temp_q.sd)
+            return qnArrayTwo(v, units = temp_q.units, sd = sd_arr)
         else:
-            raise qnArrayTwoError("Can onlydividde two qnArray objects or a qnArray with Quantity")
+            raise qnArrayTwoError("Can only divide two qnArray objects or a qnArray with Quantity")
