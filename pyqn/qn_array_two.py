@@ -132,3 +132,13 @@ class qnArrayTwo(np.ndarray):
             return qnArrayTwo(v, units = temp_q.units, sd = sd_arr)
         else:
             raise qnArrayTwoError("Can only divide two qnArray objects or a qnArray with Quantity")
+
+    def __pow__(self, other):
+        v = []
+        sd_arr = []
+        for i in range(len(self)):
+            temp_q = Quantity(value=self[i], units = self.units, sd = self.sd[i]) ** other
+            v.append(temp_q.value)
+            sd_arr.append(temp_q.sd)
+        return qnArrayTwo(v, units = temp_q.units, sd = sd_arr)
+
