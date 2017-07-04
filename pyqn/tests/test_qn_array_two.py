@@ -169,5 +169,13 @@ class qnArrayTwoTest(unittest.TestCase):
     #    self.assertFalse(qnarr3 == qnarr5)
 
     #    self.assertFalse(qnarr4 == qnarr5)
+
+    def test_qn_array_two_html(self):
+        vals = [1,2,3,4]
+        sd = [0.1,0.2,0.3,0.4]
+        qnarr = qnArrayTwo(vals, units = 'm', sd = sd)
+
+        self.assertEqual(qnarr.html_str, '1 ± 0.1 m, 2 ± 0.2 m, 3 ± 0.3 m, 4 ± 0.4 m')
+
 if __name__ == '__main__':
     unittest.main()
