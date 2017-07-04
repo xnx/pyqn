@@ -75,7 +75,7 @@ class qnArrayTwo(np.ndarray):
                 v.append(temp_q.value)
             return qnArrayTwo(v, units = temp_q.units)
         else:
-            raise qnArrayTwoError("Can only add two qnArray objects or a qnArray with Quantity")
+            raise qnArrayTwoError("Can only subtract two qnArray objects or a qnArray with Quantity")
 
     def __mul__(self, other):
         if type(other) is qnArrayTwo:
@@ -94,4 +94,23 @@ class qnArrayTwo(np.ndarray):
                 v.append(temp_q.value)
             return qnArrayTwo(v, units = temp_q.units)
         else:
-            raise qnArrayTwoError("Can only add two qnArray objects or a qnArray with Quantity")
+            raise qnArrayTwoError("Can only multiply two qnArray objects or a qnArray with Quantity")
+
+    def __truediv__(self, other):
+        if type(other) is qnArrayTwo:
+            if len(other) != len(self):
+                raise qnArrayTwoError("Inconsistent array lengths")
+            v = []
+            for i in range(len(self)):
+                temp_q = Quantity(value = self[i], units = self.units) / Quantity(value = other[i], units = other.units)
+                v.append(temp_q.value)
+            return qnArrayTwo(v, units = temp_q.units)
+
+        if type(other) is Quantity:
+            v = []
+            for i in range(len(self)):
+                temp_q = Quantity(value=self[i], units=self.units) / other
+                v.append(temp_q.value)
+            return qnArrayTwo(v, units = temp_q.units)
+        else:
+            raise qnArrayTwoError("Can onlydividde two qnArray objects or a qnArray with Quantity")
