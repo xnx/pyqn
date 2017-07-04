@@ -98,5 +98,31 @@ class qnArrayTwoTest(unittest.TestCase):
         with self.assertRaises(qnArrayTwoError) as e:
             qnarr = qnarr1 * 2
 
+    def test_qn_array_two_mul(self):
+        vals1 = [1,2,3,4]
+        qnarr1 = qnArrayTwo(vals1,units='m')
+        
+        vals2 = [2,3,4,1]
+        qnarr2 = qnArrayTwo(vals2, units='s')
+        
+        qnarr3 = qnarr1 / qnarr2
+        self.assertEqual(qnarr3.units, Units('m.s-1'))
+        for i in range(len(vals2)):
+            self.assertEqual(qnarr3[i], vals1[i]/vals2[i])
+            
+        vals3 = [1,1,1]
+        qnarr3 = qnArrayTwo(vals3, units='m')
+        with self.assertRaises(qnArrayTwoError) as e:
+            qnarr = qnarr1 / qnarr3
+
+        q1 = Quantity(value = 10, units = 'J')
+        qnarr4 = qnarr1 / q1
+        self.assertEqual(qnarr4.units, Units('m.J-1'))
+        for i in range(len(qnarr4)):
+            self.assertEqual(qnarr4[i], qnarr1[i]/10)
+
+        with self.assertRaises(qnArrayTwoError) as e:
+            qnarr = qnarr1 / 2
+
 if __name__ == '__main__':
     unittest.main()
