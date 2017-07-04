@@ -295,7 +295,8 @@ class Quantity(Symbol):
     
     def __pow__(self, power):
         return Quantity(value = self.value**power, 
-                        units = self.units**power)
+                        units = self.units**power,
+                        sd = self.value**power*math.hypot(self.sd/self.value, self.sd/self.value))
 
     @classmethod
     def parse(self, s_quantity, name=None, units=None, sd=None,
