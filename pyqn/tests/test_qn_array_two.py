@@ -138,5 +138,16 @@ class qnArrayTwoTest(unittest.TestCase):
         with self.assertRaises(qnArrayTwoError) as e:
             qnarr = qnarr1 / 2
 
+    def test_qn_array_two_pow(self):
+        vals1 = [1,2,3,4]
+        sd1 = [0.1, 0.2, 0.3, 0.4]
+        qnarr1 = qnArrayTwo(vals1, units = 'm', sd = sd1)
+
+        qnarr2 = qnarr1 ** 2
+        self.assertEqual(qnarr2.units, Units('m2'))
+        for i in range(len(vals1)):
+            self.assertEqual(qnarr2[i], vals1[i]**2)
+            self.assertAlmostEqual(qnarr2.sd[i], qnarr2[i]*np.sqrt(2.0*(sd1[i]/vals1[i])**2))
+
 if __name__ == '__main__':
     unittest.main()
