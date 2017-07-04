@@ -149,5 +149,25 @@ class qnArrayTwoTest(unittest.TestCase):
             self.assertEqual(qnarr2[i], vals1[i]**2)
             self.assertAlmostEqual(qnarr2.sd[i], qnarr2[i]*np.sqrt(2.0*(sd1[i]/vals1[i])**2))
 
+    #def test_qn_array_eq(self):
+    #    qnarr1 = qnArrayTwo([1,1,1],units = 'm', sd = [0.1,0.1,0.1])
+    #    qnarr2 = qnArrayTwo([1,1,1],units = 'm')
+    #    qnarr3 = qnArrayTwo([1,2,3],units = 'm', sd = [0.1,0.1,0.1])
+    #    qnarr4 = qnArrayTwo([1,2,3],units = 'J', sd = [0.1,0.1,0.1])
+    #    qnarr5 = qnArrayTwo([1.0,1.0,1.0],units = Units('m'), sd = [0,0,0])
+
+    #    self.assertFalse(qnarr1 == qnarr2)
+    #    self.assertFalse(qnarr1 == qnarr3)
+    #    self.assertFalse(qnarr1 == qnarr4)
+    #    self.assertFalse(qnarr1 == qnarr5)
+
+    #    self.assertFalse(qnarr2 == qnarr3)
+    #    self.assertFalse(qnarr2 == qnarr4)
+    #    self.assertTrue(qnarr2 == qnarr5)
+
+    #    self.assertFalse(qnarr3 == qnarr4)
+    #    self.assertFalse(qnarr3 == qnarr5)
+
+    #    self.assertFalse(qnarr4 == qnarr5)
 if __name__ == '__main__':
     unittest.main()
