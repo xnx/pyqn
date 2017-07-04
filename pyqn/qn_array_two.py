@@ -142,3 +142,8 @@ class qnArrayTwo(np.ndarray):
             sd_arr.append(temp_q.sd)
         return qnArrayTwo(v, units = temp_q.units, sd = sd_arr)
 
+    #def __eq__(self, other):
+    #    if all(self == other) and (self.units == other.units) and (self.sd == other.sd):
+    #        return True
+    #    else:
+    #        return False
