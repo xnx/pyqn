@@ -2,6 +2,7 @@ import unittest
 from ..qn_array_two import qnArrayTwo, qnArrayTwoError
 from ..units import Units
 from ..quantity import Quantity
+import numpy as np
 
 class qnArrayTwoTest(unittest.TestCase):
     def test_qn_array_two_init(self):
@@ -10,6 +11,7 @@ class qnArrayTwoTest(unittest.TestCase):
         self.assertEqual(qnarr1.units, Units('m'))
         for i in range(len(vals1)):
             self.assertEqual(qnarr1[i], vals1[i])
+            self.assertEqual(qnarr1.sd[i], 0)
             
         vals2 = [-10,-20,-30,0,5]
         sd2 = [0.1,0.2,0.3,0.4,0.1]
@@ -24,14 +26,17 @@ class qnArrayTwoTest(unittest.TestCase):
 
     def test_qn_array_two_add(self):
         vals1 = [1,2,3,4]
-        qnarr1 = qnArrayTwo(vals1,units='m')
+        sd1 = [0.1, 0.2, 0.3, 0.1]
+        qnarr1 = qnArrayTwo(vals1,units='m',sd=sd1)
         
         vals2 = [2,3,4,1]
-        qnarr2 = qnArrayTwo(vals2, units='m')
+        sd2 = [0.2, 0.1, 0.2, 0.1]
+        qnarr2 = qnArrayTwo(vals2, units='m', sd=sd2)
         
         qnarr3 = qnarr1 + qnarr2
         for i in range(len(vals2)):
             self.assertEqual(qnarr3[i], vals1[i]+vals2[i])
+            self.assertAlmostEqual(qnarr3.sd[i], np.sqrt(sd1[i]**2 + sd2[i]**2))
             
         vals3 = [1,1,1]
         qnarr3 = qnArrayTwo(vals3, units='m')
@@ -49,14 +54,17 @@ class qnArrayTwoTest(unittest.TestCase):
             
     def test_qn_array_two_sub(self):
         vals1 = [1,2,3,4]
-        qnarr1 = qnArrayTwo(vals1,units='m')
+        sd1 = [0.1, 0.2, 0.3, 0.1]
+        qnarr1 = qnArrayTwo(vals1,units='m',sd=sd1)
         
         vals2 = [2,3,4,1]
-        qnarr2 = qnArrayTwo(vals2, units='m')
+        sd2 = [0.2, 0.1, 0.2, 0.1]
+        qnarr2 = qnArrayTwo(vals2, units='m',sd=sd2)
         
         qnarr3 = qnarr1 - qnarr2
         for i in range(len(vals2)):
             self.assertEqual(qnarr3[i], vals1[i]-vals2[i])
+            self.assertAlmostEqual(qnarr3.sd[i], np.sqrt(sd1[i]**2 + sd2[i]**2))
             
         vals3 = [1,1,1]
         qnarr3 = qnArrayTwo(vals3, units='m')
@@ -74,15 +82,18 @@ class qnArrayTwoTest(unittest.TestCase):
 
     def test_qn_array_two_mul(self):
         vals1 = [1,2,3,4]
-        qnarr1 = qnArrayTwo(vals1,units='m')
+        sd1 = [0.1, 0.2, 0.3, 0.1]
+        qnarr1 = qnArrayTwo(vals1,units='m',sd=sd1)
         
         vals2 = [2,3,4,1]
-        qnarr2 = qnArrayTwo(vals2, units='s')
+        sd2 = [0.2, 0.1, 0.2, 0.1]
+        qnarr2 = qnArrayTwo(vals2, units='s',sd=sd2)
         
         qnarr3 = qnarr1 * qnarr2
         self.assertEqual(qnarr3.units, Units('m.s'))
         for i in range(len(vals2)):
             self.assertEqual(qnarr3[i], vals1[i]*vals2[i])
+            self.assertAlmostEqual(qnarr3.sd[i], qnarr3[i]*np.sqrt((sd1[i]/vals1[i])**2+(sd2[i]/vals2[i])**2))
             
         vals3 = [1,1,1]
         qnarr3 = qnArrayTwo(vals3, units='m')
@@ -100,15 +111,18 @@ class qnArrayTwoTest(unittest.TestCase):
 
     def test_qn_array_two_mul(self):
         vals1 = [1,2,3,4]
-        qnarr1 = qnArrayTwo(vals1,units='m')
+        sd1 = [0.1, 0.2, 0.3, 0.1]
+        qnarr1 = qnArrayTwo(vals1,units='m',sd=sd1)
         
         vals2 = [2,3,4,1]
-        qnarr2 = qnArrayTwo(vals2, units='s')
+        sd2 = [0.2, 0.1, 0.2, 0.1]
+        qnarr2 = qnArrayTwo(vals2, units='s',sd=sd2)
         
         qnarr3 = qnarr1 / qnarr2
         self.assertEqual(qnarr3.units, Units('m.s-1'))
         for i in range(len(vals2)):
             self.assertEqual(qnarr3[i], vals1[i]/vals2[i])
+            self.assertAlmostEqual(qnarr3.sd[i], qnarr3[i]*np.sqrt((sd1[i]/vals1[i])**2+(sd2[i]/vals2[i])**2))
             
         vals3 = [1,1,1]
         qnarr3 = qnArrayTwo(vals3, units='m')
