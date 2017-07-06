@@ -38,7 +38,7 @@ class DimensionsCheck(unittest.TestCase):
             self.assertEqual(d13.dims[i], arr1[i]+arr3[i])
             self.assertEqual(d23.dims[i], arr2[i]+arr3[i])
 
-    def test_dimensions_div(self):
+    def test_dimensions_truediv(self):
         arr1 = [1,0,0,0,0,0,0]
         arr2 = [0,1,1,0,1,0,0]
         arr3 = [-1,10,5,2,0,-4,0]
@@ -60,6 +60,42 @@ class DimensionsCheck(unittest.TestCase):
             self.assertEqual(d23.dims[i], arr2[i]-arr3[i])
             self.assertEqual(d32.dims[i], arr3[i]-arr2[i])
         
+    def test_dimensions_pow(self):
+        arr1 = [1,0,0,0,0,0,0]
+        arr2 = [0,1,1,0,1,0,0]
+        arr3 = [-1,10,5,2,0,-4,0]
+        d1 = Dimensions(dims = arr1)
+        d2 = Dimensions(dims = arr2)
+        d3 = Dimensions(dims = arr3)
+
+        d1_1 = d1 ** 1
+        d1_2 = d1 ** 2
+        d1__10 = d1 ** (-10)
+        d2_1 = d2 ** 1
+        d2_2 = d2 ** 2
+        d2__10 = d2 ** (-10)
+        d3_1 = d3 ** 1
+        d3_2 = d3 ** 2
+        d3__10 = d3 ** (-10)
+
+        for i in range(7):
+            self.assertEqual(d1_1.dims[i], arr1[i])
+            self.assertEqual(d1_2.dims[i], arr1[i]*2)
+            self.assertEqual(d1__10.dims[i], arr1[i]*(-10))
+            self.assertEqual(d2_1.dims[i], arr2[i])
+            self.assertEqual(d2_2.dims[i], arr2[i]*2)
+            self.assertEqual(d2__10.dims[i], arr2[i]*(-10))
+            self.assertEqual(d3_1.dims[i], arr3[i])
+            self.assertEqual(d3_2.dims[i], arr3[i]*2)
+            self.assertEqual(d3__10.dims[i], arr3[i]*(-10))
+
+    def test_dimensions_eq(self):
+        d1 = Dimensions(dims = [1,1,1,0,1,1,1])
+        d2 = Dimensions(dims = [1,1,1,0,1,1,1])
+        d3 = Dimensions(dims = [])
+        d4 = Dimensions(dims = [0,0,0,0,0,0,0])
+        self.assertTrue(d1 == d2)
+        self.assertTrue(d3 == d4)
 
 if __name__ == '__main__':
     unittest.main()
