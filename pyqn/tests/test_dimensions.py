@@ -17,16 +17,27 @@ class DimensionsCheck(unittest.TestCase):
             self.assertEqual(d3.dims[i], arr3[i])
             self.assertEqual(d4.dims[i], 0)
 
+        d5 = Dimensions(M = 1)
+        self.assertEqual(d5.dims[1], 1)
+        
+        d6 = Dimensions(Q = -2, Theta = -100)
+        self.assertEqual(d6.dims[4], -2)
+        self.assertEqual(d6.dims[3], -100)
+        
+        d7 = Dimensions(C = 10, I = 0)
+        self.assertEqual(d7.dims[5], 10)
+        self.assertEqual(d7.dims[6], 0)
+
         with self.assertRaises(DimensionsError) as e:
             d = Dimensions(dims = [1])
         with self.assertRaises(DimensionsError) as e:
             d = Dimensions(dims = [1,1,1,1,1,1,1,1,1,1,1])
         with self.assertRaises(DimensionsError) as e:
-			d = Dimensions(dims = [], kwargs = 1)
-		with self.assertRaises(DimensionsError) as e:
-			d = Dimensions(dims = [], kwargs = {'1':'a','2':'b'})
-		with self.assertRaises(DimensionsError) as e:
-			d = Dimensions(dims = [], kwargs = [1,1,1])
+            d = Dimensions(dims = ['a','b','c','d','e','f','g'])
+        with self.assertRaises(KeyError) as e:
+            d = Dimensions(Mass = 1)
+        with self.assertRaises(KeyError) as e:
+            d = Dimensions(time = -10)
     
     def test_dimensions_mul(self):
         arr1 = [1,0,0,0,0,0,0]
