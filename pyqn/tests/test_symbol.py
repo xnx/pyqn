@@ -32,6 +32,12 @@ class SymbolCheck(unittest.TestCase):
         self.assertTrue(s.html == 'NAME')
         self.assertTrue(s.latex == 'LATEX')
         self.assertTrue(s.definition == None)
+        
+    def test_symbol_str(self):
+        self.assertTrue(str(Symbol()), '[undefined]')
+        self.assertTrue(str(Symbol(name='NAME')),'NAME')
+        self.assertTrue(str(Symbol(latex='LATEX')),'[undefined]')
+        self.assertTrue(str(Symbol(name='NAME',latex='LATEX')),'NAME')
 
 if __name__ == '__main__':
     unittest.main()
