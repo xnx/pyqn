@@ -49,4 +49,7 @@ class Symbol(object):
         """
         Return the string representation of the Symbol, its name attribute.
         """
-        return self.name
+        if self.name:
+            return self.name
+        else:
+            return '[undefined]'
