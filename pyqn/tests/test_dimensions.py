@@ -39,6 +39,11 @@ class DimensionsCheck(unittest.TestCase):
         with self.assertRaises(KeyError) as e:
             d = Dimensions(time = -10)
     
+    def test_dimensions_str(self):
+        self.assertEqual(str(Dimensions(dims = [])),'[dimensionless]')
+        self.assertEqual(str(Dimensions(dims = [1,2,3,4,5,6,7])),'L.M2.T3.Theta4.Q5.C6.I7')
+        self.assertEqual(str(Dimensions(dims = [1,0,0,-2,0,1,2])),'L.Theta-2.C.I2')
+    
     def test_dimensions_mul(self):
         arr1 = [1,0,0,0,0,0,0]
         arr2 = [0,1,1,0,1,0,0]
