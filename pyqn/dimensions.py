@@ -46,10 +46,10 @@ class Dimensions(object):
         if dims:
             # initialize by dims array
             if not kwargs:
-                if len(dims) == 7:
+                if (len(dims) == 7) and (type(dims[0]) is not str):
                     self.dims = dims
                 else:
-                    raise DimensionsError('Inconsistent number of dimensions in input')
+                    raise DimensionsError('Inconsistent number of dimensions in input or non-value elements of input array')
             else:
                 raise DimensionsError('Bad initialisation of Dimensions object')
         else:
