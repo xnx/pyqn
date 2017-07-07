@@ -3,7 +3,11 @@ from ..si import SIPrefix, si_prefixes
 
 class SICheck(unittest.TestCase):
     def test_siprefix_init(self):
-        pass
+        s = SIPrefix('PREFIX','NAME',2.5)
+        self.assertEqual(s.prefix, 'PREFIX')
+        self.assertEqual(s.name, 'NAME')
+        self.assertEqual(s.power, 2.5)
+        self.assertEqual(s.fac, 10**2.5)
         
     def test_siprefixes(self):
         self.assertEqual(si_prefixes['y'].prefix, 'y')
@@ -20,9 +24,6 @@ class SICheck(unittest.TestCase):
         self.assertEqual(si_prefixes['M'].name, 'mega')
         self.assertEqual(si_prefixes['M'].power, 6)
         self.assertEqual(si_prefixes['M'].fac, 1e6)
-        
-    def test_si_unit_systems(self):
-        pass
         
 if __name__ == '__main__':
     unittest.main()
