@@ -96,6 +96,42 @@ class DimensionsCheck(unittest.TestCase):
         d4 = Dimensions(dims = [0,0,0,0,0,0,0])
         self.assertTrue(d1 == d2)
         self.assertTrue(d3 == d4)
+        
+    def test_dimensions_neq(self):
+        d1 = Dimensions(dims = [1,0,0,0,0,0,0])
+        d2 = Dimensions(dims = [0,1,1,0,1,0,0])
+        d3 = Dimensions(dims = [-1,10,5,2,0,-4,0])
+        d4 = Dimensions(dims = [1,1,1,0,1,1,1])
+        d5 = Dimensions(dims = [1,1,1,0,1,1,1])
+        d6 = Dimensions(dims = [])
+        d7 = Dimensions(dims = [0,0,0,0,0,0,0])
+
+        self.assertTrue(d1 != d2)
+        self.assertTrue(d1 != d3)
+        self.assertTrue(d1 != d4)
+        self.assertTrue(d1 != d5)
+        self.assertTrue(d1 != d6)
+        self.assertTrue(d1 != d7)
+        
+        self.assertTrue(d2 != d3)
+        self.assertTrue(d2 != d4)
+        self.assertTrue(d2 != d5)
+        self.assertTrue(d2 != d6)
+        self.assertTrue(d2 != d7)
+        
+        self.assertTrue(d3 != d4)
+        self.assertTrue(d3 != d5)
+        self.assertTrue(d3 != d6)
+        self.assertTrue(d3 != d7)
+        
+        self.assertFalse(d4 != d5)
+        self.assertTrue(d4 != d6)
+        self.assertTrue(d4 != d7)
+        
+        self.assertTrue(d5 != d6)
+        self.assertTrue(d5 != d7)
+        
+        self.assertFalse(d6 != d7)
 
 if __name__ == '__main__':
     unittest.main()
