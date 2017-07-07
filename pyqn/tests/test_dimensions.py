@@ -21,6 +21,12 @@ class DimensionsCheck(unittest.TestCase):
             d = Dimensions(dims = [1])
         with self.assertRaises(DimensionsError) as e:
             d = Dimensions(dims = [1,1,1,1,1,1,1,1,1,1,1])
+        with self.assertRaises(DimensionsError) as e:
+			d = Dimensions(dims = [], kwargs = 1)
+		with self.assertRaises(DimensionsError) as e:
+			d = Dimensions(dims = [], kwargs = {'1':'a','2':'b'})
+		with self.assertRaises(DimensionsError) as e:
+			d = Dimensions(dims = [], kwargs = [1,1,1])
     
     def test_dimensions_mul(self):
         arr1 = [1,0,0,0,0,0,0]
