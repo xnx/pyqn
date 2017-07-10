@@ -294,9 +294,11 @@ class Quantity(Symbol):
         return self.__truediv__(other)
     
     def __pow__(self, power):
-        return Quantity(value = self.value**power, 
-                        units = self.units**power,
-                        sd = self.value**power*math.hypot(self.sd/self.value, self.sd/self.value))
+        new_quantity = Quantity(value = self.value**power,
+                                units = self.units**power)
+        if self.sd:
+            new_quantity.sd = self.value**power*math.hypot(self.sd/self.value, self.sd/self.value)
+        return new_quantity
 
     @classmethod
     def parse(self, s_quantity, name=None, units=None, sd=None,
