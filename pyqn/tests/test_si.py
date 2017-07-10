@@ -25,5 +25,9 @@ class SICheck(unittest.TestCase):
         self.assertEqual(si_prefixes['M'].power, 6)
         self.assertEqual(si_prefixes['M'].fac, 1e6)
         
+    def test_siprefix_eq(self):
+        self.assertTrue(SIPrefix('PREFIX','NAME',2.0) == SIPrefix('PREFIX','',2))
+        self.assertFalse(SIPrefix('P','NAME',3) == SIPrefix('P','NAME',-3))
+        
 if __name__ == '__main__':
     unittest.main()
