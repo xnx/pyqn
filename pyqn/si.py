@@ -29,6 +29,12 @@ class SIPrefix(object):
         self.name = name
         self.power = power
         self.fac = 10**power
+        
+    def __eq__(self, other):
+        if (self.prefix == other.prefix) and (self.power == other.power):
+            return True
+        else:
+            return False
 
 # Here are the SI prefixes that we recognise.
 si_prefixes = { 'y': SIPrefix('y', 'yocto', -24),
