@@ -1,11 +1,28 @@
 import unittest
 from ..quantity import Quantity, QuantityError
 from ..dimensions import Dimensions, d_energy
-from ..units import UnitsError
+from ..units import UnitsError, Units
 
 class QuantityManipulations(unittest.TestCase):
     def test_quantity_init(self):
         pass
+        
+    def test_quantity_parse(self):
+        q1 = Quantity.parse("a = 10 m/s")
+        q2 = Quantity.parse("lambda = 300.15(10) nm")
+        q3 = Quantity.parse("1e5 J")
+        
+        self.assertEqual(q1.name, 'a')
+        self.assertEqual(q1.value, 10)
+        self.assertEqual(q1.units, Units('m.s-1'))
+        
+        self.assertEqual(q2.name, 'lambda')
+        self.assertEqual(q2.value, 300.15)
+        self.assertEqual(q2.sd, 0.1)
+        self.assertEqual(q2.units, Units('nm'))
+        
+        self.assertEqual(q3.value, 1e5)
+        self.assertEqual(q3.units, Units('J'))
         
     def test_quantity_multiplication(self):
         q1 = Quantity(value=22.4,units='m/s')
