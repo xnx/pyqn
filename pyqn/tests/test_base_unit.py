@@ -36,6 +36,16 @@ class BaseUnitCheck(unittest.TestCase):
         
         bu5 = BaseUnit('k', '', '', 1, '', '', Dimensions(dims = []))
         self.assertFalse(bu4 == bu5)
+        
+    def test_base_unit_str(self):
+        bu1 = BaseUnit('m', 'metre', 'length', 1., '', 'm', d_length)
+        bu2 = BaseUnit('s', 'second', 'time', 1., '', 's', d_time)
+        bu3 = BaseUnit('g', 'gram', 'mass', 1.e-3, '', 'g', d_mass)
+        bu4 = BaseUnit('K', 'kelvin', 'temperature', 1., '', 'K', Dimensions(Theta=1))
+        self.assertEqual(str(bu1), 'm')
+        self.assertEqual(str(bu2), 's')
+        self.assertEqual(str(bu3), 'g')
+        self.assertEqual(str(bu4), 'K')
 
 if __name__ == '__main__':
     unittest.main()
