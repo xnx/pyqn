@@ -198,20 +198,24 @@ class Quantity(Symbol):
         are propagated, but assumed to be uncorrelated.
 
         """
-
-        if type(other) != Quantity:
-            raise TypeError
-        if self.value is None or other.value is None:
-            raise ValueError
-        if self.units != other.units:
-            raise UnitsError('Can\'t add two quantities with different'
+        if type(other) is Quantity:
+            if self.value is None or other.value is None:
+                raise ValueError
+            if self.units != other.units:
+                raise UnitsError('Can\'t add two quantities with different'
                              ' units: %s and %s' % (self.units, other.units))
-        if self.sd is None or other.sd is None:
-            sd = None
+            if self.sd is None or other.sd is None:
+                sd = None
+            else:
+                sd = math.hypot(self.sd, other.sd)
+            return Quantity(value=self.value+other.value, units=self.units, sd=sd)
         else:
-            sd = math.hypot(self.sd, other.sd)
-        return Quantity(value=self.value+other.value, units=self.units, sd=sd)
-
+            try:
+                result = other.__radd__(self)
+            except TypeError:
+                print('These objects are not compatible')
+            return result
+        
     def __sub__(self, other):
         """
         Subtract two Quantity objects; they must have the same units. Errors
@@ -219,18 +223,23 @@ class Quantity(Symbol):
 
         """
 
-        if type(other) != Quantity:
-            raise TypeError
-        if self.value is None or other.value is None:
-            raise ValueError
-        if self.units != other.units:
-            raise UnitsError('Can\'t subtract two quantities with different'
+        if type(other) is Quantity:
+            if self.value is None or other.value is None:
+                raise ValueError
+            if self.units != other.units:
+                raise UnitsError('Can\'t subtract two quantities with different'
                              ' units: %s and %s' % (self.units, other.units))
-        if self.sd is None or other.sd is None:
-            sd = None
+            if self.sd is None or other.sd is None:
+                sd = None
+            else:
+                sd = math.hypot(self.sd, other.sd)
+            return Quantity(value=self.value-other.value, units=self.units, sd=sd)
         else:
-            sd = math.hypot(self.sd, other.sd)
-        return Quantity(value=self.value-other.value, units=self.units, sd=sd)
+            try:
+                result = other.__rsub__(self)
+            except TypeError:
+                print('These objects are not compatible')
+            return result
 
     def __mul__(self, other):
         """
@@ -267,19 +276,8 @@ class Quantity(Symbol):
         propagated, but assumed to be uncorrelated.
 
         """
-
-        if self.value is None:
-            raise ValueError
-        if type(other) in (int, float):
-            if self.sd is None:
-                sd = None
-            else:
-                sd = abs(other) / self.sd
-            return Quantity(value=self.value/other, units=self.units, sd=sd)
-        else:
-            #if type(other) != Quantity:
-            #    raise TypeError
-            if other.value is None:
+        if type(other) is Quantity:
+            if (self.value is None) or other.value is None:
                 raise ValueError
             value = self.value / other.value
             if not self.sd or not other.sd:
@@ -289,6 +287,18 @@ class Quantity(Symbol):
                                         other.sd/other.value)
             units = self.units / other.units
             return Quantity(value=value, units=units, sd=sd)
+        if type(other) in (int, float):
+            if self.sd is None:
+                sd = None
+            else:
+                sd = abs(other) / self.sd
+            return Quantity(value=self.value/other, units=self.units, sd=sd)
+        else:
+            try:
+                result = other.__rtruediv__(self)
+            except TypeError:
+                print('These objects are not compatible')
+            return result
 
     def __rtruediv__(self, other):
         return self.__truediv__(other)
