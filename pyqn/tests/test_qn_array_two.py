@@ -154,26 +154,26 @@ class qnArrayTwoTest(unittest.TestCase):
         for i in range(len(vals1)):
             self.assertEqual(qnarr2[i], vals1[i]**2)
 
-    #def test_qn_array_eq(self):
-    #    qnarr1 = qnArrayTwo([1,1,1],units = 'm', sd = [0.1,0.1,0.1])
-    #    qnarr2 = qnArrayTwo([1,1,1],units = 'm')
-    #    qnarr3 = qnArrayTwo([1,2,3],units = 'm', sd = [0.1,0.1,0.1])
-    #    qnarr4 = qnArrayTwo([1,2,3],units = 'J', sd = [0.1,0.1,0.1])
-    #    qnarr5 = qnArrayTwo([1.0,1.0,1.0],units = Units('m'), sd = [0,0,0])
+    def test_qn_array_eq(self):
+        qnarr1 = qnArrayTwo([1,1,1],units = 'm')
+        qnarr2 = qnArrayTwo([1,1,1],units = Units('J'))
+        qnarr3 = qnArrayTwo([1,2,3],units = 'm')
+        qnarr4 = qnArrayTwo([1,2,3],units = 'J')
+        qnarr5 = qnArrayTwo([1.0,1.0,1.0],units = Units('m'))
 
-    #    self.assertFalse(qnarr1 == qnarr2)
-    #    self.assertFalse(qnarr1 == qnarr3)
-    #    self.assertFalse(qnarr1 == qnarr4)
-    #    self.assertFalse(qnarr1 == qnarr5)
+        self.assertFalse(qnarr1 == qnarr2)
+        self.assertFalse(qnarr1 == qnarr3)
+        self.assertFalse(qnarr1 == qnarr4)
+        self.assertTrue(qnarr1 == qnarr5)
 
-    #    self.assertFalse(qnarr2 == qnarr3)
-    #    self.assertFalse(qnarr2 == qnarr4)
-    #    self.assertTrue(qnarr2 == qnarr5)
+        self.assertFalse(qnarr2 == qnarr3)
+        self.assertFalse(qnarr2 == qnarr4)
+        self.assertFalse(qnarr2 == qnarr5)
 
-    #    self.assertFalse(qnarr3 == qnarr4)
-    #    self.assertFalse(qnarr3 == qnarr5)
+        self.assertFalse(qnarr3 == qnarr4)
+        self.assertFalse(qnarr3 == qnarr5)
 
-    #    self.assertFalse(qnarr4 == qnarr5)
+        self.assertFalse(qnarr4 == qnarr5)
 
     def test_qn_array_two_html(self):
         vals = [1,2,3,4]
