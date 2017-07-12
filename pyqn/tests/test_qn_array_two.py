@@ -37,9 +37,18 @@ class qnArrayTwoTest(unittest.TestCase):
 
         q1 = Quantity(value = 10, units = 'm')
         qnarr4 = qnarr1 + q1
+        qnarr5 = q1 + qnarr1
+        qnarr6 = qnarr2 + 15
+        qnarr7 = 15 + qnarr2
         self.assertEqual(qnarr4.units, Units('m'))
+        self.assertEqual(qnarr5.units, Units('m'))
+        self.assertEqual(qnarr6.units, Units('m'))
+        self.assertEqual(qnarr7.units, Units('m'))
         for i in range(len(qnarr4)):
             self.assertEqual(qnarr4[i], qnarr1[i]+10)
+            self.assertEqual(qnarr5[i], 10+qnarr1[i])
+            self.assertEqual(qnarr6[i], qnarr2[i]+15)
+            self.assertEqual(qnarr7[i], 15+qnarr2[i])
             
     def test_qn_array_two_sub(self):
         vals1 = [1,2,3,4]
@@ -59,9 +68,18 @@ class qnArrayTwoTest(unittest.TestCase):
 
         q1 = Quantity(value = 10, units = 'm')
         qnarr4 = qnarr1 - q1
+        qnarr5 = q1 - qnarr1
+        qnarr6 = qnarr2 - 15
+        qnarr7 = 15 - qnarr2
         self.assertEqual(qnarr4.units, Units('m'))
+        self.assertEqual(qnarr5.units, Units('m'))
+        self.assertEqual(qnarr6.units, Units('m'))
+        self.assertEqual(qnarr7.units, Units('m'))
         for i in range(len(qnarr4)):
             self.assertEqual(qnarr4[i], qnarr1[i]-10)
+            self.assertEqual(qnarr5[i], 10-qnarr1[i])
+            self.assertEqual(qnarr6[i], qnarr2[i]-15)
+            self.assertEqual(qnarr7[i], 15-qnarr2[i])
 
     def test_qn_array_two_mul(self):
         vals1 = [1,2,3,4]
@@ -82,9 +100,18 @@ class qnArrayTwoTest(unittest.TestCase):
 
         q1 = Quantity(value = 10, units = 'J')
         qnarr4 = qnarr1 * q1
+        qnarr5 = q1 * qnarr1
+        qnarr6 = qnarr2 * 15
+        qnarr7 = 15 * qnarr2
         self.assertEqual(qnarr4.units, Units('m.J'))
+        self.assertEqual(qnarr5.units, Units('m.J'))
+        self.assertEqual(qnarr6.units, Units('s'))
+        self.assertEqual(qnarr7.units, Units('s'))
         for i in range(len(qnarr4)):
             self.assertEqual(qnarr4[i], qnarr1[i]*10)
+            self.assertEqual(qnarr5[i], 10*qnarr1[i])
+            self.assertEqual(qnarr6[i], qnarr2[i]*15)
+            self.assertEqual(qnarr7[i], 15*qnarr2[i])
 
     def test_qn_array_two_mul(self):
         vals1 = [1,2,3,4]
@@ -105,9 +132,18 @@ class qnArrayTwoTest(unittest.TestCase):
 
         q1 = Quantity(value = 10, units = 'J')
         qnarr4 = qnarr1 / q1
+        qnarr5 = q1 / qnarr1
+        qnarr6 = qnarr2 / 15
+        qnarr7 = 15 / qnarr2
         self.assertEqual(qnarr4.units, Units('m.J-1'))
+        self.assertEqual(qnarr5.units, Units('m-1.J'))
+        self.assertEqual(qnarr6.units, Units('s'))
+        self.assertEqual(qnarr7.units, Units('s-1'))
         for i in range(len(qnarr4)):
             self.assertEqual(qnarr4[i], qnarr1[i]/10)
+            self.assertEqual(qnarr5[i], 10/qnarr1[i])
+            self.assertEqual(qnarr6[i], qnarr2[i]/15)
+            self.assertEqual(qnarr7[i], 15/qnarr2[i])
 
     def test_qn_array_two_pow(self):
         vals1 = [1,2,3,4]
