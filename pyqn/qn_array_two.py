@@ -98,9 +98,12 @@ class qnArrayTwo(np.ndarray):
         else:
             return False
 
+    #def __neq__(self, other):
+    #    return all(not self.__eq__(other))
+
     @property
     def html_str(self):
         html_chunks = []
         for i in range(len(self)):
-            html_chunks.append(Quantity(value=self[i],units = self.units, sd = self.sd[i]).html_str)
+            html_chunks.append('{} {}'.format(self[i],self.units))
         return ', '.join(html_chunks)

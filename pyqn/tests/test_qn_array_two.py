@@ -174,12 +174,33 @@ class qnArrayTwoTest(unittest.TestCase):
         self.assertFalse(qnarr3 == qnarr5)
 
         self.assertFalse(qnarr4 == qnarr5)
+        
+#    def test_qn_array_neq(self):
+#        qnarr1 = qnArrayTwo([1,1,1],units = 'm')
+#        qnarr2 = qnArrayTwo([1,1,1],units = Units('J'))
+#        qnarr3 = qnArrayTwo([1,2,3],units = 'm')
+#        qnarr4 = qnArrayTwo([1,2,3],units = 'J')
+#        qnarr5 = qnArrayTwo([1.0,1.0,1.0],units = Units('m'))
+#
+#        self.assertTrue(qnarr1 != qnarr2)
+#        self.assertTrue(qnarr1 != qnarr3)
+#        self.assertTrue(qnarr1 != qnarr4)
+#        self.assertFalse(qnarr1 != qnarr5)
+#
+#        self.assertTrue(qnarr2 != qnarr3)
+#        self.assertTrue(qnarr2 != qnarr4)
+#        self.assertTrue(qnarr2 != qnarr5)
+#
+#        self.assertTrue(qnarr3 != qnarr4)
+#        self.assertTrue(qnarr3 != qnarr5)
+#
+#        self.assertTrue(qnarr4 != qnarr5)
 
     def test_qn_array_two_html(self):
         vals = [1,2,3,4]
         qnarr = qnArrayTwo(vals, units = 'm')
 
-        #self.assertEqual(qnarr.html_str, '1 m, 2 m, 3 m, 4 m')
+        self.assertEqual(qnarr.html_str, '1 m, 2 m, 3 m, 4 m')
 
 if __name__ == '__main__':
     unittest.main()
