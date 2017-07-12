@@ -92,11 +92,11 @@ class qnArrayTwo(np.ndarray):
     def __pow__(self, power):
         return qnArrayTwo(super(qnArrayTwo, self).__pow__(power), units = self.units ** power)
 
-    #def __eq__(self, other):
-    #    if all(self == other) and (self.units == other.units) and (self.sd == other.sd):
-    #        return True
-    #    else:
-    #        return False
+    def __eq__(self, other):
+        if all(super(qnArrayTwo, self).__eq__(super(qnArrayTwo, other))) and (self.units == other.units):
+            return True
+        else:
+            return False
 
     @property
     def html_str(self):
