@@ -29,72 +29,38 @@ class qnArrayTwo(np.ndarray):
     def __array_finalize__(self, obj):
         if obj is None: return
         self.info = getattr(obj, 'info', None)
-
-    def __add__(self, other):
-        """ Function for adding a Quantity value to all values in 
-        qnArrayTwo or adding another anArrayTwo to the current array
-        """
-        if type(other) is qnArrayTwo:
-            if self.units != other.units:
-                raise qnArrayTwoError('Units of the two array must be compatible')
-            return qnArrayTwo(super(qnArrayTwo, self).__add__(super(qnArrayTwo, other)), units = self.units, sd = np.sqrt(self.sd**2+other.sd**2))
-        if type(other) is Quantity:
-            if self.units != other.units:
-                raise qnArrayTwoError('Units of the two array must be compatible')
-            return qnArrayTwo(super(qnArrayTwo, self).__add__(other.value), units = self.units, sd = np.sqrt(self.sd**2+other.sd**2))
-        return qnArrayTwo(super(qnArrayTwo, self).__add__(other), units = self.units, sd = self.sd)
+        self.sd = getattr(obj, 'sd', None)
         
-    def __radd__(self, other):
-        return self.__add__(other)
-        
-    def __sub__(self, other):
-        if type(other) is qnArrayTwo:
-            if self.units != other.units:
-                raise qnArrayTwoError('Units of the two array must be compatible')
-            return qnArrayTwo(super(qnArrayTwo, self).__sub__(super(qnArrayTwo, other)), units = self.units, sd = np.sqrt(self.sd**2+other.sd**2))
-        if type(other) is Quantity:
-            if self.units != other.units:
-                raise qnArrayTwoError('Units of the two array must be compatible')
-            return qnArrayTwo(super(qnArrayTwo, self).__sub__(other.value), units = self.units, sd = np.sqrt(self.sd**2+other.sd**2))
-        return qnArrayTwo(super(qnArrayTwo, self).__sub__(other), units = self.units, sd = self.sd)
-            
-    def __rsub__(self, other):
-        if type(other) is qnArrayTwo:
-            if self.units != other.units:
-                raise qnArrayTwoError('Units of the two array must be compatible')
-            return qnArrayTwo(super(qnArrayTwo, self).__rsub__(super(qnArrayTwo, other)), units = self.units, sd = np.sqrt(self.sd**2+other.sd**2))
-        if type(other) is Quantity:
-            if self.units != other.units:
-                raise qnArrayTwoError('Units of the two array must be compatible')
-            return qnArrayTwo(super(qnArrayTwo, self).__rsub__(other.value), units = self.units, sd = np.sqrt(self.sd**2+other.sd**2))
-        return qnArrayTwo(super(qnArrayTwo, self).__rsub__(other), units = self.units, sd = self.sd)
-            
-    def __mul__(self, other):
-        if type(other) is qnArrayTwo:
-            return qnArrayTwo(super(qnArrayTwo, self).__mul__(super(qnArrayTwo, other)), units = self.units * other.units)
-        if type(other) is Quantity:
-            return qnArrayTwo(super(qnArrayTwo, self).__mul__(other.value), units = self.units * other.units)
-        return qnArrayTwo(super(qnArrayTwo, self).__mul__(other), units = self.units)
-    
-    def __rmul__(self, other):
-        return self.__mul__(other)
-            
-    def __truediv__(self, other):
-        if type(other) is qnArrayTwo:
-            return qnArrayTwo(super(qnArrayTwo, self).__truediv__(super(qnArrayTwo, other)), units = self.units / other.units)
-        if type(other) is Quantity:
-            return qnArrayTwo(super(qnArrayTwo, self).__truediv__(other.value), units = self.units / other.units)
-        return qnArrayTwo(super(qnArrayTwo, self).__truediv__(other), units = self.units)
-        
-    def __rtruediv__(self, other):
-        if type(other) is qnArrayTwo:
-            return qnArrayTwo(super(qnArrayTwo, self).__rtruediv__(super(qnArrayTwo, other)), units = other.units / self.units)
-        if type(other) is Quantity:
-            return qnArrayTwo(super(qnArrayTwo, self).__rtruediv__(other.value), units = other.units / self.units)
-        return qnArrayTwo(super(qnArrayTwo, self).__rtruediv__(other), units = Units('1') / self.units)
-        
-    def __pow__(self, power):
-        return qnArrayTwo(super(qnArrayTwo, self).__pow__(power), units = self.units ** power)
+    def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+        if ufunc in ufunc_dict:
+            alg_func = ufunc_dict[ufunc]
+            # check for units matching
+            if hasattr(inputs[0],'units') and hasattr(inputs[1],'units'):
+                if inputs[0].units != inputs[1].units:
+                    raise qnArrayTwoError('Units must match')
+            # if both are qn arrays
+            if (type(inputs[1]) is qnArrayTwo) and (type(inputs[0]) is qnArrayTwo):
+                return qnArrayTwo(getattr(np.asarray(inputs[0]), alg_func)(np.asarray(inputs[1])), 
+                                  units = inputs[0].units, 
+                                  sd = np.sqrt(inputs[0].sd**2+inputs[1].sd**2))
+            # if one input is a quantity
+            if type(inputs[1]) is Quantity:
+                return qnArrayTwo(getattr(np.asarray(inputs[0]), alg_func)(inputs[1].value),
+                                  units = inputs[0].units,
+                                  sd = np.sqrt(inputs[0].sd**2+inputs[1].sd**2))
+            if type(inputs[0]) is Quantity:
+                return qnArrayTwo(getattr(inputs[0].value, alg_func)(np.asarray(inputs[1])),
+                                  units = inputs[1].units,
+                                  sd = np.sqrt(inputs[1].sd**2+inputs[0].sd**2))
+            # for all other object types
+            if type(inputs[0]) is qnArrayTwo:
+                return qnArrayTwo(getattr(np.asarray(inputs[0]), alg_func)(inputs[1]),
+                                  units = inputs[0].units,
+                                  sd = inputs[0].sd)
+            else:
+                return qnArrayTwo(getattr(inputs[0], alg_func)(np.asarray(inputs[1])),
+                                  units = inputs[1].units,
+                                  sd = inputs[1].sd)
 
     def __eq__(self, other):
         if all(super(qnArrayTwo, self).__eq__(super(qnArrayTwo, other))) and (self.units == other.units):
@@ -111,3 +77,8 @@ class qnArrayTwo(np.ndarray):
         for i in range(len(self)):
             html_chunks.append('{} {}'.format(self[i],self.units))
         return ', '.join(html_chunks)
+        
+ufunc_dict = {  np.add: '__add__',
+                np.subtract: '__sub__',
+                np.multiply: '__mul__',
+                np.divide: '__truediv__'}
