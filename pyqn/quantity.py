@@ -62,7 +62,10 @@ class Quantity(Symbol):
 
         Symbol.__init__(self, name, latex, html, definition)
         self.value = value
-        self.sd = sd
+        if sd is None:
+            self.sd = 0
+        else:
+            self.sd = sd
         if units is None:
             self.units = Units([])
         else:
