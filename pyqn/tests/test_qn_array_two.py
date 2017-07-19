@@ -187,18 +187,18 @@ class qnArrayTwoTest(unittest.TestCase):
 
         #~ self.assertEqual(qnarr.html_str, '1 m, 2 m, 3 m, 4 m')
         
-    #~ def test_qn_array_two_ufunc(self):
-        #~ a1 = [1,2,3]
-        #~ sd1 = [0.1,0.2,0.3]
-        #~ q1 = qnArrayTwo(a1,units = 'm', sd = sd1)
-        #~ q2 = qnArrayTwo([4,5,6],units = 'm', sd = [0.4,0.5,0.6])
-        #~ add = np.add(q1,q2)
+    def test_qn_array_two_ufunc(self):
+        a1 = [1,2,3]
+        sd1 = [0.1,0.2,0.3]
+        q1 = qnArrayTwo(a1,units = 'm', sd = sd1)
+        q2 = qnArrayTwo([4,5,6],units = 'm', sd = [0.4,0.5,0.6])
+        add = np.add(q1,q2)
         
-        #~ q3 = qnArrayTwo(a1, units = '1', sd = sd1)
-        #~ q4 = np.exp(q3)
-        #~ for i in range(3):
-            #~ self.assertEqual(q3[i], np.exp(a1[i]))
-            #~ self.assertEqual(q3.sd[i], np.exp(sd1[i]))
+        q3 = qnArrayTwo(a1, units = '1', sd = sd1)
+        q4 = np.exp(q3)
+        for i in range(3):
+            self.assertAlmostEqual(q4[i], np.exp(a1[i]))
+            self.assertAlmostEqual(q4.sd[i], q4[i]*q3.sd[i])
 
 if __name__ == '__main__':
     unittest.main()
