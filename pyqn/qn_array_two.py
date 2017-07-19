@@ -89,8 +89,8 @@ class qnArrayTwo(np.ndarray):
             if inputs[0].units.has_units() is True:
                 raise qnArrayTwoError('qnArray must be unitless')
             sd_func = ufunc_dict_other[ufunc]
-            result_val = np.exp(super(qnArrayTwo, inputs[0]))
-            result_sd = sd_func(super(qnArrayTwo, result_val), super(qnArrayTwo, inputs[0]), inputs[0].sd)
+            result_val = ufunc(np.asarray(inputs[0]))
+            result_sd = sd_func(result_val, np.asarray(inputs[0]), inputs[0].sd)
             return qnArrayTwo(result_val, units = Units('1'), sd = result_sd)
             
     def __eq__(self, other):
@@ -115,6 +115,10 @@ def sd_mul_div(result, vals1, vals2, sd1, sd2):
     return result*np.sqrt((sd1/vals1)**2+(sd2/vals2)**2)
 def sd_exp(result, vals, sd):
     return result * sd
+def sd_sin(result, vals, sd):
+	return np.cos(vals) * sd
+def sd_cos(result, vals, sd):
+	return np.sin(vals) * sd
     
 def units_add_sub(u1, u2):
 	if u1.has_units() is True:
@@ -131,4 +135,6 @@ ufunc_dict_alg = {  np.add: ('__add__', sd_add_sub, units_add_sub, '__radd__'),
                     np.multiply: ('__mul__', sd_mul_div, units_mul, '__rmul__'),
                     np.divide: ('__truediv__', sd_mul_div, units_div, '__rtruediv__')}
                 
-ufunc_dict_other = { np.exp: sd_exp}
+ufunc_dict_other = { np.exp: sd_exp,
+					 np.sin: sd_sin,
+					 np.cos: sd_cos}
