@@ -32,36 +32,67 @@ class qnArrayTwo(np.ndarray):
         self.sd = getattr(obj, 'sd', None)
         
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        if ufunc in ufunc_dict:
-            alg_func = ufunc_dict[ufunc]
+        if ufunc in ufunc_dict_alg:
+            alg_func = ufunc_dict_alg[ufunc][0]
+            sd_func = ufunc_dict_alg[ufunc][1]
+            units_func = ufunc_dict_alg[ufunc][2]
+            alg_func_reverse = ufunc_dict_alg[ufunc][3]
+            
             # check for units matching
-            if hasattr(inputs[0],'units') and hasattr(inputs[1],'units'):
-                if inputs[0].units != inputs[1].units:
-                    raise qnArrayTwoError('Units must match')
+            #if hasattr(inputs[0],'units') and hasattr(inputs[1],'units'):
+            #    if inputs[0].units != inputs[1].units:
+            #        raise qnArrayTwoError('Units must match')
+            
+            if all([hasattr(x, 'units') for x in inputs]):
+                result_units = units_func(inputs[0].units, inputs[1].units)
+                    
             # if both are qn arrays
             if (type(inputs[1]) is qnArrayTwo) and (type(inputs[0]) is qnArrayTwo):
-                return qnArrayTwo(getattr(np.asarray(inputs[0]), alg_func)(np.asarray(inputs[1])), 
-                                  units = inputs[0].units, 
-                                  sd = np.sqrt(inputs[0].sd**2+inputs[1].sd**2))
+                result_val = getattr(np.asarray(inputs[0]), alg_func)(np.asarray(inputs[1]))
+                result_sd = sd_func(result_val, np.asarray(inputs[0]),
+                                                np.asarray(inputs[1]),
+                                                inputs[0].sd,
+                                                inputs[1].sd)
+                
             # if one input is a quantity
-            if type(inputs[1]) is Quantity:
-                return qnArrayTwo(getattr(np.asarray(inputs[0]), alg_func)(inputs[1].value),
-                                  units = inputs[0].units,
-                                  sd = np.sqrt(inputs[0].sd**2+inputs[1].sd**2))
-            if type(inputs[0]) is Quantity:
-                return qnArrayTwo(getattr(inputs[0].value, alg_func)(np.asarray(inputs[1])),
-                                  units = inputs[1].units,
-                                  sd = np.sqrt(inputs[1].sd**2+inputs[0].sd**2))
+            elif type(inputs[1]) is Quantity:
+                result_val = getattr(np.asarray(inputs[0]), alg_func)(inputs[1].value)
+                result_sd = sd_func(result_val, np.asarray(inputs[0]),
+                                                inputs[1].value,
+                                                inputs[0].sd,
+                                                inputs[1].sd)
+                
+            elif type(inputs[0]) is Quantity:
+                result_val = getattr(np.asarray(inputs[1]), alg_func_reverse)(inputs[0].value)
+                result_sd = sd_func(result_val, inputs[0].value,
+                                                np.asarray(inputs[1]),
+                                                inputs[0].sd,
+                                                inputs[1].sd)
+                
             # for all other object types
-            if type(inputs[0]) is qnArrayTwo:
-                return qnArrayTwo(getattr(np.asarray(inputs[0]), alg_func)(inputs[1]),
-                                  units = inputs[0].units,
-                                  sd = inputs[0].sd)
+            elif type(inputs[0]) is qnArrayTwo:
+                result_val = getattr(np.asarray(inputs[0]), alg_func)(inputs[1])
+                result_sd = sd_func(result_val, np.asarray(inputs[0]),
+                                                inputs[1],
+                                                inputs[0].sd, 0)
+                result_units = units_func(inputs[0].units, Units('1'))
+				
             else:
-                return qnArrayTwo(getattr(inputs[0], alg_func)(np.asarray(inputs[1])),
-                                  units = inputs[1].units,
-                                  sd = inputs[1].sd)
+                result_val = getattr(np.asarray(inputs[1]), alg_func_reverse)(inputs[0])
+                result_sd = sd_func(result_val, inputs[0],
+                                                np.asarray(inputs[1]),
+                                                0, inputs[1].sd)
+                result_units = units_func(Units('1'), inputs[1].units)
 
+            return qnArrayTwo(result_val, units = result_units, sd = result_sd)
+        #~ elif ufunc in ufunc_dict_other:
+            #~ if inputs[0].units.has_units() is True:
+                #~ raise qnArrayTwoError('qnArray must be unitless')
+            #~ sd_func = ufunc_dict_other[ufunc]
+            #~ result_val = np.exp(super(qnArrayTwo, inputs[0]))
+            #~ result_sd = sd_func(super(qnArrayTwo, result_val), super(qnArrayTwo, inputs[0]), inputs[0].sd)
+            #~ return qnArrayTwo(result_val, units = Units('1'), sd = result_sd)
+            
     def __eq__(self, other):
         if all(super(qnArrayTwo, self).__eq__(super(qnArrayTwo, other))) and (self.units == other.units):
             return True
@@ -77,8 +108,27 @@ class qnArrayTwo(np.ndarray):
         for i in range(len(self)):
             html_chunks.append('{} {}'.format(self[i],self.units))
         return ', '.join(html_chunks)
-        
-ufunc_dict = {  np.add: '__add__',
-                np.subtract: '__sub__',
-                np.multiply: '__mul__',
-                np.divide: '__truediv__'}
+                
+def sd_add_sub(result, vals1, vals2, sd1, sd2):
+    return np.sqrt(sd1**2+sd2**2)
+def sd_mul_div(result, vals1, vals2, sd1, sd2):
+    return result*np.sqrt((sd1/vals1)**2+(sd2/vals2)**2)
+def sd_exp(result, vals, sd):
+    return result * sd
+    
+def units_add_sub(u1, u2):
+	if u1.has_units() is True:
+		return u1
+	else:
+		return u2
+def units_mul(u1,u2):
+    return u1*u2
+def units_div(u1,u2):
+    return u1/u2
+    
+ufunc_dict_alg = {  np.add: ('__add__', sd_add_sub, units_add_sub, '__radd__'),
+                    np.subtract: ('__sub__', sd_add_sub, units_add_sub, '__rsub__'),
+                    np.multiply: ('__mul__', sd_mul_div, units_mul, '__rmul__'),
+                    np.divide: ('__truediv__', sd_mul_div, units_div, '__rtruediv__')}
+                
+ufunc_dict_other = { np.exp: sd_exp}
