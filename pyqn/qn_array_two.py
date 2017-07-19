@@ -85,13 +85,13 @@ class qnArrayTwo(np.ndarray):
                 result_units = units_func(Units('1'), inputs[1].units)
 
             return qnArrayTwo(result_val, units = result_units, sd = result_sd)
-        #~ elif ufunc in ufunc_dict_other:
-            #~ if inputs[0].units.has_units() is True:
-                #~ raise qnArrayTwoError('qnArray must be unitless')
-            #~ sd_func = ufunc_dict_other[ufunc]
-            #~ result_val = np.exp(super(qnArrayTwo, inputs[0]))
-            #~ result_sd = sd_func(super(qnArrayTwo, result_val), super(qnArrayTwo, inputs[0]), inputs[0].sd)
-            #~ return qnArrayTwo(result_val, units = Units('1'), sd = result_sd)
+        elif ufunc in ufunc_dict_other:
+            if inputs[0].units.has_units() is True:
+                raise qnArrayTwoError('qnArray must be unitless')
+            sd_func = ufunc_dict_other[ufunc]
+            result_val = np.exp(super(qnArrayTwo, inputs[0]))
+            result_sd = sd_func(super(qnArrayTwo, result_val), super(qnArrayTwo, inputs[0]), inputs[0].sd)
+            return qnArrayTwo(result_val, units = Units('1'), sd = result_sd)
             
     def __eq__(self, other):
         if all(super(qnArrayTwo, self).__eq__(super(qnArrayTwo, other))) and (self.units == other.units):
