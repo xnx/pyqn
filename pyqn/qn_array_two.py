@@ -76,7 +76,7 @@ class qnArrayTwo(np.ndarray):
                                                 inputs[1],
                                                 inputs[0].sd, 0)
                 result_units = units_func(inputs[0].units, Units('1'))
-				
+                
             else:
                 result_val = getattr(np.asarray(inputs[1]), alg_func_reverse)(inputs[0])
                 result_sd = sd_func(result_val, inputs[0],
@@ -116,15 +116,33 @@ def sd_mul_div(result, vals1, vals2, sd1, sd2):
 def sd_exp(result, vals, sd):
     return result * sd
 def sd_sin(result, vals, sd):
-	return np.cos(vals) * sd
+    return np.cos(vals) * sd
 def sd_cos(result, vals, sd):
-	return np.sin(vals) * sd
+    return np.sin(vals) * sd
+def sd_tan(result, vals, sd):
+    return np.cos(vals)**(-2) * sd
+def sd_arcsin_arccos(result, vals, sd):
+    return sd/np.sqrt(1-vals**2)
+def sd_arctan(result, vals, sd):
+    return sd/(1+vals**2)
+def sd_sinh(result, vals, sd):
+    return sd*np.cosh(vals)
+def sd_cosh(result, vals, sd):
+    return sd*np.sinh(vals)
+def sd_tanh(result, vals, sd):
+    return sd*np.cosh(vals)**(-2)
+def sd_arcsinh(result, vals, sd):
+    return sd/np.sqrt(1+vals**2)
+def sd_arccosh(result, vals, sd):
+    return sd/(np.sqrt(vals-1)*np.sqrt(vals+1))
+def sd_arctanh(result, vals, sd):
+    return sd/(1-vals**2)
     
 def units_add_sub(u1, u2):
-	if u1.has_units() is True:
-		return u1
-	else:
-		return u2
+    if u1.has_units() is True:
+        return u1
+    else:
+        return u2
 def units_mul(u1,u2):
     return u1*u2
 def units_div(u1,u2):
@@ -136,5 +154,15 @@ ufunc_dict_alg = {  np.add: ('__add__', sd_add_sub, units_add_sub, '__radd__'),
                     np.divide: ('__truediv__', sd_mul_div, units_div, '__rtruediv__')}
                 
 ufunc_dict_other = { np.exp: sd_exp,
-					 np.sin: sd_sin,
-					 np.cos: sd_cos}
+                     np.sin: sd_sin,
+                     np.cos: sd_cos,
+                     np.tan: sd_tan,
+                     np.arcsin: sd_arcsin_arccos,
+                     np.arccos: sd_arcsin_arccos,
+                     np.arctan: sd_arctan,
+                     np.sinh: sd_sinh,
+                     np.cosh: sd_cosh,
+                     np.tanh: sd_tanh,
+                     np.arcsinh: sd_arcsinh,
+                     np.arccosh: sd_arccosh,
+                     np.arctanh: sd_arctanh}
