@@ -190,14 +190,21 @@ class qnArrayTwoTest(unittest.TestCase):
     def test_qn_array_two_ufunc(self):
         a1 = [1,2,3]
         sd1 = [0.1,0.2,0.3]
+        a2 = [0.1,0.2,0.3]
+        sd2 = [0.01,0.02,0.03]
         q1 = qnArrayTwo(a1,units = 'm', sd = sd1)
-        q2 = qnArrayTwo([4,5,6],units = 'm', sd = [0.4,0.5,0.6])
+        q2 = qnArrayTwo(a2,units = 'm', sd = sd2)
         add = np.add(q1,q2)
         
         q3 = qnArrayTwo(a1, units = '1', sd = sd1)
+        q33 = qnArrayTwo(a2, units = '1', sd = sd2)
         q4 = np.exp(q3)
         q5 = np.sin(q3)
         q6 = np.cos(q3)
+        q7 = np.tan(q3)
+        q8 = np.arcsin(q33)
+        q9 = np.arccos(q33)
+        q10 = np.arctan(q33)
         for i in range(3):
             self.assertAlmostEqual(q4[i], np.exp(a1[i]))
             self.assertAlmostEqual(q4.sd[i], q4[i]*q3.sd[i])
@@ -205,7 +212,11 @@ class qnArrayTwoTest(unittest.TestCase):
             self.assertAlmostEqual(q5.sd[i], np.cos(a1[i])*sd1[i])
             self.assertAlmostEqual(q6[i], np.cos(a1[i]))
             self.assertAlmostEqual(q6.sd[i], np.sin(a1[i])*sd1[i])
-            
+            self.assertAlmostEqual(q7[i], np.tan(a1[i]))
+            self.assertAlmostEqual(q7.sd[i], np.cos(a1[i])**(-2)*sd1[i])
+            self.assertAlmostEqual(q8[i], np.arcsin(a2[i]))
+            self.assertAlmostEqual(q9[i], np.arccos(a2[i]))
+            self.assertAlmostEqual(q10[i], np.arctan(a2[i]))
 
 if __name__ == '__main__':
     unittest.main()
