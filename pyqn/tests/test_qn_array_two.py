@@ -196,9 +196,16 @@ class qnArrayTwoTest(unittest.TestCase):
         
         q3 = qnArrayTwo(a1, units = '1', sd = sd1)
         q4 = np.exp(q3)
+        q5 = np.sin(q3)
+        q6 = np.cos(q3)
         for i in range(3):
             self.assertAlmostEqual(q4[i], np.exp(a1[i]))
             self.assertAlmostEqual(q4.sd[i], q4[i]*q3.sd[i])
+            self.assertAlmostEqual(q5[i], np.sin(a1[i]))
+            self.assertAlmostEqual(q5.sd[i], np.cos(a1[i])*sd1[i])
+            self.assertAlmostEqual(q6[i], np.cos(a1[i]))
+            self.assertAlmostEqual(q6.sd[i], np.sin(a1[i])*sd1[i])
+            
 
 if __name__ == '__main__':
     unittest.main()
