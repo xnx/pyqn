@@ -150,42 +150,19 @@ class qnArrayTwoTest(unittest.TestCase):
             self.assertEqual(qnarr5[i], 10/qnarr1[i])
             self.assertEqual(qnarr6[i], qnarr2[i]/15)
             self.assertEqual(qnarr7[i], 15/qnarr2[i])
-
-    #~ def test_qn_array_two_pow(self):
-        #~ vals1 = [1,2,3,4]
-        #~ qnarr1 = qnArrayTwo(vals1, units = 'm')
-
-        #~ qnarr2 = qnarr1 ** 2
-        #~ self.assertEqual(qnarr2.units, Units('m2'))
-        #~ for i in range(len(vals1)):
-            #~ self.assertEqual(qnarr2[i], vals1[i]**2)
-
-    #~ def test_qn_array_eq(self):
-        #~ qnarr1 = qnArrayTwo([1,1,1],units = 'm')
-        #~ qnarr2 = qnArrayTwo([1,1,1],units = Units('J'))
-        #~ qnarr3 = qnArrayTwo([1,2,3],units = 'm')
-        #~ qnarr4 = qnArrayTwo([1,2,3],units = 'J')
-        #~ qnarr5 = qnArrayTwo([1.0,1.0,1.0],units = Units('m'))
-
-        #~ self.assertFalse(qnarr1 == qnarr2)
-        #~ self.assertFalse(qnarr1 == qnarr3)
-        #~ self.assertFalse(qnarr1 == qnarr4)
-        #~ self.assertTrue(qnarr1 == qnarr5)
-
-        #~ self.assertFalse(qnarr2 == qnarr3)
-        #~ self.assertFalse(qnarr2 == qnarr4)
-        #~ self.assertFalse(qnarr2 == qnarr5)
-
-        #~ self.assertFalse(qnarr3 == qnarr4)
-        #~ self.assertFalse(qnarr3 == qnarr5)
-
-        #~ self.assertFalse(qnarr4 == qnarr5)
-
-    #~ def test_qn_array_two_html(self):
-        #~ vals = [1,2,3,4]
-        #~ qnarr = qnArrayTwo(vals, units = 'm')
-
-        #~ self.assertEqual(qnarr.html_str, '1 m, 2 m, 3 m, 4 m')
+            
+    def test_qn_array_two_conversion(self):
+        a1 = [1,2,3]
+        sd1 = [0.1,0.2,0.3]
+        q1 = qnArrayTwo(a1, units = 'm', sd = sd1)
+        q2 = q1.convert_units_to('inch')
+        r_wanted = [a*39.37007874 for a in a1]
+        sd_wanted = [s*39.37007874 for s in sd1]
+        
+        self.assertEqual(q2.units, Units('inch'))
+        for i in range(3):
+            self.assertAlmostEqual(q2[i], r_wanted[i])
+            self.assertAlmostEqual(q2.sd[i], sd_wanted[i])
         
     def test_qn_array_two_ufunc(self):
         a1 = [1,2,3]
