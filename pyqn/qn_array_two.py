@@ -111,6 +111,13 @@ class qnArrayTwo(np.ndarray):
         for i in range(len(self)):
             html_chunks.append('{} {}'.format(self[i],self.units))
         return ', '.join(html_chunks)
+        
+    def convert_units_to(self, new_units, force=None):
+        to_units = Units(new_units)
+        fac = self.units.conversion(to_units, force)
+        new_vals = np.asarray(self)*fac
+        new_sd = self.sd*fac
+        return qnArrayTwo(new_vals, units = new_units, sd = new_sd)
                 
 def sd_add_sub(result, vals1, vals2, sd1, sd2):
     return np.sqrt(sd1**2+sd2**2)
