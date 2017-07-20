@@ -1,6 +1,7 @@
 import numpy as np
 from .units import Units
 from .quantity import Quantity
+import matplotlib.pyplot as plt
 
 class qnArrayTwoError(Exception):
     def __init__(self, error_str):
@@ -118,6 +119,17 @@ class qnArrayTwo(np.ndarray):
         new_vals = np.asarray(self)*fac
         new_sd = self.sd*fac
         return qnArrayTwo(new_vals, units = new_units, sd = new_sd)
+        
+    def append(self, value = None, sd = 0, *inputs):
+        if type(inputs[0]) is Quantity:
+            if self.units != inputs[0].units:
+                raise qnArrayTwoError('Same units expected')
+            if inputs[0] is not None:
+                return qnArrayTwo(np.append(np.asarray(self),inputs[0].value), units = self.units, sd = np.append(self.sd,inputs[0].sd))
+            else:
+                return qnArrayTwo(np.append(np.asarray(self),inputs[0].value), units = self.units, sd = np.append(self.sd,0))
+        elif value is not None:
+            return qnArrayTwo(np.append(np.asarray(self),value), units = self.units, sd = np.append(self.sd,sd))
                 
 def sd_add_sub(result, vals1, vals2, sd1, sd2):
     return np.sqrt(sd1**2+sd2**2)
@@ -188,3 +200,7 @@ ufunc_dict_other = { np.exp: sd_exp,
 ufunc_dict_otherother = {np.logaddexp: sd_logaddexp,
                          np.logaddexp2: sd_logaddexp2,
                          np.power: sd_power}
+
+def plot_qn_arrays(qn_arr_1, qn_arr_2):
+    plt.errorbar(np.asarray(qn_arr_1),np.asarray(qn_arr_2),xerr = qn_arr_1.sd, yerr = qn_arr_2.sd)
+    plt.show()
