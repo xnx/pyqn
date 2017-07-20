@@ -38,11 +38,6 @@ class qnArrayTwo(np.ndarray):
             units_func = ufunc_dict_alg[ufunc][2]
             alg_func_reverse = ufunc_dict_alg[ufunc][3]
             
-            # check for units matching
-            #if hasattr(inputs[0],'units') and hasattr(inputs[1],'units'):
-            #    if inputs[0].units != inputs[1].units:
-            #        raise qnArrayTwoError('Units must match')
-            
             if all([hasattr(x, 'units') for x in inputs]):
                 result_units = units_func(inputs[0].units, inputs[1].units)
                     
@@ -93,6 +88,14 @@ class qnArrayTwo(np.ndarray):
             result_sd = sd_func(result_val, np.asarray(inputs[0]), inputs[0].sd)
             return qnArrayTwo(result_val, units = Units('1'), sd = result_sd)
             
+        elif ufunc in ufunc_dict_otherother:
+            if inputs[0].units.has_units() is True:
+                raise qnArrayTwoError('qnArray must be unitless')
+            sd_func = ufunc_dict_otherother[ufunc]
+            result_val = ufunc(np.asarray(inputs[0]),np.asarray(inputs[1]))
+            result_sd = sd_func(result_val, np.asarray(inputs[0]), np.asarray(inputs[1]), inputs[0].sd, inputs[1].sd)
+            return qnArrayTwo(result_val, units = Units('1'), sd = result_sd)
+            
     def __eq__(self, other):
         if all(super(qnArrayTwo, self).__eq__(super(qnArrayTwo, other))) and (self.units == other.units):
             return True
@@ -113,6 +116,14 @@ def sd_add_sub(result, vals1, vals2, sd1, sd2):
     return np.sqrt(sd1**2+sd2**2)
 def sd_mul_div(result, vals1, vals2, sd1, sd2):
     return result*np.sqrt((sd1/vals1)**2+(sd2/vals2)**2)
+    
+def sd_logaddexp(result, vals1, vals2, sd1, sd2):
+    return np.sqrt(np.exp(vals1)**2*sd1**2+np.exp(vals2)**2*sd2**2)/(np.exp(vals1)+np.exp(vals2))
+def sd_logaddexp2(result, vals1, vals2, sd1, sd2):
+    return np.sqrt(np.exp(vals1)**2*sd1**2+np.exp(vals2)**2*sd2**2)/((np.log(2))*(np.exp(vals1)+np.exp(vals2)))
+def sd_power(result, vals1, vals2, sd1, sd2):
+    return np.sqrt(sd1**2*(vals2*vals1**(vals2-1))**2 + sd2**2*(result*np.log(vals1))**2)
+    
 def sd_exp(result, vals, sd):
     return result * sd
 def sd_sin(result, vals, sd):
@@ -166,3 +177,7 @@ ufunc_dict_other = { np.exp: sd_exp,
                      np.arcsinh: sd_arcsinh,
                      np.arccosh: sd_arccosh,
                      np.arctanh: sd_arctanh}
+                     
+ufunc_dict_otherother = {np.logaddexp: sd_logaddexp,
+                         np.logaddexp2: sd_logaddexp2,
+                         np.power: sd_power}
