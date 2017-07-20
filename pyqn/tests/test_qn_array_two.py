@@ -163,6 +163,30 @@ class qnArrayTwoTest(unittest.TestCase):
         for i in range(3):
             self.assertAlmostEqual(q2[i], r_wanted[i])
             self.assertAlmostEqual(q2.sd[i], sd_wanted[i])
+            
+    def test_qn_array_append(self):
+        a1 = [1,2,3]
+        sd1 = [0.1,0.2,0.3]
+        q1 = qnArrayTwo(a1, units = 'm', sd = sd1)
+        quant1 = Quantity(value=10,units='m')
+        quant2 = Quantity(value=5,units='m',sd=0.5)
+        quant3 = Quantity(value=2,units='J',sd=0.1)
+        
+        result1 = q1.append(quant1)
+        result2 = q1.append(quant2)
+        with self.assertRaises(qnArrayTwoError) as e:
+            result3 = q1.append(quant3)
+        self.assertEqual(len(result1),4)
+        self.assertEqual(result1[-1],10)
+        self.assertEqual(len(result2),4)
+        self.assertEqual(result2[-1],5)
+            
+        result1 = q1.append(value=2)
+        result2 = q1.append(value=1,sd=0.5)
+        self.assertEqual(len(result1),4)
+        self.assertEqual(result1[-1],2)
+        self.assertEqual(len(result2),4)
+        self.assertEqual(result2[-1],1)
         
     def test_qn_array_two_ufunc(self):
         a1 = [1,2,3]
