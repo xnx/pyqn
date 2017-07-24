@@ -180,13 +180,6 @@ class qnArrayTwoTest(unittest.TestCase):
         self.assertEqual(result1[-1],10)
         self.assertEqual(len(result2),4)
         self.assertEqual(result2[-1],5)
-            
-        result1 = q1.append(value=2)
-        result2 = q1.append(value=1,sd=0.5)
-        self.assertEqual(len(result1),4)
-        self.assertEqual(result1[-1],2)
-        self.assertEqual(len(result2),4)
-        self.assertEqual(result2[-1],1)
         
     def test_qn_array_two_ufunc(self):
         a1 = [1,2,3]
