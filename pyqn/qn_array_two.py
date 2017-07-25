@@ -90,11 +90,12 @@ class qnArrayTwo(np.ndarray):
             return qnArrayTwo(result_val, units = Units('1'), sd = result_sd)
 
         elif ufunc in ufunc_dict_otherother:
-            if inputs[0].units.has_units() is True:
-                raise qnArrayTwoError('qnArray must be unitless')
-            sd_func = ufunc_dict_otherother[ufunc]
-            result_val = ufunc(np.asarray(inputs[0]),np.asarray(inputs[1]))
-            result_sd = sd_func(result_val, np.asarray(inputs[0]), np.asarray(inputs[1]), inputs[0].sd, inputs[1].sd)
+            unit_test_func = ufunc_dict_otherother[ufunc][1]
+            input1 = unit_test_func(inputs[0])
+            input2 = unit_test_func(inputs[1])
+            sd_func = ufunc_dict_otherother[ufunc][0]
+            result_val = ufunc(np.asarray(input1),np.asarray(input2))
+            result_sd = sd_func(result_val, np.asarray(input1), np.asarray(input2), input1.sd, input2.sd)
             return qnArrayTwo(result_val, units = Units('1'), sd = result_sd)
 
     def __eq__(self, other):
@@ -124,7 +125,7 @@ class qnArrayTwo(np.ndarray):
         if self.units != input_quantity.units:
             raise qnArrayTwoError('Same units expected')
         return qnArrayTwo(np.append(np.asarray(self),input_quantity.value), units = self.units, sd = np.append(self.sd,input_quantity.sd))
-       
+
 def sd_add_sub(result, vals1, vals2, sd1, sd2):
     return np.sqrt(sd1**2+sd2**2)
 def sd_mul_div(result, vals1, vals2, sd1, sd2):
@@ -205,9 +206,9 @@ ufunc_dict_other = { np.exp: (sd_exp, units_check_unitless),
                      np.arccosh: (sd_arccosh, units_check_unitless),
                      np.arctanh: (sd_arctanh, units_check_unitless)}
 
-ufunc_dict_otherother = {np.logaddexp: sd_logaddexp,
-                         np.logaddexp2: sd_logaddexp2,
-                         np.power: sd_power}
+ufunc_dict_otherother = {np.logaddexp: (sd_logaddexp, units_check_unitless),
+                         np.logaddexp2: (sd_logaddexp2, units_check_unitless),
+                         np.power: (sd_power, units_check_unitless)}
 
 def plot_qn_arrays(qn_arr_1, qn_arr_2):
     plt.errorbar(np.asarray(qn_arr_1),np.asarray(qn_arr_2),xerr = qn_arr_1.sd, yerr = qn_arr_2.sd)
