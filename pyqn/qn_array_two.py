@@ -81,21 +81,26 @@ class qnArrayTwo(np.ndarray):
                 result_units = units_func(Units('1'), inputs[1].units)
 
             return qnArrayTwo(result_val, units = result_units, sd = result_sd)
-        elif ufunc in ufunc_dict_other:
-            unit_test_func = ufunc_dict_other[ufunc][1]
+            
+        elif ufunc in ufunc_dict_one_input:
+            unit_test_func = ufunc_dict_one_input[ufunc][1]
             inputs_checked = unit_test_func(inputs[0])
-            sd_func = ufunc_dict_other[ufunc][0]
+            sd_func = ufunc_dict_one_input[ufunc][0]
+            units_func = ufunc_dict_one_input[ufunc][2]
             result_val = ufunc(np.asarray(inputs_checked))
             result_sd = sd_func(result_val, np.asarray(inputs_checked), inputs_checked.sd)
-            return qnArrayTwo(result_val, units = Units('1'), sd = result_sd)
+            result_units = units_func(inputs[0].units)
+            return qnArrayTwo(result_val, units = result_units, sd = result_sd)
 
-        elif ufunc in ufunc_dict_otherother:
-            unit_test_func = ufunc_dict_otherother[ufunc][1]
+        elif ufunc in ufunc_dict_two_inputs:
+            unit_test_func = ufunc_dict_two_inputs[ufunc][1]
             input1 = unit_test_func(inputs[0])
             input2 = unit_test_func(inputs[1])
-            sd_func = ufunc_dict_otherother[ufunc][0]
+            sd_func = ufunc_dict_two_inputs[ufunc][0]
+            units_func = ufunc_dict_two_inputs[ufunc][2]
             result_val = ufunc(np.asarray(input1),np.asarray(input2))
             result_sd = sd_func(result_val, np.asarray(input1), np.asarray(input2), input1.sd, input2.sd)
+            result_units = units_func(input1.units, input2.units)
             return qnArrayTwo(result_val, units = Units('1'), sd = result_sd)
 
     def __eq__(self, other):
@@ -162,6 +167,8 @@ def sd_arccosh(result, vals, sd):
     return sd/(np.sqrt(vals-1)*np.sqrt(vals+1))
 def sd_arctanh(result, vals, sd):
     return sd/(1-vals**2)
+def sd_nochange(result, vals, sd):
+    return sd
 
 def units_check_unitless(input_arr):
     if input_arr.units.has_units() is True:
@@ -177,6 +184,9 @@ def units_check_unitless_deg_rad(input_arr):
     else:
         raise qnArrayTwoError('qnArray must have units: deg, rad, unitless')
 
+def units_check_any(input_arr):
+    return input_arr
+
 def units_add_sub(u1, u2):
     if u1.has_units() is True:
         return u1
@@ -186,29 +196,38 @@ def units_mul(u1,u2):
     return u1*u2
 def units_div(u1,u2):
     return u1/u2
+def units_unitless(u):
+    return Units('1')
+def units_self(u):
+    return u
+def units_unitless2(u1,u2):
+    return Units('1')
 
 ufunc_dict_alg = {  np.add: ('__add__', sd_add_sub, units_add_sub, '__radd__'),
                     np.subtract: ('__sub__', sd_add_sub, units_add_sub, '__rsub__'),
                     np.multiply: ('__mul__', sd_mul_div, units_mul, '__rmul__'),
                     np.divide: ('__truediv__', sd_mul_div, units_div, '__rtruediv__')}
 
-ufunc_dict_other = { np.exp: (sd_exp, units_check_unitless),
-                     np.sin: (sd_sin, units_check_unitless_deg_rad),
-                     np.cos: (sd_cos, units_check_unitless_deg_rad),
-                     np.tan: (sd_tan, units_check_unitless_deg_rad),
-                     np.arcsin: (sd_arcsin_arccos, units_check_unitless),
-                     np.arccos: (sd_arcsin_arccos, units_check_unitless),
-                     np.arctan: (sd_arctan, units_check_unitless),
-                     np.sinh: (sd_sinh, units_check_unitless),
-                     np.cosh: (sd_cosh, units_check_unitless),
-                     np.tanh: (sd_tanh, units_check_unitless),
-                     np.arcsinh: (sd_arcsinh, units_check_unitless),
-                     np.arccosh: (sd_arccosh, units_check_unitless),
-                     np.arctanh: (sd_arctanh, units_check_unitless)}
+ufunc_dict_one_input = { np.exp: (sd_exp, units_check_unitless, units_unitless),
+                        np.sin: (sd_sin, units_check_unitless_deg_rad, units_unitless),
+                        np.cos: (sd_cos, units_check_unitless_deg_rad, units_unitless),
+                        np.tan: (sd_tan, units_check_unitless_deg_rad, units_unitless),
+                        np.arcsin: (sd_arcsin_arccos, units_check_unitless, units_unitless),
+                        np.arccos: (sd_arcsin_arccos, units_check_unitless, units_unitless),
+                        np.arctan: (sd_arctan, units_check_unitless, units_unitless),
+                        np.sinh: (sd_sinh, units_check_unitless, units_unitless),
+                        np.cosh: (sd_cosh, units_check_unitless, units_unitless),
+                        np.tanh: (sd_tanh, units_check_unitless, units_unitless),
+                        np.arcsinh: (sd_arcsinh, units_check_unitless, units_unitless),
+                        np.arccosh: (sd_arccosh, units_check_unitless, units_unitless),
+                        np.arctanh: (sd_arctanh, units_check_unitless, units_unitless),
+                        np.negative: (sd_nochange, units_check_any, units_self)}
 
-ufunc_dict_otherother = {np.logaddexp: (sd_logaddexp, units_check_unitless),
-                         np.logaddexp2: (sd_logaddexp2, units_check_unitless),
-                         np.power: (sd_power, units_check_unitless)}
+ufunc_dict_two_inputs = {np.logaddexp: (sd_logaddexp, units_check_unitless, units_unitless2),
+                         np.logaddexp2: (sd_logaddexp2, units_check_unitless, units_unitless2),
+                         np.power: (sd_power, units_check_unitless, units_unitless2),
+                         np.true_divide: (sd_mul_div, units_check_any, units_div),
+                         np.floor_divide: (sd_mul_div, units_check_any, units_div)}
 
 def plot_qn_arrays(qn_arr_1, qn_arr_2):
     plt.errorbar(np.asarray(qn_arr_1),np.asarray(qn_arr_2),xerr = qn_arr_1.sd, yerr = qn_arr_2.sd)
