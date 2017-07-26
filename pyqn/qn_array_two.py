@@ -107,7 +107,7 @@ class qnArrayTwo(np.ndarray):
             result_val = ufunc(np.asarray(input1),np.asarray(input2))
             result_sd = sd_func(result_val, np.asarray(input1), np.asarray(input2), input1.sd, input2.sd)
             result_units = units_func(input1.units, input2.units)
-            return qnArrayTwo(result_val, units = Units('1'), sd = result_sd)
+            return qnArrayTwo(result_val, units = result_units, sd = result_sd)
 
     def __eq__(self, other):
         if all(super(qnArrayTwo, self).__eq__(super(qnArrayTwo, other))) and (self.units == other.units):
