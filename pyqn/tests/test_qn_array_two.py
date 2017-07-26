@@ -212,9 +212,12 @@ class qnArrayTwoTest(unittest.TestCase):
         
         a1 = [0.1,0.2,0.3]
         sd1 = [0.01,0.02,0.03]
+        a2 = [0.4,0.5,0.6]
+        sd2 = [0.04,0.05,0.06]
         q3 = qnArrayTwo(a1, units = '1', sd = sd1)
         q4 = qnArrayTwo(a1, units = 'rad', sd = sd1)
         q5 = qnArrayTwo(a1, units = 'deg', sd = sd1)
+        q6 = qnArrayTwo(a2, units = '1', sd = sd2)
         
         for ufunc in ufunc_dict_one_input:
             unit_test = ufunc_dict_one_input[ufunc][1]
@@ -236,6 +239,9 @@ class qnArrayTwoTest(unittest.TestCase):
                     ufunc(q2)
                 in1 = [unit_test(q3), unit_test(q4), unit_test(q5)]
                 r = [ufunc(in1[0]), ufunc(in1[1]), ufunc(in1[2])]
+            elif unit_test is units_check_any:
+                in1 = [unit_test(q1), unit_test(q2), unit_test(q3), unit_test(q4), unit_test(q5)]
+                r = [ufunc(i) for i in in1]
             sd_func = ufunc_dict_one_input[ufunc][0] #(result, vals, sd)
             units_func = ufunc_dict_one_input[ufunc][2] #(units)
             
@@ -246,42 +252,41 @@ class qnArrayTwoTest(unittest.TestCase):
                     self.assertAlmostEqual(result.sd[i], sd_func(result, input1, input1.sd)[i],places = 1)
             
             print('{} tested!'.format(ufunc))
-        
-        #~ q4 = np.exp(q3)
-        #~ q5 = np.sin(q3)
-        #~ q6 = np.cos(q3)
-        #~ q7 = np.tan(q3)
-        #~ q8 = np.arcsin(q33)
-        #~ q9 = np.arccos(q33)
-        #~ q10 = np.arctan(q33)
-        #~ q11 = np.sinh(q33)
-        #~ q12 = np.cosh(q33)
-        #~ q13 = np.tanh(q33)
-        #~ q14 = np.logaddexp(q3,q33)
-        #~ q15 = np.power(q3,q33)
-        #~ for i in range(3):
-            #~ self.assertAlmostEqual(q4[i], np.exp(a1[i]))
-            #~ self.assertAlmostEqual(q4.sd[i], q4[i]*q3.sd[i])
-            #~ self.assertAlmostEqual(q5[i], np.sin(a1[i]))
-            #~ self.assertAlmostEqual(q5.sd[i], np.cos(a1[i])*sd1[i])
-            #~ self.assertAlmostEqual(q6[i], np.cos(a1[i]))
-            #~ self.assertAlmostEqual(q6.sd[i], np.sin(a1[i])*sd1[i])
-            #~ self.assertAlmostEqual(q7[i], np.tan(a1[i]))
-            #~ #self.assertAlmostEqual(q7.sd[i], np.cos(a1[i])**(-2)*sd1[i])
-            #~ self.assertAlmostEqual(q8[i], np.arcsin(a2[i]))
-            #~ #self.assertAlmostEqual(q8.sd[i], sd2[i]/np.sqrt(1-sd2[i]**2))
-            #~ self.assertAlmostEqual(q9[i], np.arccos(a2[i]))
-            #~ #self.assertAlmostEqual(q9.sd[i], sd2[i]/np.sqrt(1-sd2[i]**2))
-            #~ self.assertAlmostEqual(q10[i], np.arctan(a2[i]))
-            #~ #self.assertAlmostEqual(q10.sd[i], sd2[i]*np.cosh(a2[i])**(-2))
-            #~ self.assertAlmostEqual(q11[i], np.sinh(a2[i]))
-            #~ self.assertAlmostEqual(q11.sd[i], sd2[i]*np.cosh(a2[i]))
-            #~ self.assertAlmostEqual(q12[i], np.cosh(a2[i]))
-            #~ self.assertAlmostEqual(q12.sd[i], sd2[i]*np.sinh(a2[i]))
-            #~ self.assertAlmostEqual(q13[i], np.tanh(a2[i]))
-            #~ self.assertAlmostEqual(q13.sd[i], sd2[i]*np.cosh(a2[i])**(-2))
-            #~ self.assertAlmostEqual(q14[i], np.logaddexp(a1[i], a2[i]))
-            #~ self.assertAlmostEqual(q15[i], np.power(np.asarray(q3[i]),np.asarray(q33[i])))
+
+        for ufunc in ufunc_dict_two_inputs:
+            unit_test = ufunc_dict_two_inputs[ufunc][1]
+            if unit_test is units_check_unitless:
+                with self.assertRaises(Exception) as e:
+                    ufunc(q1,q3)
+                with self.assertRaises(Exception) as e:
+                    ufunc(q2,q6)
+                with self.assertRaises(Exception) as e:
+                    ufunc(q4,q3)
+                with self.assertRaises(Exception) as e:
+                    ufunc(q5,q3)
+                in1 = [unit_test(q3)]
+                in2 = [unit_test(q6)]
+                r = [ufunc(i1,i2) for i1,i2 in zip(in1,in2)]
+            elif unit_test is units_check_any:
+                in1 = [unit_test(q1), unit_test(q2), unit_test(q3), unit_test(q4), unit_test(q5), unit_test(q6)]
+                in2 = [unit_test(q6), unit_test(q5), unit_test(q4), unit_test(q3), unit_test(q2), unit_test(q1)]
+                r = [ufunc(i1,i2) for i1,i2 in zip(in1,in2)]
+            sd_func = ufunc_dict_two_inputs[ufunc][0]
+            units_func = ufunc_dict_two_inputs[ufunc][2]
+                
+            for result, input1, input2 in zip(r, in1, in2):
+                self.assertEqual(result.units, units_func(input1.units, input2.units))
+                result_got = result
+                result_wanted = ufunc(np.asarray(input1),np.asarray(input2))
+                sd_got = result.sd
+                sd_wanted = sd_func(np.asarray(result), 
+                                    np.asarray(input1), np.asarray(input2),
+                                    input1.sd, input2.sd)
+                for i in range(3):
+                    self.assertAlmostEqual(result_got[i], result_wanted[i])
+                    self.assertAlmostEqual(sd_got[i], sd_wanted[i])
+            
+            print('{} tested!'.format(ufunc))
 
 if __name__ == '__main__':
     unittest.main()
