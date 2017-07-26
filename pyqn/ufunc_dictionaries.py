@@ -20,7 +20,7 @@ def sd_sin(result, vals, sd):
 def sd_cos(result, vals, sd):
     return np.sin(vals) * sd
 def sd_tan(result, vals, sd):
-    return np.cos(vals)**(-2) * sd
+    return np.cos(np.asarray(vals))**(-2) * np.asarray(sd)
 def sd_arcsin_arccos(result, vals, sd):
     return np.asarray(sd)/np.sqrt(1-np.asarray(vals)**2)
 def sd_arctan(result, vals, sd):

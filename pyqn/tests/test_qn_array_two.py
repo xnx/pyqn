@@ -191,24 +191,24 @@ class qnArrayTwoTest(unittest.TestCase):
         q2 = qnArrayTwo(a2,units = 'm', sd = sd2)
         q3 = qnArrayTwo(a2,units = 's', sd = sd2)
         
-        for ufunc in ufunc_dict_alg:
-            if (ufunc is np.multiply) or (ufunc is np.divide):
-                in1 = q1
-                in2 = q3
-            elif (ufunc is np.add) or (ufunc is np.subtract):
-                in1 = q1
-                in2 = q2
-            result = ufunc(in1, in2)
+        #~ for ufunc in ufunc_dict_alg:
+            #~ if (ufunc is np.multiply) or (ufunc is np.divide):
+                #~ in1 = q1
+                #~ in2 = q3
+            #~ elif (ufunc is np.add) or (ufunc is np.subtract):
+                #~ in1 = q1
+                #~ in2 = q2
+            #~ result = ufunc(in1, in2)
             
-            sd_func = ufunc_dict_alg[ufunc][1]
-            units_func = ufunc_dict_alg[ufunc][2]
+            #~ sd_func = ufunc_dict_alg[ufunc][1]
+            #~ units_func = ufunc_dict_alg[ufunc][2]
             
-            self.assertTrue(result.units, units_func(in1.units, in2.units))
-            for i in range(3):
-                self.assertEqual(result[i], ufunc(np.asarray(in1), np.asarray(in2))[i])
-                self.assertEqual(result.sd[i], sd_func(np.asarray(result), np.asarray(in1), np.asarray(in2), in1.sd, in2.sd)[i])
+            #~ self.assertTrue(result.units, units_func(in1.units, in2.units))
+            #~ for i in range(3):
+                #~ self.assertEqual(result[i], ufunc(np.asarray(in1), np.asarray(in2))[i])
+                #~ self.assertEqual(result.sd[i], sd_func(np.asarray(result), np.asarray(in1), np.asarray(in2), in1.sd, in2.sd)[i])
                 
-            print('{} tested!'.format(ufunc))
+            #~ print('{} tested!'.format(ufunc))
         
         a1 = [0.1,0.2,0.3]
         sd1 = [0.01,0.02,0.03]
@@ -216,36 +216,36 @@ class qnArrayTwoTest(unittest.TestCase):
         q4 = qnArrayTwo(a1, units = 'rad', sd = sd1)
         q5 = qnArrayTwo(a1, units = 'deg', sd = sd1)
         
-        #~ for ufunc in ufunc_dict_one_input:
-            #~ unit_test = ufunc_dict_one_input[ufunc][1]
-            #~ if unit_test is units_check_unitless:
-                #~ with self.assertRaises(Exception) as e:
-                    #~ ufunc(q1)
-                #~ with self.assertRaises(Exception) as e:
-                    #~ ufunc(q2)
-                #~ with self.assertRaises(Exception) as e:
-                    #~ ufunc(q4)
-                #~ with self.assertRaises(Exception) as e:
-                    #~ ufunc(q5)
-                #~ in1 = [q3]
-                #~ r = [ufunc(q3)]
-            #~ elif unit_test is units_check_unitless_deg_rad:
-                #~ with self.assertRaises(Exception) as e:
-                    #~ ufunc(q1)
-                #~ with self.assertRaises(Exception) as e:
-                    #~ ufunc(q2)
-                #~ in1 = [q3, q4, q5]
-                #~ r = [ufunc(q3), ufunc(q4), ufunc(q5)]
-            #~ sd_func = ufunc_dict_one_input[ufunc][0] #(result, vals, sd)
-            #~ units_func = ufunc_dict_one_input[ufunc][2] #(units)
+        for ufunc in ufunc_dict_one_input:
+            unit_test = ufunc_dict_one_input[ufunc][1]
+            if unit_test is units_check_unitless:
+                with self.assertRaises(Exception) as e:
+                    ufunc(q1)
+                with self.assertRaises(Exception) as e:
+                    ufunc(q2)
+                with self.assertRaises(Exception) as e:
+                    ufunc(q4)
+                with self.assertRaises(Exception) as e:
+                    ufunc(q5)
+                in1 = [unit_test(q3)]
+                r = [ufunc(in1[0])]
+            elif unit_test is units_check_unitless_deg_rad:
+                with self.assertRaises(Exception) as e:
+                    ufunc(q1)
+                with self.assertRaises(Exception) as e:
+                    ufunc(q2)
+                in1 = [unit_test(q3), unit_test(q4), unit_test(q5)]
+                r = [ufunc(in1[0]), ufunc(in1[1]), ufunc(in1[2])]
+            sd_func = ufunc_dict_one_input[ufunc][0] #(result, vals, sd)
+            units_func = ufunc_dict_one_input[ufunc][2] #(units)
             
-            #~ for result, input1 in zip(r,in1):
-                #~ self.assertEqual(result.units, units_func(input1.units))
-                #~ for i in range(3):
-                    #~ self.assertAlmostEqual(result[i], ufunc(np.asarray(input1))[i], places = 1)
-                    #~ self.assertAlmostEqual(result.sd[i], sd_func(result, input1, input1.sd)[i],places = 1)
+            for result, input1 in zip(r,in1):
+                self.assertEqual(result.units, units_func(input1.units))
+                for i in range(3):
+                    self.assertAlmostEqual(result[i], ufunc(np.asarray(input1))[i], places = 2)
+                    self.assertAlmostEqual(result.sd[i], sd_func(result, input1, input1.sd)[i],places = 1)
             
-            #~ print('{} tested!'.format(ufunc))
+            print('{} tested!'.format(ufunc))
         
         #~ q4 = np.exp(q3)
         #~ q5 = np.sin(q3)
