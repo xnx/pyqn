@@ -91,12 +91,13 @@ ufunc_dict_one_input = {np.exp: (sd_exp, units_check_unitless, units_unitless),
                         #np.arcsinh: (sd_arcsinh, units_check_unitless, units_unitless),
                         #np.arccosh: (sd_arccosh, units_check_unitless, units_unitless),
                         #np.arctanh: (sd_arctanh, units_check_unitless, units_unitless),
-                        #np.negative: (sd_nochange, units_check_any, units_self)
+                        np.negative: (sd_nochange, units_check_any, units_self)
                         }
 
 ufunc_dict_two_inputs = {np.logaddexp: (sd_logaddexp, units_check_unitless, units_unitless2),
                          np.logaddexp2: (sd_logaddexp2, units_check_unitless, units_unitless2),
                          np.power: (sd_power, units_check_unitless, units_unitless2),
                          np.true_divide: (sd_mul_div, units_check_any, units_div),
-                         np.floor_divide: (sd_mul_div, units_check_any, units_div)}
+                         np.floor_divide: (sd_mul_div, units_check_any, units_div)
+                         }
 
