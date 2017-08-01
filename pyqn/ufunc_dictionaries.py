@@ -17,6 +17,8 @@ def sd_exp(result, vals, sd):
     return result * sd
 def sd_exp2(result, vals, sd):
     return result * sd * np.log(2)
+def sd_expm1(result, vals, sd):
+    return sd*np.exp(vals)
 def sd_sin(result, vals, sd):
     return np.cos(vals) * sd
 def sd_cos(result, vals, sd):
@@ -106,7 +108,7 @@ ufunc_dict_alg = {  np.add: ('__add__', sd_add_sub, units_add_sub, '__radd__'),
 
 ufunc_dict_one_input = {np.exp: (sd_exp, units_check_unitless, units_unitless),
                         np.exp2: (sd_exp2, units_check_unitless, units_unitless),
-                        np.expm1: (sd_exp, units_check_unitless, units_unitless),
+                        np.expm1: (sd_expm1, units_check_unitless, units_unitless),
                         np.log: (sd_log, units_check_unitless, units_unitless),
                         np.log2: (sd_log2, units_check_unitless, units_unitless),
                         np.log10: (sd_log10, units_check_unitless, units_unitless),
