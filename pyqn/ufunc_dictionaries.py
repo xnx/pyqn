@@ -105,10 +105,11 @@ def units_check_any(input_arr):
     return input_arr
 
 def units_add_sub(u1, u2):
-    if u1.has_units() is True:
+    if u1 == u2:
         return u1
     else:
-        return u2
+        raise UnitsError('units must match')
+
 def units_mul(u1,u2):
     return u1*u2
 def units_div(u1,u2):
