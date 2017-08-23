@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 # quantity.py
 # A class representing physical quantity, with name, units and uncertainty.
 #
@@ -59,7 +62,10 @@ class Quantity(Symbol):
 
         Symbol.__init__(self, name, latex, html, definition)
         self.value = value
-        self.sd = sd
+        if sd is None:
+            self.sd = 0
+        else:
+            self.sd = sd
         if units is None:
             self.units = Units([])
         else:
@@ -182,6 +188,12 @@ class Quantity(Symbol):
                              ' deviation.'.format(self.name))
 
         return np.random.normal(loc=self.value, scale=self.sd, size=shape)
+        
+    def __eq__(self, other):
+        if (self.value == other.value) and (self.units == other.units):
+            return True
+        else:
+            return False
 
     def __add__(self, other):
         """
@@ -189,20 +201,24 @@ class Quantity(Symbol):
         are propagated, but assumed to be uncorrelated.
 
         """
-
-        if type(other) != Quantity:
-            raise TypeError
-        if self.value is None or other.value is None:
-            raise ValueError
-        if self.units != other.units:
-            raise UnitsError('Can\'t add two quantities with different'
+        if type(other) is Quantity:
+            if self.value is None or other.value is None:
+                raise ValueError
+            if self.units != other.units:
+                raise UnitsError('Can\'t add two quantities with different'
                              ' units: %s and %s' % (self.units, other.units))
-        if self.sd is None or other.sd is None:
-            sd = None
+            if self.sd is None or other.sd is None:
+                sd = None
+            else:
+                sd = math.hypot(self.sd, other.sd)
+            return Quantity(value=self.value+other.value, units=self.units, sd=sd)
         else:
-            sd = math.hypot(self.sd, other.sd)
-        return Quantity(value=self.value+other.value, units=self.units, sd=sd)
-
+            try:
+                result = other.__radd__(self)
+            except TypeError:
+                print('These objects are not compatible')
+            return result
+        
     def __sub__(self, other):
         """
         Subtract two Quantity objects; they must have the same units. Errors
@@ -210,18 +226,23 @@ class Quantity(Symbol):
 
         """
 
-        if type(other) != Quantity:
-            raise TypeError
-        if self.value is None or other.value is None:
-            raise ValueError
-        if self.units != other.units:
-            raise UnitsError('Can\'t subtract two quantities with different'
+        if type(other) is Quantity:
+            if self.value is None or other.value is None:
+                raise ValueError
+            if self.units != other.units:
+                raise UnitsError('Can\'t subtract two quantities with different'
                              ' units: %s and %s' % (self.units, other.units))
-        if self.sd is None or other.sd is None:
-            sd = None
+            if self.sd is None or other.sd is None:
+                sd = None
+            else:
+                sd = math.hypot(self.sd, other.sd)
+            return Quantity(value=self.value-other.value, units=self.units, sd=sd)
         else:
-            sd = math.hypot(self.sd, other.sd)
-        return Quantity(value=self.value-other.value, units=self.units, sd=sd)
+            try:
+                result = other.__rsub__(self)
+            except TypeError:
+                print('These objects are not compatible')
+            return result
 
     def __mul__(self, other):
         """
@@ -239,7 +260,7 @@ class Quantity(Symbol):
                 sd = abs(other) * self.sd
             return Quantity(value=self.value*other, units=self.unit, sd=sd)
         else:
-            if type(other) != Quantity:
+            if (type(other) is not Quantity) and (type(other) is not qnArray):
                 raise TypeError
             if other.value is None:
                 raise ValueError
@@ -258,19 +279,8 @@ class Quantity(Symbol):
         propagated, but assumed to be uncorrelated.
 
         """
-
-        if self.value is None:
-            raise ValueError
-        if type(other) in (int, float):
-            if self.sd is None:
-                sd = None
-            else:
-                sd = abs(other) / self.sd
-            return Quantity(value=self.value/other, units=self.units, sd=sd)
-        else:
-            if type(other) != Quantity:
-                raise TypeError
-            if other.value is None:
+        if type(other) is Quantity:
+            if (self.value is None) or other.value is None:
                 raise ValueError
             value = self.value / other.value
             if not self.sd or not other.sd:
@@ -280,13 +290,28 @@ class Quantity(Symbol):
                                         other.sd/other.value)
             units = self.units / other.units
             return Quantity(value=value, units=units, sd=sd)
+        if type(other) in (int, float):
+            if self.sd is None:
+                sd = None
+            else:
+                sd = abs(other) / self.sd
+            return Quantity(value=self.value/other, units=self.units, sd=sd)
+        else:
+            try:
+                result = other.__rtruediv__(self)
+            except TypeError:
+                print('These objects are not compatible')
+            return result
 
     def __rtruediv__(self, other):
         return self.__truediv__(other)
     
     def __pow__(self, power):
-        return Quantity(value = self.value**power, 
-                        units = self.units**power)
+        new_quantity = Quantity(value = self.value**power,
+                                units = self.units**power)
+        if self.sd:
+            new_quantity.sd = self.value**power*math.hypot(self.sd/self.value, self.sd/self.value)
+        return new_quantity
 
     @classmethod
     def parse(self, s_quantity, name=None, units=None, sd=None,
@@ -327,3 +352,14 @@ class Quantity(Symbol):
                 ndp = 0
             sd = float(s_sd) * 10**(exp-ndp)
         return Quantity(name=name, value=value, units=units, sd=sd)
+
+    @property
+    def html_str(self):
+        html_chunks = []
+        if self.name:
+            html_chunks.append('{:s} ='.format(self.name))
+        html_chunks.append('{:}'.format(self.value))
+        if self.sd:
+            html_chunks.append('± {:}'.format(self.sd))
+        html_chunks.append(self.units.html)
+        return ' '.join(html_chunks)

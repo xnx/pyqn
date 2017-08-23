@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 # dimensions.py
 # A class representing the dimensions of a physical quantity's units, in
 # terms of powers of length (L), mass (M), time (T), temperature (Theta),
@@ -22,9 +25,15 @@
 # You should have received a copy of the GNU General Public License
 # along with PyQn.  If not, see <http://www.gnu.org/licenses/>
 
+class DimensionsError(Exception):
+    def __init__(self, error_str):
+        self.error_str = error_str
+    def __str__(self):
+        return self.error_str
+
 class Dimensions(object):
     # these are the abbreviations for Length, Mass, Time, Temperature,
-    # Quantity (amount of substance), Current, and Luminous Intensity:
+    # Quantity (amount of substance), Current, and Luminous Intensity
     dim_names = ['L', 'M', 'T', 'Theta', 'Q', 'C', 'I']
     dim_desc = ['length', 'mass', 'time', 'temperature', 'amount',
                 'current', 'luminous intensity']
@@ -37,10 +46,12 @@ class Dimensions(object):
         if dims:
             # initialize by dims array
             if not kwargs:
-                self.dims = dims
+                if (len(dims) == 7) and (type(dims[0]) is not str):
+                    self.dims = dims
+                else:
+                    raise DimensionsError('Inconsistent number of dimensions in input or non-value elements of input array')
             else:
-                print('bad initialisation of Dimensions object')
-                sys.exit(1)
+                raise DimensionsError('Bad initialisation of Dimensions object')
         else:
             # initialize by keyword arguments
             for dim_name in kwargs:
