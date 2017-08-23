@@ -280,7 +280,7 @@ class Units(object):
             fac = fac/(NA**(from_dims.dims[4]-to_dims.dims[4]))
         else:
             fac = fac*(NA**(to_dims.dims[4]-from_dims.dims[4]))
-        return fac/other.to_si()
+        return (fac/other.to_si())**(-1)
         
     def spec_conversion(self, other):
         d_wavenumber = d_length**-1
