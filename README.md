@@ -1,4 +1,4 @@
-# pyvalem
+# pyqn
 A Python package for handling physical units and quantities.
 
 A very quick overview:
