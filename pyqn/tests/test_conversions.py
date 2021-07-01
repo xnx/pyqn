@@ -23,6 +23,12 @@ class UnitsConversionCheck(unittest.TestCase):
         with self.assertRaises(UnitsError) as cm:
             u1.conversion(u4)
 
+    def test_litres(self):
+        u1 = Units('l')
+        self.assertEqual(u1.to_si(), 1.e-3)
+        u2 = Units('L')
+        self.assertEqual(u1.to_si(), 1.e-3)
+
     def test_molar_units_conversion(self):
         u1 = Units('kJ')
         u2 = Units('J/mol')
@@ -43,9 +49,9 @@ class UnitsConversionCheck(unittest.TestCase):
         u3 = Units('s-1')
         
         self.assertAlmostEqual(u1.conversion(u2, force='spec'),
-                                                    5.034116651114543e+22)
+                                                    5.0341165675427096e+22)
         self.assertAlmostEqual(u1.conversion(u3, force='spec'),
-                                                    1.5091902046963573e+33)
+                                                    1.5091901796421518e+33)
  
 if __name__ == '__main__':
     unittest.main()

@@ -150,6 +150,7 @@ BaseUnit('a0', 'bohr', 'length', 5.2917721092e-11, '', 'a_0', d_length),
 BaseUnit('b', 'barn', 'area', 1.e-28, '', 'b', d_area),
 # Non-SI volume units
 BaseUnit('l', 'litre', 'volume', 1.e-3, '', 'l', d_volume),
+BaseUnit('L', 'litre', 'volume', 1.e-3, '', 'L', d_volume),
 ]),
 
 ('Non-SI time units', [
