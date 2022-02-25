@@ -26,7 +26,7 @@ from .dimensions import (d_dimensionless, d_length, d_energy, d_time,
                          d_temperature)
 from .atom_unit import AtomUnit, UnitsError, feq
 
-from scipy.constants import h, N_A as NA, c, k as kB
+h, NA, c, kB = (6.62607015e-34, 6.02214076e+23, 299792458.0, 1.380649e-23)
 
 class Units(object):
     """
