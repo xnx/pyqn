@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 setup(
     name = 'pyqn',
-    version = '1.2',
+    version = '1.2.1',
     packages = find_packages(),
     author = 'Christian Hill',
     url = 'https://github.com/xnx/pyqn',

@@ -223,6 +223,21 @@ class Units(object):
                 h.append(' ')
         return ''.join(h)
 
+
+    @property
+    def latex(self):
+        e = []
+        n = len(self.atom_units)
+        for i, atom_unit in enumerate(self.atom_units):
+            # TODO use proper LaTeX for prefix.
+            e.extend([atom_unit.prefix or '', atom_unit.base_unit.latex])
+            if atom_unit.exponent != 1:
+                e.append('^{' + str(atom_unit.exponent) + '}')
+            if i < n-1:
+                e.append(r'\,')
+        return r'\mathrm{' + ''.join(e) + '}'
+
+
     def conversion(self, other, force=None, strict=False):
         """
         Return the factor required to convert this Units to

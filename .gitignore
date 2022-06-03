@@ -5,3 +5,5 @@
 build/
 dist/
 pyqn.egg-info/
+.venv
+activate
