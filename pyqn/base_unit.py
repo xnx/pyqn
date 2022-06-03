@@ -136,7 +136,7 @@ BaseUnit('Ry', 'rydberg', 'energy', 13.60569253 * 1.602176487e-19, '', 'Ry',
 ]),
 
 ('Non-SI mass units', [
-BaseUnit('u', 'atomic mass unit', 'mass', 1.660538921e-27, '', '', d_mass),
+BaseUnit('u', 'atomic mass unit', 'mass', 1.660538921e-27, '', 'u', d_mass),
 BaseUnit('amu', 'atomic mass unit', 'mass', 1.660538921e-27, '', 'am', d_mass),
 BaseUnit('Da', 'dalton', 'mass', 1.660538921e-27, '', 'Da', d_mass),
 BaseUnit('m_e', 'electron mass', 'mass', 9.10938291e-31, '', 'm_e', d_mass),
