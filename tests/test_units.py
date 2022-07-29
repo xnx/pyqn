@@ -6,8 +6,8 @@
 # Unit tests for the Units class.
 
 import unittest
-from ..units import Units
-from ..dimensions import Dimensions,d_energy
+from pyqn.units import Units
+from pyqn.dimensions import Dimensions,d_energy
 
 class UnitsCheck(unittest.TestCase):
     """Unit tests for the Units class."""

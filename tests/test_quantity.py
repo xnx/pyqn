@@ -1,7 +1,7 @@
 import unittest
-from ..quantity import Quantity, QuantityError
-from ..dimensions import Dimensions, d_energy
-from ..units import UnitsError
+from pyqn.quantity import Quantity, QuantityError
+from pyqn.dimensions import Dimensions, d_energy
+from pyqn.units import UnitsError
 
 class QuantityManipulations(unittest.TestCase):
     def test_quantity_init(self):

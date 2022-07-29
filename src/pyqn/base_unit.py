@@ -111,7 +111,7 @@ BaseUnit('erg', 'erg', 'energy', 1.e-7, '', 'erg', d_energy),
 BaseUnit('k', 'kayser', 'wavenumber', 100., '', 'k', d_length**-1),
 BaseUnit('D', 'debye', 'electric dipole moment', 1.e-21/299792458., '', 'D',
          d_charge * d_length),
-BaseUnit('hbar', 'hbar', 'angular momentum', 1.05457148e-34, '', '\hbar',
+BaseUnit('hbar', 'hbar', 'angular momentum', 1.05457148e-34, '', r'\hbar',
          Dimensions(L=2, M=1, T=-1)),
 BaseUnit('e', 'electron charge', 'charge', 1.602176565e-19, '', 'e', d_charge),
 ]),
@@ -144,7 +144,7 @@ BaseUnit('m_e', 'electron mass', 'mass', 9.10938291e-31, '', 'm_e', d_mass),
 
 ('Non-SI units of length, area and volume', [
 # Non-SI length units
-BaseUnit('Å', 'angstrom', 'length', 1.e-10, '', '\AA', d_length),
+BaseUnit('Å', 'angstrom', 'length', 1.e-10, '', r'\AA', d_length),
 BaseUnit('a0', 'bohr', 'length', 5.2917721092e-11, '', 'a_0', d_length),
 # Non-SI area units
 BaseUnit('b', 'barn', 'area', 1.e-28, '', 'b', d_area),

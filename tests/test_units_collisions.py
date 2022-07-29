@@ -8,9 +8,9 @@
 # of "min" for minutes.
 
 import unittest
-from ..units import Units
-from ..base_unit import base_units
-from ..si import si_prefixes
+from pyqn.units import Units
+from pyqn.base_unit import base_units
+from pyqn.si import si_prefixes
 
 class ConflictsCheck(unittest.TestCase):
     """

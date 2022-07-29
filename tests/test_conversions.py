@@ -6,7 +6,7 @@
 # Unit tests for unit conversions within the Units class.
 
 import unittest
-from ..units import Units, UnitsError
+from pyqn.units import Units, UnitsError
 
 class UnitsConversionCheck(unittest.TestCase):
     """Unit tests for unit conversions within the Units class."""

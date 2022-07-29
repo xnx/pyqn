@@ -22,7 +22,7 @@
 
 import re
 import math
-import numpy as np
+#import numpy as np
 from .symbol import Symbol
 from .units import Units, UnitsError
 
@@ -167,21 +167,21 @@ class Quantity(Symbol):
         else:
             return Quantity(value = self.value*fac, units = new_units)
 
-    def draw_from_dist(self, shape=None):
-        """
-        Return a value or number array of values drawn from the normal
-        distribution described by this Quantity's mean and standard
-        deviation. shape is the shape of the NumPy array to return, or
-        None (the default) to return a single scalar value from the
-        distribution.
-
-        """
-
-        if self.sd is None:
-            raise ValueError('Quantity instance {} has no defined standard'
-                             ' deviation.'.format(self.name))
-
-        return np.random.normal(loc=self.value, scale=self.sd, size=shape)
+#    def draw_from_dist(self, shape=None):
+#        """
+#        Return a value or number array of values drawn from the normal
+#        distribution described by this Quantity's mean and standard
+#        deviation. shape is the shape of the NumPy array to return, or
+#        None (the default) to return a single scalar value from the
+#        distribution.
+#
+#        """
+#
+#        if self.sd is None:
+#            raise ValueError('Quantity instance {} has no defined standard'
+#                             ' deviation.'.format(self.name))
+#
+#        return np.random.normal(loc=self.value, scale=self.sd, size=shape)
 
     def __add__(self, other):
         """
@@ -311,7 +311,7 @@ class Quantity(Symbol):
         else:
             s_mantsd = s_valsd
             exp = 0
-        patt = '([+-]?\d*\.?\d*)\(?(\d+)?\)?'
+        patt = r'([+-]?\d*\.?\d*)\(?(\d+)?\)?'
         m = re.match(patt, s_mantsd)
         if not m:
             raise QuantityError('Failed to parse string into quantity:\n'\
