@@ -8,7 +8,7 @@ long_description = (root / "README.rst").read_text(encoding="utf-8")
 
 setup(
     name="pyqn",
-    version="1.3",
+    version="1.3.2",
     description="A package for managing physical units and quantities",
     long_description=long_description,
     long_description_content_type="text/x-rst",
@@ -40,7 +40,7 @@ setup(
     ],
     extras_require={"dev": ["black", "pytest-cov", "tox", "ipython"]},
     # package_data will include all the resolved globs into both the wheel and sdist
-    #package_data={},
+    # package_data={},
     # no need for MANIFEST.in, which should be reserved only for build-time files
     project_urls={
         "Bug Reports": "https://github.com/xnx/pyqn/issues",

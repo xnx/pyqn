@@ -22,13 +22,13 @@
 
 import copy
 from .dimensions import Dimensions
-from .dimensions import (d_dimensionless, d_length, d_energy, d_time,
-                         d_temperature)
+from .dimensions import d_dimensionless, d_length, d_energy, d_time, d_temperature
 from .atom_unit import AtomUnit, UnitsError, feq
 
-h, NA, c, kB = (6.62607015e-34, 6.02214076e+23, 299792458.0, 1.380649e-23)
+h, NA, c, kB = (6.62607015e-34, 6.02214076e23, 299792458.0, 1.380649e-23)
 
-class Units(object):
+
+class Units:
     """
     A class to represent the units of a physical quantity.
 
@@ -41,15 +41,26 @@ class Units(object):
 
         """
 
+        self.undef = False
+        self.dims = None
+
         if type(units) is Units:
+            if units.undef:
+                self.undef = True
+                return
             self.__init__(units.atom_units)
         elif type(units) is str:
+            if units == "undef":
+                self.undef = True
+                return
             self.__init__(self.parse(units).atom_units)
         elif type(units) is list:
             self.atom_units = copy.deepcopy(units)
         else:
-            raise TypeError('Attempt to initialize Units object with'
-                            ' argument units of type %s' % type(units))
+            raise TypeError(
+                "Attempt to initialize Units object with"
+                " argument units of type %s" % type(units)
+            )
         # also get the dimensions of the units
         self.dims = self.get_dims()
 
@@ -78,7 +89,7 @@ class Units(object):
 
         """
 
-        div_fields = s_compoundunit.split('/')
+        div_fields = s_compoundunit.split("/")
         ndiv_fields = len(div_fields)
         compound_unit = Units.parse_mult_units(div_fields[0])
         for div_field in div_fields[1:]:
@@ -93,9 +104,9 @@ class Units(object):
 
         """
         atom_units = []
-        for s_unit in munit.split('.'):
+        for s_unit in munit.split("."):
             atom_unit = AtomUnit.parse(s_unit)
-            if atom_unit.base_unit.stem != '1':
+            if atom_unit.base_unit.stem != "1":
                 # the unity 'unit' is not really a unit
                 atom_units.append(atom_unit)
         return Units(atom_units)
@@ -107,13 +118,13 @@ class Units(object):
 
         """
 
-        for i,my_atom_unit in enumerate(self.atom_units):
+        for i, my_atom_unit in enumerate(self.atom_units):
             if my_atom_unit.prefix_base_eq(atom_unit):
                 return i
         return None
 
     def __mul__(self, other):
-        """ Return the product of this Units object with another. """
+        """Return the product of this Units object with another."""
 
         if other == 1:
             return copy.deepcopy(self)
@@ -137,19 +148,20 @@ class Units(object):
                     del product.atom_units[i]
         product.dims = product.get_dims()
         return product
+
     def __rmul__(self, other):
         if type(other) == str:
             other = Units(other)
         elif other == 1:
-            other = Units('1')
+            other = Units("1")
         return self.__mul__(other)
 
     def __truediv__(self, other):
-        """ Return the ratio of this Units divided by another. """
+        """Return the ratio of this Units divided by another."""
         if type(other) == str:
             other = Units(other)
         elif other == 1:
-            other = Units('1')
+            other = Units("1")
         ratio = Units(self.atom_units)
         for other_atom_unit in other.atom_units:
             i = ratio._find_atom(other_atom_unit)
@@ -166,37 +178,48 @@ class Units(object):
                     del ratio.atom_units[i]
         ratio.dims = ratio.get_dims()
         return ratio
-        
+
     def __rdiv__(self, other):
         if type(other) == str:
             other = Units(other)
         elif other == 1:
-            other = Units('1')
+            other = Units("1")
         return other.__truediv__(self)
- 
+
     def __pow__(self, power):
         result_atom_units = []
         for atom_unit in self.atom_units:
             result_atom_units.append(atom_unit**power)
         return Units(result_atom_units)
-        
-    def __str__(self):
-        """ String representation of this Units. """
-        return '.'.join([str(atom_unit) for atom_unit in self.atom_units])
 
-    __repr__ = __str__
+    def __repr__(self):
+        """String representation of this Units."""
+        if self.undef:
+            return "undef"
+        return ".".join([str(atom_unit) for atom_unit in self.atom_units])
+
+    __str__ = __repr__
 
     def __eq__(self, other):
-        """ Test for equality with another Units object. """
+        """Test for equality with another Units object."""
+
         if other is None:
             return False
-        elif other == 1:
+
+        if self.undef:
+            return False
+
+        if other == 1:
             return self.get_dims() == d_dimensionless
+
+        if other.undef:
+            return False
+
         if self.get_dims() != other.get_dims():
-        # obviously the units aren't the same if they have different dimensions
+            # obviously the units aren't the same if they have different dimensions
             return False
         # if two Units objects have the same dimensions, they are equal if
-        # their conversion factors to SI units are the same: 
+        # their conversion factors to SI units are the same:
         if feq(self.to_si(), other.to_si()):
             return True
         return False
@@ -205,38 +228,42 @@ class Units(object):
         return not self == other
 
     def to_si(self):
-        """ Return the factor needed to convert this Units to SI. """
-        fac = 1.
+        """Return the factor needed to convert this Units to SI."""
+        fac = 1.0
         for atom_unit in self.atom_units:
             fac *= atom_unit.si_fac
         return fac
 
     @property
     def html(self):
+        if self.undef:
+            return "undef"
+
         h = []
         n = len(self.atom_units)
-        for i,atom_unit in enumerate(self.atom_units):
-            h.extend([atom_unit.prefix or '', atom_unit.base_unit.stem])
+        for i, atom_unit in enumerate(self.atom_units):
+            h.extend([atom_unit.prefix or "", atom_unit.base_unit.stem])
             if atom_unit.exponent != 1:
-                h.append('<sup>{:d}</sup>'.format(atom_unit.exponent))
-            if i < n-1:
-                h.append(' ')
-        return ''.join(h)
-
+                h.append("<sup>{:d}</sup>".format(atom_unit.exponent))
+            if i < n - 1:
+                h.append(" ")
+        return "".join(h)
 
     @property
     def latex(self):
+        if self.undef:
+            return r"\mathrm{undef}"
+
         e = []
         n = len(self.atom_units)
         for i, atom_unit in enumerate(self.atom_units):
             # TODO use proper LaTeX for prefix.
-            e.extend([atom_unit.prefix or '', atom_unit.base_unit.latex])
+            e.extend([atom_unit.prefix or "", atom_unit.base_unit.latex])
             if atom_unit.exponent != 1:
-                e.append('^{' + str(atom_unit.exponent) + '}')
-            if i < n-1:
-                e.append(r'\,')
-        return r'\mathrm{' + ''.join(e) + '}'
-
+                e.append("^{" + str(atom_unit.exponent) + "}")
+            if i < n - 1:
+                e.append(r"\,")
+        return r"\mathrm{" + "".join(e) + "}"
 
     def conversion(self, other, force=None, strict=False):
         """
@@ -246,82 +273,93 @@ class Units(object):
         force='spec':   spectroscopic units: conversions between [L-1],
         [M,L2,T-2], [T-1] are allowed (i.e. cm-1, s-1, and J can be
         interconverted through factors of h, hc).
- 
+
         """
 
         if type(other) == str:
             other = Units(other)
-            
+
         conversion_method = {
-                             'spec': self.spec_conversion,
-                             'mol': self.mol_conversion,
-                             'kBT': self.kBT_conversion
-                             }
+            "spec": self.spec_conversion,
+            "mol": self.mol_conversion,
+            "kBT": self.kBT_conversion,
+        }
 
         self_dims, other_dims = self.get_dims(), other.get_dims()
         if self_dims != other_dims:
             try:
                 return conversion_method[force](other)
             except KeyError:
-                raise UnitsError('Failure in units conversion: units %s[%s] and'
-                                 ' %s[%s] have different dimensions'
-                           % (self, self.get_dims(), other, other.get_dims()))
+                raise UnitsError(
+                    "Failure in units conversion: units %s[%s] and"
+                    " %s[%s] have different dimensions"
+                    % (self, self.get_dims(), other, other.get_dims())
+                )
         return self.to_si() / other.to_si()
-    
+
     def kBT_conversion(self, other):
         from_dims = self.get_dims()
         to_dims = other.get_dims()
         fac = self.to_si()
-        
+
         if from_dims == d_energy and to_dims == d_temperature:
             fac = fac / kB
         elif from_dims == d_temperature and to_dims == d_energy:
             fac = fac * kB
         else:
-            raise UnitsError('Failure in conversion of units: was expecting to '
-                             'covert between energy and temperature')
-        return fac/other.to_si()
+            raise UnitsError(
+                "Failure in conversion of units: was expecting to "
+                "covert between energy and temperature"
+            )
+        return fac / other.to_si()
 
     def mol_conversion(self, other):
-        from_dims = self.get_dims() #original unit dimensions
-        to_dims = other.get_dims()  #desired unit dimensions
-        fac = self.to_si()          #factor needed to conver to SI units
-        
+        from_dims = self.get_dims()  # original unit dimensions
+        to_dims = other.get_dims()  # desired unit dimensions
+        fac = self.to_si()  # factor needed to conver to SI units
+
         if from_dims.dims[4] == to_dims.dims[4]:
-            raise UnitsError('Failure in conversion of units: no '
-                             'different in quantity dimensions between %s and %s'
-                             % from_dims, to_dims)
+            raise UnitsError(
+                "Failure in conversion of units: no "
+                "different in quantity dimensions between %s and %s" % from_dims,
+                to_dims,
+            )
         elif from_dims.dims[4] > to_dims.dims[4]:
-            fac = fac/(NA**(from_dims.dims[4]-to_dims.dims[4]))
+            fac = fac / (NA ** (from_dims.dims[4] - to_dims.dims[4]))
         else:
-            fac = fac*(NA**(to_dims.dims[4]-from_dims.dims[4]))
-        return fac/other.to_si()
-        
+            fac = fac * (NA ** (to_dims.dims[4] - from_dims.dims[4]))
+        return fac / other.to_si()
+
     def spec_conversion(self, other):
         d_wavenumber = d_length**-1
         d_frequency = d_time**-1
         d_wavelength = d_length
-        
+
         from_dims = self.get_dims()
         to_dims = other.get_dims()
         fac = self.to_si()
         if from_dims == d_wavenumber:
-            fac *= h*c
+            fac *= h * c
         elif from_dims == d_frequency:
             fac *= h
         elif from_dims != d_energy:
-            raise UnitsError('Failure in conversion of spectroscopic units:'
-                ' I only recognise from-units of wavenumber, energy and'
-                ' frequency but got %s' % str(self))
+            raise UnitsError(
+                "Failure in conversion of spectroscopic units:"
+                " I only recognise from-units of wavenumber, energy and"
+                " frequency but got %s" % str(self)
+            )
         if to_dims == d_wavenumber:
-            fac /= h*c
+            fac /= h * c
         elif to_dims == d_frequency:
             fac /= h
         elif to_dims != d_energy:
-            raise UnitsError('Failure in conversion of spectroscopic units:'
-                ' I only recognise to-units of wavenumber, energy and'
-                ' frequency but got %s' % str(other))
+            raise UnitsError(
+                "Failure in conversion of spectroscopic units:"
+                " I only recognise to-units of wavenumber, energy and"
+                " frequency but got %s" % str(other)
+            )
         return fac / other.to_si()
+
 
 def convert(from_units, to_units):
     return Units(from_units).conversion(to_units)

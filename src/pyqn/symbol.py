@@ -21,6 +21,7 @@
 # You should have received a copy of the GNU General Public License
 # along with PyQn.  If not, see <http://www.gnu.org/licenses/>
 
+
 class Symbol(object):
     """
     A Python class representing a symbol - typically the label for a physical
