@@ -52,6 +52,15 @@ class UnitsConversionCheck(unittest.TestCase):
         self.assertAlmostEqual(u1.conversion(u2, force="spec"), 5.0341165675427096e22)
         self.assertAlmostEqual(u1.conversion(u3, force="spec"), 1.5091901796421518e33)
 
+    def test_rational_units_conversion(self):
+        u1 = Units("Hz-1/2")
+        u2 = Units("ns1/2")
+        self.assertAlmostEqual(u1.conversion(u2), 10**4.5)
+
+        u3 = Units("m-3/2")
+        u4 = Units("inch-3/2")
+        self.assertAlmostEqual(u3.conversion(u4), 0.0254**1.5)
+
 
 if __name__ == "__main__":
     unittest.main()

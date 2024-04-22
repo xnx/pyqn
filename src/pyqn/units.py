@@ -20,6 +20,7 @@
 # You should have received a copy of the GNU General Public License
 # along with PyQn.  If not, see <http://www.gnu.org/licenses/>
 
+import re
 import copy
 from .dimensions import Dimensions
 from .dimensions import d_dimensionless, d_length, d_energy, d_time, d_temperature
@@ -82,18 +83,35 @@ class Units:
         return dims
 
     @classmethod
-    def parse(self, s_compoundunit):
+    def parse(self, s_compoundunit, no_divided_units=False):
         """
         Parse the string s_compoundunit and return the corresponding
         Units object.
 
         """
 
+        if no_divided_units:
+            # s_compoundunit does not consist of any units separated by '/'
+            # so parse immediately as a sequence of multiplied units.
+            return Units.parse_mult_units(s_compoundunit)
+
+        # We need to temporarily identify rational exponents (e.g. "Pa-1/2")
+        # and replace the / with : so that we can split up the atomic units
+        # properly.
+        patt = r"\d+/\d+"
+        rational_exponents = re.findall(patt, s_compoundunit)
+        for e in rational_exponents:
+            es = e.replace("/", ":")
+            s_compoundunit = s_compoundunit.replace(e, es)
+
         div_fields = s_compoundunit.split("/")
-        ndiv_fields = len(div_fields)
-        compound_unit = Units.parse_mult_units(div_fields[0])
+        # don't forget to put back the "/" character in any rational exponents.
+        compound_unit = Units.parse_mult_units(div_fields[0].replace(":", "/"))
         for div_field in div_fields[1:]:
-            compound_unit = compound_unit / Units.parse(div_field)
+            div_field = div_field.replace(":", "/")
+            compound_unit = compound_unit / Units.parse(
+                div_field, no_divided_units=True
+            )
         return compound_unit
 
     @classmethod
@@ -244,7 +262,7 @@ class Units:
         for i, atom_unit in enumerate(self.atom_units):
             h.extend([atom_unit.prefix or "", atom_unit.base_unit.stem])
             if atom_unit.exponent != 1:
-                h.append("<sup>{:d}</sup>".format(atom_unit.exponent))
+                h.append(f"<sup>{atom_unit.exponent}</sup>")
             if i < n - 1:
                 h.append(" ")
         return "".join(h)

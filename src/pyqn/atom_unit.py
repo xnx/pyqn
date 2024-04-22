@@ -23,6 +23,7 @@
 # along with PyQn.  If not, see <http://www.gnu.org/licenses/>
 
 import sys
+from fractions import Fraction
 from pyparsing import Word, Group, Literal, Suppress, ParseException, oneOf, Optional
 from .si import si_prefixes
 from .base_unit import BaseUnit, base_unit_stems
@@ -33,12 +34,13 @@ caps = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 lowers = caps.lower()
 letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0"
 digits = "123456789"
-exponent = Word(digits + "-")
+exponent = Word(digits + "-/")
 prefix = oneOf(list(si_prefixes.keys()))
 ustem = Word(letters + "Å" + "Ω")
 uatom = (Group("1" | (Optional(prefix) + ustem)) + Optional(exponent)) | (
     Group("1" | ustem) + Optional(exponent)
 )
+
 
 # floating point equality and its negation, to some suitable tolerance
 def feq(f1, f2, tol=1.0e-10):
@@ -125,7 +127,10 @@ class AtomUnit(object):
         # if there is an exponent, determine what it is (default is 1)
         exponent = 1
         if len(uatom_data) == 2:
-            exponent = int(uatom_data[1])
+            if "/" in uatom_data:
+                exponent = int(uatom_data[1])
+            else:
+                exponent = Fraction(uatom_data[1])
         return AtomUnit(prefix, base_unit, exponent)
 
     def __pow__(self, power):

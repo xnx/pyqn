@@ -6,6 +6,7 @@
 # Unit tests for the Units class.
 
 import unittest
+from fractions import Fraction
 from pyqn.units import Units
 from pyqn.dimensions import Dimensions, d_energy
 
@@ -106,6 +107,34 @@ class UnitsCheck(unittest.TestCase):
         self.assertEqual(u1.html, "m s<sup>-1</sup>")
         u2 = Units("μs.J/m3")
         self.assertEqual(u2.html, "μs J m<sup>-3</sup>")
+
+    def test_units_with_rational_powers(self):
+        u1 = Units("m-3.Pa-1/2")
+        u2 = Units("cm-3.bar-1/2")
+        self.assertEqual(str(u1), "m-3.Pa-1/2")
+        self.assertEqual(u1.dims, u2.dims)
+        self.assertEqual(u1.html, "m<sup>-3</sup> Pa<sup>-1/2</sup>")
+
+        self.assertEqual(u1.dims, Dimensions(M=-0.5, T=1, L=-2.5))
+
+        u3 = Units("kg1/2.m-3/2")
+        self.assertEqual(str(u3), "kg1/2.m-3/2")
+        self.assertEqual(u3.html, "kg<sup>1/2</sup> m<sup>-3/2</sup>")
+
+    def test_rational_units_algebra(self):
+        u1 = Units("m-3.Pa-1/2")
+        u2 = Units("m3")
+        u3 = u1 * u2
+        self.assertEqual(str(u3), "Pa-1/2")
+
+        u4 = Units("Pa-2/3.s4")
+        u5 = u1 / u4
+        u6 = Units("m-3.s4.Pa1/6")
+        self.assertEqual(str(u6), "m-3.s4.Pa1/6")
+        self.assertEqual(
+            u6.dims,
+            Dimensions(M=Fraction("1/6"), T=Fraction("11/3"), L=Fraction("-19/6")),
+        )
 
 
 if __name__ == "__main__":
