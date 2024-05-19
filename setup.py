@@ -8,7 +8,7 @@ long_description = (root / "README.rst").read_text(encoding="utf-8")
 
 setup(
     name="pyqn",
-    version="1.4",
+    version="1.4.1",
     description="A package for managing physical units and quantities",
     long_description=long_description,
     long_description_content_type="text/x-rst",

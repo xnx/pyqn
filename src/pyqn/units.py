@@ -29,6 +29,10 @@ from .atom_unit import AtomUnit, UnitsError, feq
 h, NA, c, kB = (6.62607015e-34, 6.02214076e23, 299792458.0, 1.380649e-23)
 
 
+class UnitsConversionError(UnitsError):
+    pass
+
+
 class Units:
     """
     A class to represent the units of a physical quantity.
@@ -327,25 +331,25 @@ class Units:
         else:
             raise UnitsError(
                 "Failure in conversion of units: was expecting to "
-                "covert between energy and temperature"
+                "convert between energy and temperature"
             )
         return fac / other.to_si()
 
     def mol_conversion(self, other):
-        from_dims = self.get_dims()  # original unit dimensions
-        to_dims = other.get_dims()  # desired unit dimensions
-        fac = self.to_si()  # factor needed to conver to SI units
+        from_dims_Q = self.get_dims().dims[4]
+        to_dims_Q = other.get_dims().dims[4]
 
-        if from_dims.dims[4] == to_dims.dims[4]:
-            raise UnitsError(
-                "Failure in conversion of units: no "
-                "different in quantity dimensions between %s and %s" % from_dims,
-                to_dims,
+        # We can only remove or add the amount dimension in its entirity.
+        if from_dims_Q and to_dims_Q:
+            raise UnitsConversionError(
+                f"Cannot force molar conversion between {self} and {other}"
             )
-        elif from_dims.dims[4] > to_dims.dims[4]:
-            fac = fac / (NA ** (from_dims.dims[4] - to_dims.dims[4]))
+
+        fac = self.to_si()
+        if from_dims_Q:
+            fac = fac * NA**from_dims_Q
         else:
-            fac = fac * (NA ** (to_dims.dims[4] - from_dims.dims[4]))
+            fac = fac * NA**to_dims_Q
         return fac / other.to_si()
 
     def spec_conversion(self, other):

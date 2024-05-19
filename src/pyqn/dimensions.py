@@ -47,8 +47,7 @@ class Dimensions(object):
             if not kwargs:
                 self.dims = dims
             else:
-                print("bad initialisation of Dimensions object")
-                sys.exit(1)
+                raise ValueError("Bad initialisation of Dimensions object")
         else:
             # initialize by keyword arguments
             for dim_name in kwargs:
