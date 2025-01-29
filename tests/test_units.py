@@ -1,9 +1,4 @@
-# test_units.py
-#
-# Copyright (C) 2012-2016 Christian Hill
-#
-# Version 1.0
-# Unit tests for the Units class.
+"""Unit tests of basic functionality for the Units class."""
 
 import unittest
 from fractions import Fraction

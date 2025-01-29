@@ -14,7 +14,6 @@ setup(
     long_description_content_type="text/x-rst",
     url="https://github.com/xnx/pyqn",
     author="Christian Hill",
-    author_email="xn.hill@gmail.com",
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Science/Research",
