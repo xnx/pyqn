@@ -1,0 +1,50 @@
+# Changelog
+
+## 2.0.0 (unreleased)
+
+### Breaking changes
+
+- PyQn needs Python 3.10 or later, and no longer depends on pyparsing: it has
+  no dependencies.
+- Unit strings are parsed strictly. Strings that used to be misread silently
+  now raise `UnitsError`: `"kg m-2"` (spaces are not allowed) was read as kg,
+  `"m^2"` as m and `"100"` as 1.
+- `Units` equality compares conversion factors with a relative tolerance
+  (it used an absolute one, so that `pm == fm` and `eV == E_h`), and
+  dimensionless units are equal only if their factors are: `deg != rad`, and
+  `Units("deg") != 1`.
+- `Units.conversion()` no longer takes the unused `strict` argument.
+- The `pyqn.qn_array` module, which could not be imported, has been removed.
+
+### Fixes
+
+- Multiplying or dividing units containing the same unit (`cm * cm`,
+  `"km.hr-1/hr"`) gave the wrong conversion factor, and multiplying could
+  change the right-hand operand.
+- Exponents containing 0, such as `m10`, are read correctly.
+- The micro, ohm and angstrom signs are read as `μ`, `Ω` and `Å`: `"kΩ"`
+  typed with the ohm sign was read as the kayser.
+- Bad syntax raises `UnitsError` rather than pyparsing or `ValueError`
+  exceptions.
+- `force="mol"` conversions to molar units were wrong (`eV` to `kJ.mol-1`
+  gave 2.7e-46), and conversions between units whose other dimensions differ
+  were allowed.
+- The knot was 3600 times too large.
+- `1 / Units("s")` and `"m" / Units("s")` work; `u**0` has no units left;
+  dimensions with fractional exponents print correctly.
+- `Quantity`: `q * 2` and `2 * q` work; `q / 2` and `2 / q` give the right
+  value and uncertainty; products and quotients with negative or zero values
+  or exact (`sd=0`) operands propagate the uncertainty correctly;
+  `as_str()` and `value_as_str()` show the right number of digits;
+  `Quantity.parse()` no longer drops units that contain a space (it raises
+  `UnitsError`).
+
+### Other changes
+
+- Constants use the exact values of the SI defining constants and CODATA
+  2022 values of the others, so `e.V` and `eV` agree. The torr, mmHg,
+  parsec, US gallon and US pint have their defined values.
+- `Units`, `Quantity`, `Dimensions`, `convert` and the exceptions can be
+  imported from `pyqn`, which also has `__version__`.
+- `python -m pyqn.list_base_units text|html|rst` lists the units.
+- The README documents the unit syntax and lists the units.

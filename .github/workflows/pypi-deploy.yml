@@ -5,27 +5,50 @@ on:
     types: [published]
 
 jobs:
-  deploy:
-    name: Build and deploy the package to PyPI
+  build:
+    name: Build the package
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v2
+    - uses: actions/checkout@v7
+    - name: Set up Python
+      uses: actions/setup-python@v7
       with:
-        python-version: "3.9"
-    - name: Install dependencies
+        python-version: "3.x"
+    - name: Install the build tools
       run: |
-        python -m pip install --upgrade pip
-        pip install --upgrade build
-        pip install --upgrade twine
-    - name: Build package
+        python -m pip install --upgrade pip build twine
+    - name: Build and check the package
       run: |
         python -m build --outdir dist/
-        twine check dist/*
-    - name: Publish package
-      uses: pypa/gh-action-pypi-publish@master
+        twine check --strict dist/*
+    - name: Check that the release tag matches the package version
+      env:
+        TAG: ${{ github.event.release.tag_name }}
+      run: |
+        if [ ! -f "dist/pyqn-${TAG#v}-py3-none-any.whl" ]; then
+          echo "::error::Release tag $TAG does not match the package version:"
+          ls dist/
+          exit 1
+        fi
+    - uses: actions/upload-artifact@v7
       with:
-        user: __token__
-        password: ${{ secrets.PYPI_API_TOKEN }}
-        verbose: true
+        name: dist
+        path: dist/
+
+  publish:
+    name: Publish the package to PyPI
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/project/pyqn/
+    permissions:
+      # Trusted Publishing: PyPI accepts a token that GitHub issues to this job.
+      id-token: write
+    steps:
+    - uses: actions/download-artifact@v8
+      with:
+        name: dist
+        path: dist/
+    - name: Publish package
+      uses: pypa/gh-action-pypi-publish@release/v1

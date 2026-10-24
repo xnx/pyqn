@@ -1,9 +1,12 @@
+__pycache__/
 *.pyc
 *.swp
 *.swo
 .DS_Store
 build/
 dist/
-pyqn.egg-info/
+*.egg-info/
 .venv
 activate
+.pytest_cache/
+.coverage

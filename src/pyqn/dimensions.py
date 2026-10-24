@@ -4,26 +4,10 @@
 # amount of substance (Q), current (C) and luminous intensity (I).
 #
 # Copyright (C) 2012-2016 Christian Hill
-# Department of Physics and Astronomy, University College London
-# christian.hill@ucl.ac.uk
-#
-# This file is part of PyQn
-#
-# PyQn is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# PyQn is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with PyQn.  If not, see <http://www.gnu.org/licenses/>
+# SPDX-License-Identifier: GPL-3.0-or-later
 
 
-class Dimensions(object):
+class Dimensions:
     # these are the abbreviations for Length, Mass, Time, Temperature,
     # Quantity (amount of substance), Current, and Luminous Intensity:
     dim_names = ["L", "M", "T", "Theta", "Q", "C", "I"]
@@ -77,7 +61,7 @@ class Dimensions(object):
             if self.dims[i] != 0:
                 this_s_dim = dim_name
                 if self.dims[i] != 1:
-                    this_s_dim += "%d" % self.dims[i]
+                    this_s_dim += str(self.dims[i])
                 s_dims.append(this_s_dim)
         if len(s_dims) == 0:
             return "[dimensionless]"

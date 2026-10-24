@@ -1,48 +1,73 @@
 # list_base_units.py
+# List the base units, by group, as text, HTML or reStructuredText tables:
+#     python -m pyqn.list_base_units <text|html|rst>
+# The rst output is the table of units in README.rst.
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 import sys
-from base_unit import base_units
+
+from .base_unit import base_units
 
 
 def list_units_text():
+    lines = []
     for group_name, base_unit_group in base_units:
-        print()
-        print(group_name)
-        print("=" * len(group_name))
-        print("{0:6s} {1:30s} {2:20s}".format("Unit", "Name", "Dimensions"))
-        print("{0:6s} {1:30s} {2:20s}".format("----", "----", "----------"))
+        lines += ["", group_name, "=" * len(group_name)]
+        lines.append(f"{'Unit':6s} {'Name':30s} {'Dimensions':20s}")
+        lines.append(f"{'----':6s} {'----':30s} {'----------':20s}")
         for base_unit in base_unit_group:
-            print(
-                "{0:6s} {1:30s} {2:20s}".format(
-                    unicode(base_unit.stem), base_unit.name, base_unit.dims
-                )
+            lines.append(
+                f"{base_unit.stem:6s} {base_unit.name:30s} {str(base_unit.dims):20s}"
             )
+    return "\n".join(lines)
 
 
 def list_units_html():
+    lines = []
     for group_name, base_unit_group in base_units:
-        print("<h4>{0}</h4>".format(group_name))
-        print('<table class="my-table">')
-        print("<tr><th>Unit</th><th>Name</th><th>Dimensions</th></tr>")
+        lines.append(f"<h4>{group_name}</h4>")
+        lines.append('<table class="my-table">')
+        lines.append("<tr><th>Unit</th><th>Name</th><th>Dimensions</th></tr>")
         for base_unit in base_unit_group:
-            # NB we need to encode('utf-8') to pipe in that encoding to the
-            # shell, e.g. to create a file
-            print(
-                "<tr><td>{0:s}</td><td>{1:s}</td><td>{2:s}</td><td></tr>".format(
-                    unicode(base_unit.stem), base_unit.name, base_unit.dims
-                ).encode("utf-8")
+            lines.append(
+                f"<tr><td>{base_unit.stem}</td><td>{base_unit.name}</td>"
+                f"<td>{base_unit.dims}</td></tr>"
             )
-        print("</table>")
+        lines.append("</table>")
+    return "\n".join(lines)
 
 
-try:
-    list_type = sys.argv[1]
-    assert list_type in ("text", "html")
-except (IndexError, AssertionError):
-    print("usage:\n{0} <list_type>".format(sys.argv[0]))
-    print("where <list_type> is text or html")
-    sys.exit(1)
+def list_units_rst():
+    blocks = []
+    for group_name, base_unit_group in base_units:
+        rows = [("Unit", "Name", "Dimensions")]
+        for base_unit in base_unit_group:
+            rows.append((f"``{base_unit.stem}``", base_unit.name, str(base_unit.dims)))
+        widths = [max(len(row[i]) for row in rows) for i in range(3)]
+        rule = "  ".join("=" * width for width in widths)
+        lines = [f"**{group_name}**", "", rule]
+        for i, row in enumerate(rows):
+            lines.append("  ".join(f"{s:{w}s}" for s, w in zip(row, widths)).rstrip())
+            if i == 0:
+                lines.append(rule)
+        lines.append(rule)
+        blocks.append("\n".join(lines))
+    return "\n\n".join(blocks)
 
-if list_type == "text":
-    list_units_text()
-else:
-    list_units_html()
+
+if __name__ == "__main__":
+    list_units = {
+        "text": list_units_text,
+        "html": list_units_html,
+        "rst": list_units_rst,
+    }
+    try:
+        list_type = sys.argv[1]
+        assert list_type in list_units
+    except (IndexError, AssertionError):
+        print(f"usage:\n{sys.argv[0]} <list_type>")
+        print("where <list_type> is text, html or rst")
+        sys.exit(1)
+
+    print(list_units[list_type]())

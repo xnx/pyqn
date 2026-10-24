@@ -2,26 +2,10 @@
 # A class representing physical quantity, with name, units and uncertainty.
 #
 # Copyright (C) 2012-2016 Christian Hill
-# Department of Physics and Astronomy, University College London
-# christian.hill@ucl.ac.uk
-#
-# This file is part of PyQn
-#
-# PyQn is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# PyQn is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with PyQn.  If not, see <http://www.gnu.org/licenses/>
+# SPDX-License-Identifier: GPL-3.0-or-later
 
-import re
 import math
+import re
 
 # import numpy as np
 from .symbol import Symbol
@@ -40,6 +24,26 @@ class QuantityError(Exception):
 
     def __str__(self):
         return self.error_str
+
+
+def round_sd(sd, nsd_digits):
+    """
+    Return the number of decimal places, dp, needed to show nsd_digits
+    significant digits of the standard deviation sd, and those digits
+    as an integer.
+
+    """
+
+    dp = nsd_digits - 1 - math.floor(math.log10(sd))
+    sd_digits = round(sd * 10**dp)
+    if sd_digits >= 10**nsd_digits:
+        # sd has rounded up to the next power of 10, e.g. 0.0996 -> 0.100
+        dp -= 1
+        sd_digits = round(sd * 10**dp)
+    if dp < 0:
+        dp = 0
+        sd_digits = round(sd)
+    return dp, sd_digits
 
 
 class Quantity(Symbol):
@@ -82,9 +86,9 @@ class Quantity(Symbol):
         """A simple string representation of the Quantity."""
 
         if self.name:
-            return "%s = %s %s" % (self.name, self.value, self.units)
+            return f"{self.name} = {self.value} {self.units}"
         else:
-            return "%s %s" % (self.value, self.units)
+            return f"{self.value} {self.units}"
 
     __repr__ = __str__
 
@@ -96,7 +100,7 @@ class Quantity(Symbol):
         Examples:
         0.04857623(71) for 4.857623e-2 +/- 7.1e-7
         -0.412(40) for -0.412 +/- 0.04
-        1.7324(38)e7 for 17324000 +/- 380
+        1.732400(38)e7 for 17324000 +/- 380
 
         Notes:
         This routine has not been rigorously tested, because I wrote
@@ -124,18 +128,12 @@ class Quantity(Symbol):
             power = int(math.floor(math.log(absN, 10)))
             N *= pow(10, -power)
             sd *= pow(10, -power)
-            dp = int(-math.log(sd, 10)) + nsd_digits
-            if dp < 0:
-                dp = 0
-            sd_digits = int(round(sd * pow(10, dp)))
+            dp, sd_digits = round_sd(sd, nsd_digits)
             fmt = "%." + str(dp) + "f(" + str(sd_digits) + ")e%d"
             return fmt % (N, power)
         else:
             # regular floating point notation
-            dp = int(-math.log(sd, 10)) + nsd_digits
-            if dp < 0:
-                dp = 0
-            sd_digits = int(round(sd * pow(10, dp)))
+            dp, sd_digits = round_sd(sd, nsd_digits)
             fmt = "%." + str(dp) + "f(" + str(sd_digits) + ")"
 
         return fmt % N
@@ -149,13 +147,13 @@ class Quantity(Symbol):
 
         s = []
         if b_name and self.name:
-            s.append("%s = " % self.name)
+            s.append(f"{self.name} = ")
         if b_sd:
-            s.append(self.value_as_str(b_sd))
+            s.append(self.value_as_str())
         else:
             s.append(str(self.value))
         if b_units and self.units.has_units():
-            s.append(" %s" % str(self.units))
+            s.append(f" {self.units}")
         return "".join(s)
 
     def convert_units_to(self, new_units, force=None):
@@ -203,14 +201,14 @@ class Quantity(Symbol):
 
         """
 
-        if type(other) != Quantity:
+        if not isinstance(other, Quantity):
             raise TypeError
         if self.value is None or other.value is None:
             raise ValueError
         if self.units != other.units:
             raise UnitsError(
                 "Can't add two quantities with different"
-                " units: %s and %s" % (self.units, other.units)
+                f" units: {self.units} and {other.units}"
             )
         if self.sd is None or other.sd is None:
             sd = None
@@ -225,14 +223,14 @@ class Quantity(Symbol):
 
         """
 
-        if type(other) != Quantity:
+        if not isinstance(other, Quantity):
             raise TypeError
         if self.value is None or other.value is None:
             raise ValueError
         if self.units != other.units:
             raise UnitsError(
                 "Can't subtract two quantities with different"
-                " units: %s and %s" % (self.units, other.units)
+                f" units: {self.units} and {other.units}"
             )
         if self.sd is None or other.sd is None:
             sd = None
@@ -254,19 +252,23 @@ class Quantity(Symbol):
                 sd = None
             else:
                 sd = abs(other) * self.sd
-            return Quantity(value=self.value * other, units=self.unit, sd=sd)
+            return Quantity(value=self.value * other, units=self.units, sd=sd)
         else:
-            if type(other) != Quantity:
+            if not isinstance(other, Quantity):
                 raise TypeError
             if other.value is None:
                 raise ValueError
             value = self.value * other.value
-            if not self.sd or not other.sd:
+            if self.sd is None or other.sd is None:
                 sd = None
             else:
-                sd = value * math.hypot(self.sd / self.value, other.sd / other.value)
+                sd = math.hypot(self.sd * other.value, other.sd * self.value)
             units = self.units * other.units
             return Quantity(value=value, units=units, sd=sd)
+
+    def __rmul__(self, other):
+        """Multiply a number by this quantity."""
+        return self.__mul__(other)
 
     def __truediv__(self, other):
         """
@@ -281,23 +283,34 @@ class Quantity(Symbol):
             if self.sd is None:
                 sd = None
             else:
-                sd = abs(other) / self.sd
+                sd = self.sd / abs(other)
             return Quantity(value=self.value / other, units=self.units, sd=sd)
         else:
-            if type(other) != Quantity:
+            if not isinstance(other, Quantity):
                 raise TypeError
             if other.value is None:
                 raise ValueError
             value = self.value / other.value
-            if not self.sd or not other.sd:
+            if self.sd is None or other.sd is None:
                 sd = None
             else:
-                sd = value * math.hypot(self.sd / self.value, other.sd / other.value)
+                sd = math.hypot(self.sd / other.value, other.sd * value / other.value)
             units = self.units / other.units
             return Quantity(value=value, units=units, sd=sd)
 
     def __rtruediv__(self, other):
-        return self.__truediv__(other)
+        """Divide a number by this quantity."""
+
+        if self.value is None:
+            raise ValueError
+        if type(other) not in (int, float):
+            raise TypeError
+        value = other / self.value
+        if self.sd is None:
+            sd = None
+        else:
+            sd = abs(value * self.sd / self.value)
+        return Quantity(value=value, units=self.units**-1, sd=sd)
 
     def __pow__(self, power):
         return Quantity(value=self.value**power, units=self.units**power)
@@ -311,7 +324,7 @@ class Quantity(Symbol):
             if s_name:
                 name = s_name
             s_quantity = fields[1].strip()
-        fields = s_quantity.split(" ")
+        fields = s_quantity.split(maxsplit=1)
         s_valsd = fields[0]
         if len(fields) == 2:
             units = Units(fields[1])
@@ -327,9 +340,7 @@ class Quantity(Symbol):
         patt = r"([+-]?\d*\.?\d*)\(?(\d+)?\)?"
         m = re.match(patt, s_mantsd)
         if not m:
-            raise QuantityError(
-                "Failed to parse string into quantity:\n" "%s" % s_mantsd
-            )
+            raise QuantityError(f"Failed to parse string into quantity:\n{s_mantsd}")
         s_mantissa, s_sd = m.groups()
         mantissa = float(s_mantissa)
         value = mantissa * 10**exp
