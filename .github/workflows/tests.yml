@@ -23,10 +23,13 @@ jobs:
     - name: Install dependencies for testing
       run: |
         pip install pytest-cov
-        pip install black
+        pip install ruff==0.17.2
     - name: Test with pytest
       run: |
         pytest --cov
     - name: Check code format
       run: |
-        black --check .
+        ruff format --check .
+    - name: Lint
+      run: |
+        ruff check --output-format=github .

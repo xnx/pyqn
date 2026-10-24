@@ -35,7 +35,7 @@ class UnitsConversionCheck(unittest.TestCase):
         self.assertEqual(u1.conversion(u2), approx(100))
         self.assertEqual(u2.conversion(u1), approx(0.01))
         self.assertEqual(u1.conversion(u3), approx(3600 / 0.3048))
-        with self.assertRaises(UnitsError) as cm:
+        with self.assertRaises(UnitsError):
             u1.conversion(u4)
 
     def test_litres(self):
@@ -60,7 +60,7 @@ class UnitsConversionCheck(unittest.TestCase):
 
         u1 = Units("kJ")
         u2 = Units("kJ.mol-1")
-        with self.assertRaises(UnitsError) as cm:
+        with self.assertRaises(UnitsError):
             u1.conversion(u2)
 
         u3 = Units("cal.mol-1")

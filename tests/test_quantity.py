@@ -2,7 +2,7 @@ import math
 import unittest
 import pytest
 from pyqn.quantity import Quantity, QuantityError
-from pyqn.dimensions import Dimensions, d_energy
+from pyqn.dimensions import Dimensions
 from pyqn.units import Units, UnitsError
 
 e = 1.602176634e-19
@@ -32,7 +32,7 @@ class QuantityManipulations(unittest.TestCase):
         self.assertAlmostEqual(q3.value, 0.128205128205)
         self.assertEqual(q3.units.dims, Dimensions(M=-1, L=-2, T=3))
 
-        with self.assertRaises(ZeroDivisionError) as cm:
+        with self.assertRaises(ZeroDivisionError):
             q3 = q1 / q4
 
     def test_quantity_addition(self):
@@ -44,7 +44,7 @@ class QuantityManipulations(unittest.TestCase):
         self.assertEqual(q4.value, 51.2)
         self.assertEqual(q4.units.dims, Dimensions(M=1, L=2, T=-2))
 
-        with self.assertRaises(UnitsError) as cm:
+        with self.assertRaises(UnitsError):
             q4 = q1 + q3
 
     def test_quantity_subtraction(self):
@@ -56,7 +56,7 @@ class QuantityManipulations(unittest.TestCase):
         self.assertEqual(q4.value, -10.2)
         self.assertEqual(q4.units.dims, Dimensions(M=1, L=2, T=-2))
 
-        with self.assertRaises(UnitsError) as cm:
+        with self.assertRaises(UnitsError):
             q4 = q1 - q3
 
     def test_quantity_exponent(self):

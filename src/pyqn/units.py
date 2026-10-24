@@ -312,7 +312,7 @@ class Units:
 
         """
 
-        if type(other) == str:
+        if isinstance(other, str):
             other = Units(other)
 
         conversion_method = {
@@ -372,7 +372,6 @@ class Units:
     def spec_conversion(self, other):
         d_wavenumber = d_length**-1
         d_frequency = d_time**-1
-        d_wavelength = d_length
 
         from_dims = self.get_dims()
         to_dims = other.get_dims()

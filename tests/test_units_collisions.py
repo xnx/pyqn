@@ -8,7 +8,6 @@
 # of "min" for minutes.
 
 import unittest
-from pyqn.units import Units
 from pyqn.atom_unit import AtomUnit
 from pyqn.base_unit import base_units, base_unit_stems
 from pyqn.si import si_prefixes

@@ -217,7 +217,7 @@ class Quantity(Symbol):
 
         """
 
-        if type(other) != Quantity:
+        if not isinstance(other, Quantity):
             raise TypeError
         if self.value is None or other.value is None:
             raise ValueError
@@ -239,7 +239,7 @@ class Quantity(Symbol):
 
         """
 
-        if type(other) != Quantity:
+        if not isinstance(other, Quantity):
             raise TypeError
         if self.value is None or other.value is None:
             raise ValueError
@@ -270,7 +270,7 @@ class Quantity(Symbol):
                 sd = abs(other) * self.sd
             return Quantity(value=self.value * other, units=self.units, sd=sd)
         else:
-            if type(other) != Quantity:
+            if not isinstance(other, Quantity):
                 raise TypeError
             if other.value is None:
                 raise ValueError
@@ -302,7 +302,7 @@ class Quantity(Symbol):
                 sd = self.sd / abs(other)
             return Quantity(value=self.value / other, units=self.units, sd=sd)
         else:
-            if type(other) != Quantity:
+            if not isinstance(other, Quantity):
                 raise TypeError
             if other.value is None:
                 raise ValueError
@@ -356,9 +356,7 @@ class Quantity(Symbol):
         patt = r"([+-]?\d*\.?\d*)\(?(\d+)?\)?"
         m = re.match(patt, s_mantsd)
         if not m:
-            raise QuantityError(
-                "Failed to parse string into quantity:\n" "%s" % s_mantsd
-            )
+            raise QuantityError("Failed to parse string into quantity:\n%s" % s_mantsd)
         s_mantissa, s_sd = m.groups()
         mantissa = float(s_mantissa)
         value = mantissa * 10**exp

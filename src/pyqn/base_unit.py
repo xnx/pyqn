@@ -22,7 +22,23 @@
 # along with PyQn.  If not, see <http://www.gnu.org/licenses/>
 
 import math
-from .dimensions import *
+from .dimensions import (
+    Dimensions,
+    d_dimensionless,
+    d_length,
+    d_area,
+    d_volume,
+    d_time,
+    d_mass,
+    d_energy,
+    d_force,
+    d_pressure,
+    d_current,
+    d_charge,
+    d_voltage,
+    d_magfield_strength,
+    d_magnetic_flux,
+)
 from .constants import c, e, hbar, m_u, m_e, E_h, a0
 
 

@@ -25,8 +25,7 @@
 import re
 from fractions import Fraction
 from .si import si_prefixes
-from .base_unit import BaseUnit, base_unit_stems
-from .dimensions import Dimensions
+from .base_unit import base_unit_stems
 
 # A unit atom is a stem, perhaps with an SI prefix, followed by an optional
 # integer or rational exponent, e.g. 'kg', 's-1', 'Pa-1/2'. Exponents can't

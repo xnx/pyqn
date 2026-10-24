@@ -137,6 +137,7 @@ class UnitsCheck(unittest.TestCase):
 
         u4 = Units("Pa-2/3.s4")
         u5 = u1 / u4
+        self.assertEqual(u5, Units("m-3.Pa1/6.s-4"))
         u6 = Units("m-3.s4.Pa1/6")
         self.assertEqual(str(u6), "m-3.s4.Pa1/6")
         self.assertEqual(

@@ -1,15 +1,13 @@
 import unittest
-from fractions import Fraction
 from pyqn.units import Units
-from pyqn.dimensions import Dimensions, d_energy
 
 
 class UserDefinedUnitsCheck(unittest.TestCase):
     """Unit tests for user-defined units."""
 
+    @unittest.skip("user-defined dimensionless units are not implemented yet")
     def test_dimensionless_units(self):
-        return
-        u1 = Units("cm-2.molec-1", dimensionless=("molec",))
+        Units("cm-2.molec-1", dimensionless=("molec",))
 
 
 if __name__ == "__main__":

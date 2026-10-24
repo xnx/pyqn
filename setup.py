@@ -36,7 +36,7 @@ setup(
     packages=find_packages(where="src"),
     python_requires=">=3.6",
     install_requires=[],
-    extras_require={"dev": ["black", "pytest-cov", "tox", "ipython"]},
+    extras_require={"dev": ["ruff==0.17.2", "pytest-cov", "tox", "ipython"]},
     # package_data will include all the resolved globs into both the wheel and sdist
     # package_data={},
     # no need for MANIFEST.in, which should be reserved only for build-time files
