@@ -1,9 +1,22 @@
 """Unit tests of basic functionality for the Units class."""
 
+import math
 import unittest
 from fractions import Fraction
+import pytest
 from pyqn.units import Units
 from pyqn.dimensions import Dimensions, d_energy
+
+e = 1.602176634e-19
+
+
+def approx(expected, rel=1.0e-6):
+    """
+    Compare with a relative tolerance only: pytest.approx's default absolute
+    tolerance (1e-12) would accept any two very small factors.
+
+    """
+    return pytest.approx(expected, rel=rel, abs=0)
 
 
 class UnitsCheck(unittest.TestCase):
@@ -48,12 +61,12 @@ class UnitsCheck(unittest.TestCase):
         u1 = Units("mm2")
         u2 = Units("g/m2")
         u3 = u1 * u2
-        self.assertAlmostEqual(u3.to_si(), 1.0e-9)
+        self.assertEqual(u3.to_si(), approx(1.0e-9))
         self.assertTupleEqual(u3.get_dims().dims, (0, 1, 0, 0, 0, 0, 0))
 
         u4 = Units("J/s")
         u5 = u4 * u2
-        self.assertAlmostEqual(u5.to_si(), 1.0e-3)
+        self.assertEqual(u5.to_si(), approx(1.0e-3))
         self.assertEqual(u5.get_dims().dims, (0, 2, -3, 0, 0, 0, 0))
 
     def test_units_division(self):
@@ -62,7 +75,7 @@ class UnitsCheck(unittest.TestCase):
 
         u3 = u1 / u2
         self.assertEqual(u3.get_dims().dims, (2, 1, -2, -1, 0, 0, 0))
-        self.assertAlmostEqual(u3.to_si(), 1.6 * 10 ** (-20))
+        self.assertEqual(u3.to_si(), approx(e * 1.0e-3 / 1.0e-2))
 
         u4 = Units("s-1")
         u5 = u2 / ("eV" * u4)
@@ -130,6 +143,70 @@ class UnitsCheck(unittest.TestCase):
             u6.dims,
             Dimensions(M=Fraction("1/6"), T=Fraction("11/3"), L=Fraction("-19/6")),
         )
+
+    def test_units_equality(self):
+        self.assertEqual(Units("J"), Units("kg.m2.s-2"))
+        self.assertEqual(Units("cm.cm"), Units("cm2"))
+        self.assertEqual(Units("fm"), Units("fm"))
+        self.assertEqual(Units("1"), 1)
+        self.assertEqual(Units("m/m"), 1)
+        self.assertNotEqual(Units("m"), Units("cm"))
+        self.assertNotEqual(Units("m"), Units("s"))
+
+    @pytest.mark.xfail(
+        strict=True,
+        raises=AssertionError,
+        reason="__mul__ and __truediv__ add exponents without updating si_fac",
+    )
+    def test_merged_exponents_factor(self):
+        self.assertEqual((Units("cm") * Units("cm")).to_si(), approx(1.0e-4))
+        self.assertEqual((Units("km2") / Units("km")).to_si(), approx(1.0e3))
+        self.assertEqual(Units("km.hr-1/hr").to_si(), approx(1.0e3 / 3600**2))
+
+    @pytest.mark.xfail(
+        strict=True,
+        raises=AssertionError,
+        reason="__eq__ compares SI factors with an absolute tolerance of 1e-10",
+    )
+    def test_equality_of_small_factors(self):
+        self.assertNotEqual(Units("pm"), Units("fm"))
+        self.assertNotEqual(Units("eV"), Units("E_h"))
+        self.assertNotEqual(Units("u"), Units("m_e"))
+
+    @pytest.mark.xfail(
+        strict=True,
+        raises=AssertionError,
+        reason="the 'other == 1' shortcut treats every dimensionless unit as 1",
+    )
+    def test_dimensionless_units(self):
+        self.assertNotEqual(Units("deg"), Units("rad"))
+        self.assertNotEqual(Units("deg"), 1)
+        self.assertEqual((Units("m") * Units("deg")).to_si(), approx(math.pi / 180))
+
+    @pytest.mark.xfail(
+        strict=True, raises=TypeError, reason="__rdiv__ should be __rtruediv__"
+    )
+    def test_reflected_division(self):
+        self.assertEqual(1 / Units("s"), Units("s-1"))
+        self.assertEqual("m" / Units("s"), Units("m.s-1"))
+
+    @pytest.mark.xfail(
+        strict=True,
+        raises=AssertionError,
+        reason="__pow__ keeps atoms with zero exponent",
+    )
+    def test_zero_power(self):
+        u1 = Units("J.m") ** 0
+        self.assertFalse(u1.has_units())
+        self.assertEqual(str(u1), "")
+
+    @pytest.mark.xfail(
+        strict=True,
+        raises=AssertionError,
+        reason="Dimensions.__str__ formats exponents with %d",
+    )
+    def test_fractional_dimensions_str(self):
+        self.assertEqual(str(Units("Pa-1/2").dims), "L1/2.M-1/2.T")
 
 
 if __name__ == "__main__":
