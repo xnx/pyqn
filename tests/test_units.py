@@ -3,9 +3,11 @@
 import math
 import unittest
 from fractions import Fraction
+
 import pytest
-from pyqn.units import Units
+
 from pyqn.dimensions import Dimensions, d_energy
+from pyqn.units import Units
 
 e = 1.602176634e-19
 

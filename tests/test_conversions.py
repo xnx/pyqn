@@ -6,7 +6,9 @@
 # Unit tests for unit conversions within the Units class.
 
 import unittest
+
 import pytest
+
 from pyqn.units import Units, UnitsError
 
 # Exact values of the SI defining constants.

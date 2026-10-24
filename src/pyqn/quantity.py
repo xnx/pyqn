@@ -2,26 +2,10 @@
 # A class representing physical quantity, with name, units and uncertainty.
 #
 # Copyright (C) 2012-2016 Christian Hill
-# Department of Physics and Astronomy, University College London
-# christian.hill@ucl.ac.uk
-#
-# This file is part of PyQn
-#
-# PyQn is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# PyQn is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with PyQn.  If not, see <http://www.gnu.org/licenses/>
+# SPDX-License-Identifier: GPL-3.0-or-later
 
-import re
 import math
+import re
 
 # import numpy as np
 from .symbol import Symbol
@@ -102,9 +86,9 @@ class Quantity(Symbol):
         """A simple string representation of the Quantity."""
 
         if self.name:
-            return "%s = %s %s" % (self.name, self.value, self.units)
+            return f"{self.name} = {self.value} {self.units}"
         else:
-            return "%s %s" % (self.value, self.units)
+            return f"{self.value} {self.units}"
 
     __repr__ = __str__
 
@@ -163,13 +147,13 @@ class Quantity(Symbol):
 
         s = []
         if b_name and self.name:
-            s.append("%s = " % self.name)
+            s.append(f"{self.name} = ")
         if b_sd:
             s.append(self.value_as_str())
         else:
             s.append(str(self.value))
         if b_units and self.units.has_units():
-            s.append(" %s" % str(self.units))
+            s.append(f" {self.units}")
         return "".join(s)
 
     def convert_units_to(self, new_units, force=None):
@@ -224,7 +208,7 @@ class Quantity(Symbol):
         if self.units != other.units:
             raise UnitsError(
                 "Can't add two quantities with different"
-                " units: %s and %s" % (self.units, other.units)
+                f" units: {self.units} and {other.units}"
             )
         if self.sd is None or other.sd is None:
             sd = None
@@ -246,7 +230,7 @@ class Quantity(Symbol):
         if self.units != other.units:
             raise UnitsError(
                 "Can't subtract two quantities with different"
-                " units: %s and %s" % (self.units, other.units)
+                f" units: {self.units} and {other.units}"
             )
         if self.sd is None or other.sd is None:
             sd = None
@@ -356,7 +340,7 @@ class Quantity(Symbol):
         patt = r"([+-]?\d*\.?\d*)\(?(\d+)?\)?"
         m = re.match(patt, s_mantsd)
         if not m:
-            raise QuantityError("Failed to parse string into quantity:\n%s" % s_mantsd)
+            raise QuantityError(f"Failed to parse string into quantity:\n{s_mantsd}")
         s_mantissa, s_sd = m.groups()
         mantissa = float(s_mantissa)
         value = mantissa * 10**exp

@@ -3,46 +3,31 @@
 # prefix or exponent, such as 'g', 'hr', 'bar', 's'.
 #
 # Copyright (C) 2012-2016 Christian Hill
-# Department of Physics and Astronomy, University College London
-# christian.hill@ucl.ac.uk
-#
-# This file is part of PyQn
-#
-# PyQn is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# PyQn is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with PyQn.  If not, see <http://www.gnu.org/licenses/>
+# SPDX-License-Identifier: GPL-3.0-or-later
 
 import math
+
+from .constants import E_h, a0, c, e, hbar, m_e, m_u
 from .dimensions import (
     Dimensions,
-    d_dimensionless,
-    d_length,
     d_area,
-    d_volume,
-    d_time,
-    d_mass,
+    d_charge,
+    d_current,
+    d_dimensionless,
     d_energy,
     d_force,
-    d_pressure,
-    d_current,
-    d_charge,
-    d_voltage,
+    d_length,
     d_magfield_strength,
     d_magnetic_flux,
+    d_mass,
+    d_pressure,
+    d_time,
+    d_voltage,
+    d_volume,
 )
-from .constants import c, e, hbar, m_u, m_e, E_h, a0
 
 
-class BaseUnit(object):
+class BaseUnit:
     """
     A BaseUnit is a commonly-used single unit without a prefix, for example:
     m (metre, length), erg (energy), bar (pressure). BaseUnit objects have
@@ -230,7 +215,7 @@ base_units = (
             BaseUnit("eV", "electron volt", "energy", e, "", "eV", d_energy),
             BaseUnit("E_h", "hartree", "energy", E_h, "", "E_h", d_energy),
             BaseUnit(
-                "cal", "thermodynamic calorie", "energy", 4.184, "", "cal", d_energy
+                "cal", "thermochemical calorie", "energy", 4.184, "", "cal", d_energy
             ),
             BaseUnit(
                 "Ry",

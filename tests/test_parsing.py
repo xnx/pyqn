@@ -1,8 +1,9 @@
 """Unit tests for parsing unit strings: syntax errors, Unicode and round trips."""
 
 import unittest
-from pyqn.units import Units, UnitsError
+
 from pyqn.dimensions import Dimensions
+from pyqn.units import Units, UnitsError
 
 
 class ParsingCheck(unittest.TestCase):

@@ -1,8 +1,10 @@
 import math
 import unittest
+
 import pytest
-from pyqn.quantity import Quantity, QuantityError
+
 from pyqn.dimensions import Dimensions
+from pyqn.quantity import Quantity, QuantityError
 from pyqn.units import Units, UnitsError
 
 e = 1.602176634e-19

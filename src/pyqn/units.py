@@ -2,32 +2,16 @@
 # A class representing the units of a physical quantity.
 #
 # Copyright (C) 2012-2016 Christian Hill
-# Department of Physics and Astronomy, University College London
-# christian.hill@ucl.ac.uk
-#
-# This file is part of PyQn
-#
-# PyQn is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# PyQn is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with PyQn.  If not, see <http://www.gnu.org/licenses/>
+# SPDX-License-Identifier: GPL-3.0-or-later
 
-import re
 import copy
 import math
+import re
 import unicodedata
-from .dimensions import Dimensions
-from .dimensions import d_length, d_energy, d_time, d_temperature
+
 from .atom_unit import AtomUnit, UnitsError
-from .constants import h, NA, c, kB
+from .constants import NA, c, h, kB
+from .dimensions import Dimensions, d_energy, d_length, d_temperature, d_time
 
 
 class UnitsConversionError(UnitsError):
@@ -65,7 +49,7 @@ class Units:
         else:
             raise TypeError(
                 "Attempt to initialize Units object with"
-                " argument units of type %s" % type(units)
+                f" argument units of type {type(units)}"
             )
         # also get the dimensions of the units
         self.dims = self.get_dims()
@@ -99,7 +83,7 @@ class Units:
         # ohm sign (U+2126) as the characters in the unit table (U+03BC, U+03A9).
         s_compoundunit = unicodedata.normalize("NFKC", s_compoundunit)
         if re.search(r"\s", s_compoundunit):
-            raise UnitsError("Units cannot contain spaces: %r" % s_compoundunit)
+            raise UnitsError(f"Units cannot contain spaces: {s_compoundunit!r}")
 
         if no_divided_units:
             # s_compoundunit does not consist of any units separated by '/'
@@ -327,9 +311,8 @@ class Units:
                 return conversion_method[force](other)
             except KeyError:
                 raise UnitsError(
-                    "Failure in units conversion: units %s[%s] and"
-                    " %s[%s] have different dimensions"
-                    % (self, self.get_dims(), other, other.get_dims())
+                    f"Failure in units conversion: units {self}[{self.get_dims()}] and"
+                    f" {other}[{other.get_dims()}] have different dimensions"
                 )
         return self.to_si() / other.to_si()
 
@@ -384,7 +367,7 @@ class Units:
             raise UnitsError(
                 "Failure in conversion of spectroscopic units:"
                 " I only recognise from-units of wavenumber, energy and"
-                " frequency but got %s" % str(self)
+                f" frequency but got {self}"
             )
         if to_dims == d_wavenumber:
             fac /= h * c
@@ -394,7 +377,7 @@ class Units:
             raise UnitsError(
                 "Failure in conversion of spectroscopic units:"
                 " I only recognise to-units of wavenumber, energy and"
-                " frequency but got %s" % str(other)
+                f" frequency but got {other}"
             )
         return fac / other.to_si()
 

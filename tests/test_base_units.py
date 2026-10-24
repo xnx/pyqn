@@ -2,7 +2,9 @@
 
 import math
 import unittest
+
 import pytest
+
 from pyqn.base_unit import base_unit_stems
 
 inch, lb, au = 0.0254, 0.45359237, 1.495978707e11
