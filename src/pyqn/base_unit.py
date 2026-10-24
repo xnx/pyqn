@@ -21,7 +21,9 @@
 # You should have received a copy of the GNU General Public License
 # along with PyQn.  If not, see <http://www.gnu.org/licenses/>
 
+import math
 from .dimensions import *
+from .constants import c, e, hbar, m_u, m_e, E_h, a0
 
 
 class BaseUnit(object):
@@ -133,13 +135,13 @@ base_units = (
         [
             BaseUnit("bar", "bar", "pressure", 1.0e5, "", "bar", d_pressure),
             BaseUnit("atm", "atmosphere", "pressure", 1.01325e5, "", "atm", d_pressure),
-            BaseUnit("Torr", "torr", "pressure", 133.322368, "", "Torr", d_pressure),
-            # (but see e.g. Wikipedia for the precise relationship between Torr and mmHg
+            # 1 Torr is exactly 1/760 atm; 1 mmHg is defined as 133.322387415 Pa
+            BaseUnit("Torr", "torr", "pressure", 101325 / 760, "", "Torr", d_pressure),
             BaseUnit(
                 "mmHg",
                 "millimetres of mercury",
                 "pressure",
-                133.322368,
+                133.322387415,
                 "",
                 "mmHg",
                 d_pressure,
@@ -156,7 +158,7 @@ base_units = (
                 "D",
                 "debye",
                 "electric dipole moment",
-                1.0e-21 / 299792458.0,
+                1.0e-21 / c,
                 "",
                 "D",
                 d_charge * d_length,
@@ -165,14 +167,12 @@ base_units = (
                 "hbar",
                 "hbar",
                 "angular momentum",
-                1.05457148e-34,
+                hbar,
                 "",
                 r"\hbar",
                 Dimensions(L=2, M=1, T=-1),
             ),
-            BaseUnit(
-                "e", "electron charge", "charge", 1.602176565e-19, "", "e", d_charge
-            ),
+            BaseUnit("e", "electron charge", "charge", e, "", "e", d_charge),
         ],
     ),
     (
@@ -211,10 +211,8 @@ base_units = (
     (
         "Non-SI energy units",
         [
-            BaseUnit(
-                "eV", "electron volt", "energy", 1.602176487e-19, "", "eV", d_energy
-            ),
-            BaseUnit("E_h", "hartree", "energy", 4.35974394e-18, "", "E_h", d_energy),
+            BaseUnit("eV", "electron volt", "energy", e, "", "eV", d_energy),
+            BaseUnit("E_h", "hartree", "energy", E_h, "", "E_h", d_energy),
             BaseUnit(
                 "cal", "thermodynamic calorie", "energy", 4.184, "", "cal", d_energy
             ),
@@ -222,7 +220,7 @@ base_units = (
                 "Ry",
                 "rydberg",
                 "energy",
-                13.60569253 * 1.602176487e-19,
+                E_h / 2,
                 "",
                 "Ry",
                 d_energy,
@@ -232,12 +230,10 @@ base_units = (
     (
         "Non-SI mass units",
         [
-            BaseUnit("u", "atomic mass unit", "mass", 1.660538921e-27, "", "u", d_mass),
-            BaseUnit(
-                "amu", "atomic mass unit", "mass", 1.660538921e-27, "", "am", d_mass
-            ),
-            BaseUnit("Da", "dalton", "mass", 1.660538921e-27, "", "Da", d_mass),
-            BaseUnit("m_e", "electron mass", "mass", 9.10938291e-31, "", "m_e", d_mass),
+            BaseUnit("u", "atomic mass unit", "mass", m_u, "", "u", d_mass),
+            BaseUnit("amu", "atomic mass unit", "mass", m_u, "", "amu", d_mass),
+            BaseUnit("Da", "dalton", "mass", m_u, "", "Da", d_mass),
+            BaseUnit("m_e", "electron mass", "mass", m_e, "", "m_e", d_mass),
         ],
     ),
     (
@@ -245,7 +241,7 @@ base_units = (
         [
             # Non-SI length units
             BaseUnit("Å", "angstrom", "length", 1.0e-10, "", r"\AA", d_length),
-            BaseUnit("a0", "bohr", "length", 5.2917721092e-11, "", "a_0", d_length),
+            BaseUnit("a0", "bohr", "length", a0, "", "a_0", d_length),
             # Non-SI area units
             BaseUnit("b", "barn", "area", 1.0e-28, "", "b", d_area),
             # Non-SI volume units
@@ -269,7 +265,16 @@ base_units = (
             BaseUnit(
                 "AU", "astronomical unit", "length", 1.495978707e11, "", "AU", d_length
             ),
-            BaseUnit("pc", "parsec", "length", 3.085677637634e16, "", "pc", d_length),
+            # 1 pc = 648000/π au
+            BaseUnit(
+                "pc",
+                "parsec",
+                "length",
+                648000 / math.pi * 1.495978707e11,
+                "",
+                "pc",
+                d_length,
+            ),
             BaseUnit(
                 "ly", "light-year", "length", 9.4607304725808e15, "", "ly", d_length
             ),
@@ -295,7 +300,7 @@ base_units = (
                 "USgal",
                 "US liquid gallon",
                 "volume",
-                3.785411783e-3,
+                3.785411784e-3,
                 "",
                 "USgal",
                 d_volume,
@@ -304,7 +309,7 @@ base_units = (
                 "USpt",
                 "US liquid pint",
                 "volume",
-                4.73176472875e-4,
+                4.73176473e-4,
                 "",
                 "USpt",
                 d_volume,
@@ -318,13 +323,13 @@ base_units = (
         "Maritime units",
         [
             BaseUnit("NM", "nautical mile", "length", 1852.0, "", "NM", d_length),
-            BaseUnit("kn", "knot", "speed", 1852.0, "", "kn", d_length / d_time),
+            BaseUnit("kn", "knot", "speed", 1852.0 / 3600, "", "kn", d_length / d_time),
         ],
     ),
     (
         "Silly units",
         [
-            BaseUnit("fir", "fikin", "mass", 40.8233133, "", "fir", d_mass),
+            BaseUnit("fir", "firkin", "mass", 40.8233133, "", "fir", d_mass),
             BaseUnit("ftn", "fortnight", "time", 1.2096e6, "", "ftn", d_time),
         ],
     ),
@@ -348,7 +353,7 @@ base_units = (
                 "",
                 "Jy",
                 d_energy / d_area,
-            ),  # W.m-2.s-1
+            ),  # W.m-2.Hz-1
         ],
     ),
 )

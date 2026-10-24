@@ -42,6 +42,26 @@ class QuantityError(Exception):
         return self.error_str
 
 
+def round_sd(sd, nsd_digits):
+    """
+    Return the number of decimal places, dp, needed to show nsd_digits
+    significant digits of the standard deviation sd, and those digits
+    as an integer.
+
+    """
+
+    dp = nsd_digits - 1 - math.floor(math.log10(sd))
+    sd_digits = round(sd * 10**dp)
+    if sd_digits >= 10**nsd_digits:
+        # sd has rounded up to the next power of 10, e.g. 0.0996 -> 0.100
+        dp -= 1
+        sd_digits = round(sd * 10**dp)
+    if dp < 0:
+        dp = 0
+        sd_digits = round(sd)
+    return dp, sd_digits
+
+
 class Quantity(Symbol):
     """
     A Python class representing a physical quantity. This class extends the
@@ -96,7 +116,7 @@ class Quantity(Symbol):
         Examples:
         0.04857623(71) for 4.857623e-2 +/- 7.1e-7
         -0.412(40) for -0.412 +/- 0.04
-        1.7324(38)e7 for 17324000 +/- 380
+        1.732400(38)e7 for 17324000 +/- 380
 
         Notes:
         This routine has not been rigorously tested, because I wrote
@@ -124,18 +144,12 @@ class Quantity(Symbol):
             power = int(math.floor(math.log(absN, 10)))
             N *= pow(10, -power)
             sd *= pow(10, -power)
-            dp = int(-math.log(sd, 10)) + nsd_digits
-            if dp < 0:
-                dp = 0
-            sd_digits = int(round(sd * pow(10, dp)))
+            dp, sd_digits = round_sd(sd, nsd_digits)
             fmt = "%." + str(dp) + "f(" + str(sd_digits) + ")e%d"
             return fmt % (N, power)
         else:
             # regular floating point notation
-            dp = int(-math.log(sd, 10)) + nsd_digits
-            if dp < 0:
-                dp = 0
-            sd_digits = int(round(sd * pow(10, dp)))
+            dp, sd_digits = round_sd(sd, nsd_digits)
             fmt = "%." + str(dp) + "f(" + str(sd_digits) + ")"
 
         return fmt % N
@@ -151,7 +165,7 @@ class Quantity(Symbol):
         if b_name and self.name:
             s.append("%s = " % self.name)
         if b_sd:
-            s.append(self.value_as_str(b_sd))
+            s.append(self.value_as_str())
         else:
             s.append(str(self.value))
         if b_units and self.units.has_units():
@@ -254,19 +268,23 @@ class Quantity(Symbol):
                 sd = None
             else:
                 sd = abs(other) * self.sd
-            return Quantity(value=self.value * other, units=self.unit, sd=sd)
+            return Quantity(value=self.value * other, units=self.units, sd=sd)
         else:
             if type(other) != Quantity:
                 raise TypeError
             if other.value is None:
                 raise ValueError
             value = self.value * other.value
-            if not self.sd or not other.sd:
+            if self.sd is None or other.sd is None:
                 sd = None
             else:
-                sd = value * math.hypot(self.sd / self.value, other.sd / other.value)
+                sd = math.hypot(self.sd * other.value, other.sd * self.value)
             units = self.units * other.units
             return Quantity(value=value, units=units, sd=sd)
+
+    def __rmul__(self, other):
+        """Multiply a number by this quantity."""
+        return self.__mul__(other)
 
     def __truediv__(self, other):
         """
@@ -281,7 +299,7 @@ class Quantity(Symbol):
             if self.sd is None:
                 sd = None
             else:
-                sd = abs(other) / self.sd
+                sd = self.sd / abs(other)
             return Quantity(value=self.value / other, units=self.units, sd=sd)
         else:
             if type(other) != Quantity:
@@ -289,15 +307,26 @@ class Quantity(Symbol):
             if other.value is None:
                 raise ValueError
             value = self.value / other.value
-            if not self.sd or not other.sd:
+            if self.sd is None or other.sd is None:
                 sd = None
             else:
-                sd = value * math.hypot(self.sd / self.value, other.sd / other.value)
+                sd = math.hypot(self.sd / other.value, other.sd * value / other.value)
             units = self.units / other.units
             return Quantity(value=value, units=units, sd=sd)
 
     def __rtruediv__(self, other):
-        return self.__truediv__(other)
+        """Divide a number by this quantity."""
+
+        if self.value is None:
+            raise ValueError
+        if type(other) not in (int, float):
+            raise TypeError
+        value = other / self.value
+        if self.sd is None:
+            sd = None
+        else:
+            sd = abs(value * self.sd / self.value)
+        return Quantity(value=value, units=self.units**-1, sd=sd)
 
     def __pow__(self, power):
         return Quantity(value=self.value**power, units=self.units**power)
@@ -311,7 +340,7 @@ class Quantity(Symbol):
             if s_name:
                 name = s_name
             s_quantity = fields[1].strip()
-        fields = s_quantity.split(" ")
+        fields = s_quantity.split(maxsplit=1)
         s_valsd = fields[0]
         if len(fields) == 2:
             units = Units(fields[1])

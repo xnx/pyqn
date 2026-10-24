@@ -77,7 +77,7 @@ class Dimensions(object):
             if self.dims[i] != 0:
                 this_s_dim = dim_name
                 if self.dims[i] != 1:
-                    this_s_dim += "%d" % self.dims[i]
+                    this_s_dim += str(self.dims[i])
                 s_dims.append(this_s_dim)
         if len(s_dims) == 0:
             return "[dimensionless]"

@@ -35,10 +35,7 @@ setup(
     package_dir={"": "src"},
     packages=find_packages(where="src"),
     python_requires=">=3.6",
-    install_requires=[
-        "pyparsing>=2.3",
-        'importlib-resources>=1.0; python_version < "3.7.0"',
-    ],
+    install_requires=[],
     extras_require={"dev": ["black", "pytest-cov", "tox", "ipython"]},
     # package_data will include all the resolved globs into both the wheel and sdist
     # package_data={},

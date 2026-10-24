@@ -153,58 +153,38 @@ class UnitsCheck(unittest.TestCase):
         self.assertNotEqual(Units("m"), Units("cm"))
         self.assertNotEqual(Units("m"), Units("s"))
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=AssertionError,
-        reason="__mul__ and __truediv__ add exponents without updating si_fac",
-    )
+    def test_product_leaves_operands_unchanged(self):
+        u1 = Units("m")
+        u2 = Units("cm.cm")
+        u1 * u2
+        u1 / u2
+        self.assertEqual(str(u1), "m")
+        self.assertEqual(str(u2), "cm.cm")
+
     def test_merged_exponents_factor(self):
         self.assertEqual((Units("cm") * Units("cm")).to_si(), approx(1.0e-4))
         self.assertEqual((Units("km2") / Units("km")).to_si(), approx(1.0e3))
         self.assertEqual(Units("km.hr-1/hr").to_si(), approx(1.0e3 / 3600**2))
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=AssertionError,
-        reason="__eq__ compares SI factors with an absolute tolerance of 1e-10",
-    )
     def test_equality_of_small_factors(self):
         self.assertNotEqual(Units("pm"), Units("fm"))
         self.assertNotEqual(Units("eV"), Units("E_h"))
         self.assertNotEqual(Units("u"), Units("m_e"))
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=AssertionError,
-        reason="the 'other == 1' shortcut treats every dimensionless unit as 1",
-    )
     def test_dimensionless_units(self):
         self.assertNotEqual(Units("deg"), Units("rad"))
         self.assertNotEqual(Units("deg"), 1)
         self.assertEqual((Units("m") * Units("deg")).to_si(), approx(math.pi / 180))
 
-    @pytest.mark.xfail(
-        strict=True, raises=TypeError, reason="__rdiv__ should be __rtruediv__"
-    )
     def test_reflected_division(self):
         self.assertEqual(1 / Units("s"), Units("s-1"))
         self.assertEqual("m" / Units("s"), Units("m.s-1"))
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=AssertionError,
-        reason="__pow__ keeps atoms with zero exponent",
-    )
     def test_zero_power(self):
         u1 = Units("J.m") ** 0
         self.assertFalse(u1.has_units())
         self.assertEqual(str(u1), "")
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=AssertionError,
-        reason="Dimensions.__str__ formats exponents with %d",
-    )
     def test_fractional_dimensions_str(self):
         self.assertEqual(str(Units("Pa-1/2").dims), "L1/2.M-1/2.T")
 

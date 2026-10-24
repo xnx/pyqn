@@ -22,11 +22,12 @@
 
 import re
 import copy
+import math
+import unicodedata
 from .dimensions import Dimensions
-from .dimensions import d_dimensionless, d_length, d_energy, d_time, d_temperature
-from .atom_unit import AtomUnit, UnitsError, feq
-
-h, NA, c, kB = (6.62607015e-34, 6.02214076e23, 299792458.0, 1.380649e-23)
+from .dimensions import d_length, d_energy, d_time, d_temperature
+from .atom_unit import AtomUnit, UnitsError
+from .constants import h, NA, c, kB
 
 
 class UnitsConversionError(UnitsError):
@@ -94,6 +95,12 @@ class Units:
 
         """
 
+        # Read look-alike characters such as the micro sign (U+00B5) and the
+        # ohm sign (U+2126) as the characters in the unit table (U+03BC, U+03A9).
+        s_compoundunit = unicodedata.normalize("NFKC", s_compoundunit)
+        if re.search(r"\s", s_compoundunit):
+            raise UnitsError("Units cannot contain spaces: %r" % s_compoundunit)
+
         if no_divided_units:
             # s_compoundunit does not consist of any units separated by '/'
             # so parse immediately as a sequence of multiplied units.
@@ -145,26 +152,39 @@ class Units:
                 return i
         return None
 
+    @staticmethod
+    def _as_units(other):
+        """
+        Return other as a Units object if it is one, a string or the number 1;
+        otherwise return None.
+
+        """
+
+        if isinstance(other, Units):
+            return other
+        if isinstance(other, str):
+            return Units(other)
+        if other == 1:
+            return Units([])
+        return None
+
     def __mul__(self, other):
         """Return the product of this Units object with another."""
 
-        if other == 1:
-            return copy.deepcopy(self)
-
-        if type(other) == str:
-            other = Units(other)
+        other = self._as_units(other)
+        if other is None:
+            return NotImplemented
 
         product = Units(self.atom_units)
         for other_atom_unit in other.atom_units:
             i = product._find_atom(other_atom_unit)
             if i is None:
-                # new prefix and BaseUnit; append to the resulting product
-                product.atom_units.append(other_atom_unit)
+                # new prefix and BaseUnit; append (a copy) to the product
+                product.atom_units.append(copy.copy(other_atom_unit))
             else:
                 # this prefix and BaseUnit is already in the AtomUnits
                 # of the first operand: update its exponent in the product
                 product.atom_units[i].exponent += other_atom_unit.exponent
-                product.atom_units[i].dims *= other_atom_unit.dims
                 if product.atom_units[i].exponent == 0:
                     # this AtomUnit has cancelled:
                     del product.atom_units[i]
@@ -172,18 +192,18 @@ class Units:
         return product
 
     def __rmul__(self, other):
-        if type(other) == str:
-            other = Units(other)
-        elif other == 1:
-            other = Units("1")
-        return self.__mul__(other)
+        other = self._as_units(other)
+        if other is None:
+            return NotImplemented
+        return other * self
 
     def __truediv__(self, other):
         """Return the ratio of this Units divided by another."""
-        if type(other) == str:
-            other = Units(other)
-        elif other == 1:
-            other = Units("1")
+
+        other = self._as_units(other)
+        if other is None:
+            return NotImplemented
+
         ratio = Units(self.atom_units)
         for other_atom_unit in other.atom_units:
             i = ratio._find_atom(other_atom_unit)
@@ -194,21 +214,21 @@ class Units:
                 # this prefix and BaseUnit is already in the AtomUnits
                 # of the first operand: update its exponent in the ratio
                 ratio.atom_units[i].exponent -= other_atom_unit.exponent
-                ratio.atom_units[i].dims /= other_atom_unit.dims
                 if ratio.atom_units[i].exponent == 0:
                     # this AtomUnit has cancelled:
                     del ratio.atom_units[i]
         ratio.dims = ratio.get_dims()
         return ratio
 
-    def __rdiv__(self, other):
-        if type(other) == str:
-            other = Units(other)
-        elif other == 1:
-            other = Units("1")
-        return other.__truediv__(self)
+    def __rtruediv__(self, other):
+        other = self._as_units(other)
+        if other is None:
+            return NotImplemented
+        return other / self
 
     def __pow__(self, power):
+        if power == 0:
+            return Units([])
         result_atom_units = []
         for atom_unit in self.atom_units:
             result_atom_units.append(atom_unit**power)
@@ -223,18 +243,14 @@ class Units:
     __str__ = __repr__
 
     def __eq__(self, other):
-        """Test for equality with another Units object."""
+        """Test for equality with another Units object, or with 1."""
 
-        if other is None:
-            return False
+        if not isinstance(other, Units):
+            if other != 1:
+                return NotImplemented
+            other = Units([])
 
-        if self.undef:
-            return False
-
-        if other == 1:
-            return self.get_dims() == d_dimensionless
-
-        if other.undef:
+        if self.undef or other.undef:
             return False
 
         if self.get_dims() != other.get_dims():
@@ -242,9 +258,7 @@ class Units:
             return False
         # if two Units objects have the same dimensions, they are equal if
         # their conversion factors to SI units are the same:
-        if feq(self.to_si(), other.to_si()):
-            return True
-        return False
+        return math.isclose(self.to_si(), other.to_si(), rel_tol=1.0e-9)
 
     def __ne__(self, other):
         return not self == other
@@ -287,7 +301,7 @@ class Units:
                 e.append(r"\,")
         return r"\mathrm{" + "".join(e) + "}"
 
-    def conversion(self, other, force=None, strict=False):
+    def conversion(self, other, force=None):
         """
         Return the factor required to convert this Units to
         another. Their dimensions have to match, unless force is set
@@ -336,11 +350,14 @@ class Units:
         return fac / other.to_si()
 
     def mol_conversion(self, other):
-        from_dims_Q = self.get_dims().dims[4]
-        to_dims_Q = other.get_dims().dims[4]
+        from_dims, to_dims = self.get_dims(), other.get_dims()
+        from_dims_Q, to_dims_Q = from_dims.dims[4], to_dims.dims[4]
 
-        # We can only remove or add the amount dimension in its entirity.
-        if from_dims_Q and to_dims_Q:
+        # We can only remove or add the amount dimension in its entirety, and
+        # the other dimensions must match.
+        if (from_dims_Q and to_dims_Q) or (
+            from_dims / Dimensions(Q=from_dims_Q) != to_dims / Dimensions(Q=to_dims_Q)
+        ):
             raise UnitsConversionError(
                 f"Cannot force molar conversion between {self} and {other}"
             )
@@ -349,7 +366,7 @@ class Units:
         if from_dims_Q:
             fac = fac * NA**from_dims_Q
         else:
-            fac = fac * NA**to_dims_Q
+            fac = fac * NA**-to_dims_Q
         return fac / other.to_si()
 
     def spec_conversion(self, other):

@@ -31,6 +31,8 @@ class BaseUnitFactorsCheck(unittest.TestCase):
             self,
             {
                 "atm": 101325,
+                "Torr": 101325 / 760,
+                "mmHg": 133.322387415,
                 "cal": 4.184,
                 "inch": inch,
                 "ft": 12 * inch,
@@ -44,44 +46,22 @@ class BaseUnitFactorsCheck(unittest.TestCase):
                 "fir": 90 * lb,
                 "gal": 4.54609e-3,
                 "pt": 4.54609e-3 / 8,
+                "USgal": us_gal,
+                "USpt": us_gal / 8,
                 "deg": math.pi / 180,
                 "arcmin": math.pi / 10800,
                 "asec": math.pi / 648000,
                 "AU": au,
+                "pc": 648000 / math.pi * au,
                 "yr": 31557600,
                 "ly": 299792458 * 31557600,
                 "D": 1.0e-21 / 299792458,
             },
         )
 
-    @pytest.mark.xfail(
-        strict=True, raises=AssertionError, reason="the knot's factor is 1852"
-    )
     def test_knot(self):
         check_factors(self, {"kn": 1852 / 3600})
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=AssertionError,
-        reason="factors truncated or taken from other definitions",
-    )
-    def test_imprecise_defined_units(self):
-        check_factors(
-            self,
-            {
-                "Torr": 101325 / 760,
-                "mmHg": 133.322387415,
-                "pc": 648000 / math.pi * au,
-                "USgal": us_gal,
-                "USpt": us_gal / 8,
-            },
-        )
-
-    @pytest.mark.xfail(
-        strict=True,
-        raises=AssertionError,
-        reason="constants come from CODATA 2006 and 2010",
-    )
     def test_codata_2022(self):
         e, h, m_u = 1.602176634e-19, 6.62607015e-34, 1.66053906892e-27
         check_factors(

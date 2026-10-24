@@ -61,7 +61,7 @@ class UnitsConversionCheck(unittest.TestCase):
         u1 = Units("kJ")
         u2 = Units("kJ.mol-1")
         with self.assertRaises(UnitsError) as cm:
-            u1.conversion(u2, strict=True)
+            u1.conversion(u2)
 
         u3 = Units("cal.mol-1")
         u4 = Units("eV")
@@ -75,11 +75,6 @@ class UnitsConversionCheck(unittest.TestCase):
         u10 = Units("L-1")
         self.assertEqual(u9.conversion(u10, force="mol"), approx((1.0e-9 * NA) ** 2))
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=AssertionError,
-        reason="mol_conversion uses NA**to_dims_Q, not NA**-to_dims_Q",
-    )
     def test_to_molar_units_conversion(self):
         u1 = Units("kJ")
         u2 = Units("kJ.mol-1")
@@ -92,11 +87,6 @@ class UnitsConversionCheck(unittest.TestCase):
         self.assertEqual(u4.conversion("mol", force="mol"), approx(1 / NA))
         self.assertEqual(u4.conversion("mol-2", force="mol"), approx(NA**2))
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=AssertionError,
-        reason="mol_conversion doesn't check the dimensions other than amount",
-    )
     def test_molar_conversion_checks_other_dimensions(self):
         for from_units, to_units in (("J", "K"), ("J.mol-1", "K")):
             with self.assertRaises(UnitsError, msg=f"{from_units} -> {to_units}"):
