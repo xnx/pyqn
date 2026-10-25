@@ -6,6 +6,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import math
+from dataclasses import dataclass
 
 from .constants import E_h, a0, c, e, hbar, m_e, m_u
 from .dimensions import (
@@ -27,6 +28,7 @@ from .dimensions import (
 )
 
 
+@dataclass(frozen=True, slots=True)
 class BaseUnit:
     """
     A BaseUnit is a commonly-used single unit without a prefix, for example:
@@ -36,28 +38,22 @@ class BaseUnit:
 
     """
 
-    def __init__(self, stem, name, unit_type, fac, description, latex, dims=None):
-        """Initialize the BaseUnit object."""
-        # BaseUnit stem, e.g. 'm', 'g', 'bar', ...
-        self.stem = stem
-        # BaseUnit name, e.g. 'metre', 'gram', 'bar', ...
-        self.name = name
-        # BaseUnit type, e.g. 'length', 'mass', 'pressure', ...
-        self.unit_type = unit_type
-        # fac is the relationship between this base unit and the SI base
-        # unit, e.g. m: 1. (m is SI), g: 1.e-3 (1 g = 1.e-3 kg),
-        # bar: 1.e5 (1 bar = 10e5 Pa)
-        self.fac = fac
-        # any further description of the BaseUnit
-        self.description = description
-        # LaTex representation of the BaseUnit
-        self.latex = latex
-        # BaseUnit dimensions, as a Dimension object
-        self.dims = dims
-
-    def __eq__(self, other):
-        if self.stem == other.stem:
-            return True
+    # BaseUnit stem, e.g. 'm', 'g', 'bar', ...
+    stem: str
+    # BaseUnit name, e.g. 'metre', 'gram', 'bar', ...
+    name: str
+    # BaseUnit type, e.g. 'length', 'mass', 'pressure', ...
+    unit_type: str
+    # fac is the relationship between this base unit and the SI base
+    # unit, e.g. m: 1. (m is SI), g: 1.e-3 (1 g = 1.e-3 kg),
+    # bar: 1.e5 (1 bar = 10e5 Pa)
+    fac: float
+    # any further description of the BaseUnit
+    description: str
+    # LaTex representation of the BaseUnit
+    latex: str
+    # BaseUnit dimensions, as a Dimension object
+    dims: Dimensions | None = None
 
     def __str__(self):
         """String representation of the BaseUnit is just its 'stem'."""

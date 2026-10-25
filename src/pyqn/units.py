@@ -4,55 +4,66 @@
 # Copyright (C) 2012-2016 Christian Hill
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-import copy
+import dataclasses
 import math
 import re
 import unicodedata
 
 from .atom_unit import AtomUnit, UnitsError
 from .constants import NA, c, h, kB
-from .dimensions import Dimensions, d_energy, d_length, d_temperature, d_time
+from .dimensions import (
+    Dimensions,
+    d_dimensionless,
+    d_energy,
+    d_length,
+    d_temperature,
+    d_time,
+)
 
 
 class UnitsConversionError(UnitsError):
     pass
 
 
+# Units objects are immutable; __init__, __eq__, __hash__ and __repr__ are
+# defined below.
+@dataclasses.dataclass(frozen=True, slots=True, init=False, eq=False, repr=False)
 class Units:
     """
     A class to represent the units of a physical quantity.
 
     """
 
+    atom_units: tuple
+    undef: bool
+    dims: Dimensions | None
+
     def __init__(self, units):
         """
-        Initialize this Units from a list of AtomUnit objects or by parsing
-        a string representing the units.
+        Initialize this Units from another Units object, a list or tuple of
+        AtomUnit objects, or by parsing a string representing the units.
 
         """
 
-        self.undef = False
-        self.dims = None
-
-        if type(units) is Units:
-            if units.undef:
-                self.undef = True
-                return
-            self.__init__(units.atom_units)
-        elif type(units) is str:
+        undef = False
+        if isinstance(units, Units):
+            atom_units, undef = units.atom_units, units.undef
+        elif isinstance(units, str):
             if units == "undef":
-                self.undef = True
-                return
-            self.__init__(self.parse(units).atom_units)
-        elif type(units) is list:
-            self.atom_units = copy.deepcopy(units)
+                atom_units, undef = (), True
+            else:
+                atom_units = self.parse(units).atom_units
+        elif isinstance(units, (list, tuple)):
+            atom_units = tuple(units)
         else:
             raise TypeError(
                 "Attempt to initialize Units object with"
                 f" argument units of type {type(units)}"
             )
+        object.__setattr__(self, "atom_units", atom_units)
+        object.__setattr__(self, "undef", undef)
         # also get the dimensions of the units
-        self.dims = self.get_dims()
+        object.__setattr__(self, "dims", None if undef else self.get_dims())
 
     def has_units(self):
         if self.undef or self.atom_units:
@@ -126,17 +137,33 @@ class Units:
                 atom_units.append(atom_unit)
         return Units(atom_units)
 
-    def _find_atom(self, atom_unit):
+    def _times_atoms(self, other_atom_units):
         """
-        Return the index of atom_unit in the atom_units list, if it exists,
-        ignoring any exponent. Otherwise return None.
+        Return the AtomUnits of this Units multiplied by other_atom_units: the
+        exponents of AtomUnits with the same prefix and BaseUnit are added,
+        and AtomUnits that cancel are dropped.
 
         """
 
-        for i, my_atom_unit in enumerate(self.atom_units):
-            if my_atom_unit.prefix_base_eq(atom_unit):
-                return i
-        return None
+        atom_units = list(self.atom_units)
+        for other_atom_unit in other_atom_units:
+            for i, atom_unit in enumerate(atom_units):
+                if atom_unit.prefix_base_eq(other_atom_unit):
+                    # this prefix and BaseUnit is already in the AtomUnits:
+                    # update its exponent
+                    exponent = atom_unit.exponent + other_atom_unit.exponent
+                    if exponent == 0:
+                        # this AtomUnit has cancelled:
+                        del atom_units[i]
+                    else:
+                        atom_units[i] = dataclasses.replace(
+                            atom_unit, exponent=exponent
+                        )
+                    break
+            else:
+                # new prefix and BaseUnit; append to the AtomUnits
+                atom_units.append(other_atom_unit)
+        return atom_units
 
     @staticmethod
     def _as_units(other):
@@ -163,22 +190,7 @@ class Units:
         if self.undef or other.undef:
             # a product involving undefined units is undefined
             return Units("undef")
-
-        product = Units(self.atom_units)
-        for other_atom_unit in other.atom_units:
-            i = product._find_atom(other_atom_unit)
-            if i is None:
-                # new prefix and BaseUnit; append (a copy) to the product
-                product.atom_units.append(copy.copy(other_atom_unit))
-            else:
-                # this prefix and BaseUnit is already in the AtomUnits
-                # of the first operand: update its exponent in the product
-                product.atom_units[i].exponent += other_atom_unit.exponent
-                if product.atom_units[i].exponent == 0:
-                    # this AtomUnit has cancelled:
-                    del product.atom_units[i]
-        product.dims = product.get_dims()
-        return product
+        return Units(self._times_atoms(other.atom_units))
 
     def __rmul__(self, other):
         other = self._as_units(other)
@@ -195,22 +207,7 @@ class Units:
         if self.undef or other.undef:
             # a ratio involving undefined units is undefined
             return Units("undef")
-
-        ratio = Units(self.atom_units)
-        for other_atom_unit in other.atom_units:
-            i = ratio._find_atom(other_atom_unit)
-            if i is None:
-                # new prefix and BaseUnit; append to the resulting ratio
-                ratio.atom_units.append(other_atom_unit**-1)
-            else:
-                # this prefix and BaseUnit is already in the AtomUnits
-                # of the first operand: update its exponent in the ratio
-                ratio.atom_units[i].exponent -= other_atom_unit.exponent
-                if ratio.atom_units[i].exponent == 0:
-                    # this AtomUnit has cancelled:
-                    del ratio.atom_units[i]
-        ratio.dims = ratio.get_dims()
-        return ratio
+        return Units(self._times_atoms(atom_unit**-1 for atom_unit in other.atom_units))
 
     def __rtruediv__(self, other):
         other = self._as_units(other)
@@ -257,6 +254,16 @@ class Units:
 
     def __ne__(self, other):
         return not self == other
+
+    def __hash__(self):
+        # Units that are equal have the same dimensions, and units equal to 1
+        # are dimensionless, so hashing the dimensions is consistent with
+        # __eq__. Undefined units are equal to nothing, not even themselves.
+        if self.undef:
+            return object.__hash__(self)
+        if self.dims == d_dimensionless:
+            return hash(1)
+        return hash(self.dims)
 
     def to_si(self):
         """Return the factor needed to convert this Units to SI."""

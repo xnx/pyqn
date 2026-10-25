@@ -7,9 +7,10 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import re
+from dataclasses import dataclass
 from fractions import Fraction
 
-from .base_unit import base_unit_stems
+from .base_unit import BaseUnit, base_unit_stems
 from .si import si_prefixes
 
 # A unit atom is a stem, perhaps with an SI prefix, followed by an optional
@@ -31,6 +32,7 @@ class UnitsError(Exception):
         return self.error_str
 
 
+@dataclass(frozen=True, slots=True)
 class AtomUnit:
     """
     AtomUnit is a class to represent a single BaseUnit, possibly with an SI
@@ -38,19 +40,20 @@ class AtomUnit:
 
     """
 
-    def __init__(self, prefix, base_unit, exponent=1):
-        """Initialize the AtomUnit object."""
+    prefix: str | None
+    base_unit: BaseUnit
+    exponent: int | Fraction = 1
 
-        self.base_unit = base_unit
-        self.exponent = exponent
+    def __post_init__(self):
+        if self.prefix is not None and self.prefix not in si_prefixes:
+            raise UnitsError(f"Invalid or unsupported SI prefix: {self.prefix}")
 
-        # get the SI prefix (if present)
-        self.prefix = prefix
-        if prefix is not None:
-            try:
-                self.si_prefix = si_prefixes[prefix]
-            except KeyError:
-                raise UnitsError(f"Invalid or unsupported SI prefix: {prefix}")
+    @property
+    def si_prefix(self):
+        """The SIPrefix of this AtomUnit, or None if it has no prefix."""
+        if self.prefix is None:
+            return None
+        return si_prefixes[self.prefix]
 
     @property
     def dims(self):

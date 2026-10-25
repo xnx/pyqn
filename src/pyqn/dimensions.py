@@ -6,8 +6,17 @@
 # Copyright (C) 2012-2016 Christian Hill
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+from dataclasses import dataclass
 
+
+@dataclass(frozen=True, slots=True, init=False)
 class Dimensions:
+    """
+    The dimensions of a physical quantity's units: an immutable, hashable
+    tuple of the powers of the seven base dimensions, named in dim_names.
+
+    """
+
     # these are the abbreviations for Length, Mass, Time, Temperature,
     # Quantity (amount of substance), Current, and Luminous Intensity:
     dim_names = ["L", "M", "T", "Theta", "Q", "C", "I"]
@@ -20,22 +29,21 @@ class Dimensions:
         "current",
         "luminous intensity",
     ]
-    dim_index = {}
-    for i, dim_name in enumerate(dim_names):
-        dim_index[dim_name] = i
+    dim_index = {dim_name: i for i, dim_name in enumerate(dim_names)}
+
+    dims: tuple
 
     def __init__(self, dims=None, **kwargs):
-        self.dims = [0] * 7
         if dims:
             # initialize by dims array
-            if not kwargs:
-                self.dims = dims
-            else:
+            if kwargs or len(dims) != 7:
                 raise ValueError("Bad initialisation of Dimensions object")
         else:
             # initialize by keyword arguments
+            dims = [0] * 7
             for dim_name in kwargs:
-                self.dims[self.dim_index[dim_name]] = kwargs[dim_name]
+                dims[self.dim_index[dim_name]] = kwargs[dim_name]
+        object.__setattr__(self, "dims", tuple(dims))
 
     def __mul__(self, other):
         new_dims = []
@@ -69,15 +77,6 @@ class Dimensions:
 
     def __repr__(self):
         return str(self.dims)
-
-    def __eq__(self, other):
-        for i, dim in enumerate(self.dims):
-            if other.dims[i] != dim:
-                return False
-        return True
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
 
 
 d_dimensionless = Dimensions()
