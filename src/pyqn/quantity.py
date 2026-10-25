@@ -65,12 +65,14 @@ class Quantity(Symbol):
         units=None,
         sd=None,
         definition=None,
+        domain=None,
     ):
         """
         Initialize the Quantity object: set up its name as for the base,
         Symbol class, and set the quantity's value, sd and units (which
         can be None, a string representing the units, or a Units object and
-        will be converted to a Units object in any case).
+        will be converted to a Units object in any case). A string is parsed
+        with the units of domain (by default, domains.everything).
 
         """
 
@@ -80,7 +82,7 @@ class Quantity(Symbol):
         if units is None:
             self.units = Units([])
         else:
-            self.units = Units(units)
+            self.units = Units(units, domain=domain)
 
     def __str__(self):
         """A simple string representation of the Quantity."""
@@ -334,11 +336,14 @@ class Quantity(Symbol):
         return Quantity(value=self.value**power, units=self.units**power, sd=sd)
 
     @classmethod
-    def parse(self, s_quantity, name=None, units=None, sd=None, definition=None):
+    def parse(
+        self, s_quantity, name=None, units=None, sd=None, definition=None, domain=None
+    ):
         """
         Parse a string such as "x = 1.5(2)e-3 m.s-1" into a Quantity. A name,
         units or standard deviation given in the string takes precedence over
-        the name, units or sd argument.
+        the name, units or sd argument. Units are parsed with the units of
+        domain (by default, domains.everything).
 
         """
 
@@ -352,7 +357,7 @@ class Quantity(Symbol):
         fields = s_quantity.split(maxsplit=1)
         s_valsd = fields[0]
         if len(fields) == 2:
-            units = Units(fields[1])
+            units = Units(fields[1], domain=domain)
         # force lower case, and replace Fortran-style 'D'/'d' exponents
         s_valsd = s_valsd.lower()
         s_valsd = s_valsd.replace("d", "e")
@@ -376,5 +381,10 @@ class Quantity(Symbol):
                 ndp = 0
             sd = float(s_sd) * 10 ** (exp - ndp)
         return Quantity(
-            name=name, value=value, units=units, sd=sd, definition=definition
+            name=name,
+            value=value,
+            units=units,
+            sd=sd,
+            definition=definition,
+            domain=domain,
         )

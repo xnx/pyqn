@@ -86,17 +86,59 @@ an optional exponent:
   involving ``undef`` are ``undef`` too; ``undef`` units cannot be converted,
   and quantities with them cannot be added or subtracted.
 
-Every combination of prefix and unit symbol reads in only one way. To make
-that possible, a few units have unusual symbols:
-
-- ``inch``, not ``in``, because ``min`` would be both minutes and
-  milli-inches;
-- ``yard``, not ``yd`` (the yoctoday);
-- ``dy`` for the day, because ``d`` is the prefix deci;
-- ``asec`` for the arcsecond, because ``as`` is the attosecond.
+Every string reads in only one way. Because each unit takes only some
+prefixes, the standard symbols ``in`` (inch), ``yd`` (yard) and ``d`` (day)
+are safe to use: ``min`` is still the minute and ``cd`` the candela. pyqn
+prints these units with the symbols it used before version 2.1, ``inch``,
+``yard`` and ``dy``, which every version reads (see `Domains`_). The
+arcsecond is ``asec``, because ``as`` is the attosecond.
 
 Note also that ``b`` is the barn, so ``mb`` is the millibarn: the millibar
 is ``mbar``.
+
+
+Domains
+=======
+
+A *domain* is a named set of units, used when parsing unit strings, so that
+strings that make no sense in a field are rejected. The default domain,
+``domains.everything``, has every unit.
+
+>>> from pyqn import domains
+>>> Units("km.h-1", domain=domains.si)
+km.h-1
+>>> Units("ft", domain=domains.si)
+Traceback (most recent call last):
+    ...
+UnitsError: Unrecognised unit in the si domain: ft (the tonne, t, does not take the prefix f)
+
+``domains.si`` has the SI units and the non-SI units accepted for use with
+them: the minute, hour, day, astronomical unit, degree, arcminute,
+arcsecond, hectare, litre, tonne, dalton and electronvolt.
+
+Each unit has a *canonical symbol*, which means the same in every domain and
+is what pyqn prints, so what pyqn prints can be read back in any domain that
+has the unit. A domain can also accept other spellings of a unit, and its
+``format()`` writes units with them:
+
+>>> u = Units("km.d-1", domain=domains.si)
+>>> u
+km.dy-1
+>>> domains.si.format(u)
+'km.d-1'
+
+Once parsed, units are the same whatever domain they came from: arithmetic,
+comparisons and conversions work in the same way, and a string in them, as
+in ``u.conversion("m.s-1")``, is read in the default domain. ``Quantity`` and
+``Quantity.parse()`` also take a ``domain``.
+
+You can make domains of your own. When a domain is made, pyqn checks that
+every string it accepts reads in only one way:
+
+>>> from pyqn import Domain
+>>> lab = Domain("lab", units=[*domains.si.units, domains.everything.stems["Torr"]])
+>>> Units("mTorr", domain=lab)
+mTorr
 
 
 Conventions
@@ -165,8 +207,10 @@ Limitations
 Units
 =====
 
-These are the units that PyQn recognises, with the SI prefixes that each
-takes ("all except h" is every SI prefix except hecto).
+These are the units in the default domain, with their canonical symbols
+and the SI prefixes that each takes ("all except h" is every SI prefix except
+hecto). The default domain also reads ``in``, ``yd`` and ``d`` as the inch,
+yard and day.
 
 .. units-table-start
 
@@ -273,6 +317,7 @@ Unit     Name              Dimensions  Prefixes
 ``u``    atomic mass unit  M           μ
 ``amu``  atomic mass unit  M           none
 ``Da``   dalton            M           k, M
+``t``    tonne             M           k, M, G
 ``m_e``  electron mass     M           none
 =======  ================  ==========  ========
 
@@ -284,6 +329,7 @@ Unit    Name      Dimensions  Prefixes
 ``Å``   angstrom  L           none
 ``a0``  bohr      L           none
 ``b``   barn      L2          all except h
+``ha``  hectare   L2          none
 ``l``   litre     L3          all
 ``L``   litre     L3          all
 ======  ========  ==========  ============

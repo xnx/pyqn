@@ -1,0 +1,160 @@
+"""Unit tests for domains: named sets of units used to parse unit strings."""
+
+import dataclasses
+import unittest
+import warnings
+
+from pyqn import Domain, Quantity, Units, domains
+from pyqn.base_unit import base_unit_stems, metric
+from pyqn.dimensions import Dimensions
+from pyqn.units import UnitsError
+
+
+class EverythingCheck(unittest.TestCase):
+    """Unit tests for the default domain, everything."""
+
+    def test_standard_spellings(self):
+        for spelling, stem in (("in", "inch"), ("yd", "yard"), ("d", "dy")):
+            u1 = Units(spelling)
+            self.assertEqual(u1, Units(stem))
+            # pyqn prints the canonical symbol; format() uses the spelling
+            self.assertEqual(str(u1), stem)
+            self.assertEqual(domains.everything.format(u1), spelling)
+        # min is still the minute, and cd the candela
+        self.assertEqual(Units("min").to_si(), 60)
+        self.assertEqual(Units("cd").dims, Dimensions(I=1))
+
+    def test_spellings_are_strict(self):
+        # 'in' is new in pyqn 2.1, so it takes no deprecated prefixes, but
+        # 'inch' keeps those of pyqn 2.0 until 3.0
+        with self.assertRaises(UnitsError):
+            Units("kin")
+        with self.assertWarns(DeprecationWarning):
+            Units("kinch")
+
+    def test_default_domain(self):
+        self.assertEqual(Units("ft", domain=domains.everything), Units("ft"))
+
+
+class SICheck(unittest.TestCase):
+    """Unit tests for the SI domain."""
+
+    def test_si_units(self):
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            for s_units in (
+                "km.h-1",
+                "kg.m-2",
+                "hPa",
+                "mL",
+                "kDa",
+                "MeV",
+                "Mt",
+                "ha",
+                "d",
+                "au",
+                "lm",
+                "mSv",
+                "deg",
+                "masec",
+                "min",
+            ):
+                Units(s_units, domain=domains.si)
+        self.assertEqual(Units("Mt", domain=domains.si), Units("Tg"))
+        self.assertEqual(Units("ha", domain=domains.si), Units("hm2"))
+        self.assertEqual(Units("au", domain=domains.si), Units("AU"))
+
+    def test_canonical_symbols(self):
+        # a unit's canonical symbol works in every domain that has the unit
+        self.assertEqual(Units("dy", domain=domains.si), Units("d", domain=domains.si))
+        self.assertEqual(Units("AU", domain=domains.si), Units("au", domain=domains.si))
+
+    def test_not_si_units(self):
+        for s_units in ("ft", "in", "hr", "atm", "kcal", "Å", "Torr", "k"):
+            with self.assertRaises(UnitsError, msg=s_units) as cm:
+                Units(s_units, domain=domains.si)
+            self.assertIn("si domain", str(cm.exception))
+
+    def test_no_deprecated_prefixes(self):
+        # only the default domain keeps the prefixes that pyqn 2.0 allowed
+        with self.assertRaises(UnitsError):
+            Units("kmin", domain=domains.si)
+
+
+class FormatCheck(unittest.TestCase):
+    """Unit tests for writing units with a domain's spellings."""
+
+    def test_format(self):
+        u1 = Units("km.d-1", domain=domains.si)
+        self.assertEqual(str(u1), "km.dy-1")
+        self.assertEqual(domains.si.format(u1), "km.d-1")
+        self.assertEqual(domains.si.format(Units("undef")), "undef")
+        with self.assertRaises(UnitsError):
+            domains.si.format(Units("ft"))
+
+    def test_round_trip(self):
+        for domain, s_units in (
+            (domains.everything, "in.yd-1/d"),
+            (domains.everything, "kg1/2.m-3/2"),
+            (domains.si, "au.d-1"),
+            (domains.si, "MeV.Da-1/2"),
+        ):
+            u1 = Units(s_units, domain=domain)
+            self.assertEqual(Units(domain.format(u1), domain=domain), u1)
+            self.assertEqual(Units(str(u1), domain=domain), u1)
+
+
+class QuantityDomainCheck(unittest.TestCase):
+    """Unit tests for parsing the units of quantities in a domain."""
+
+    def test_quantity_domain(self):
+        q1 = Quantity.parse("1.5(2) km.d-1", domain=domains.si)
+        self.assertEqual(q1.units, Units("km.dy-1"))
+        for make in (
+            lambda: Quantity(value=1, units="ft", domain=domains.si),
+            lambda: Quantity.parse("1.5 ft", domain=domains.si),
+            lambda: Quantity.parse("1.5", units="ft", domain=domains.si),
+        ):
+            with self.assertRaises(UnitsError):
+                make()
+
+
+class DomainCheck(unittest.TestCase):
+    """Unit tests for making domains."""
+
+    def test_ambiguous_prefixed_unit(self):
+        # an inch spelt 'in' that took prefixes would make 'min' ambiguous
+        inch = dataclasses.replace(base_unit_stems["inch"], stem="in", prefixes=metric)
+        with self.assertRaisesRegex(ValueError, "min is ambiguous"):
+            Domain("test", units=[inch, base_unit_stems["min"]])
+
+    def test_ambiguous_spelling(self):
+        with self.assertRaisesRegex(ValueError, "D is ambiguous"):
+            Domain(
+                "test",
+                units=[base_unit_stems["D"]],
+                spellings={"D": base_unit_stems["m"]},
+            )
+
+    def test_invalid_symbols(self):
+        for stem in ("", "x2", "a b", "m.s", "m/s", "x-"):
+            with self.assertRaises(ValueError, msg=repr(stem)):
+                Domain(
+                    "test", units=[dataclasses.replace(base_unit_stems["m"], stem=stem)]
+                )
+
+    def test_domain_is_immutable(self):
+        with self.assertRaises(dataclasses.FrozenInstanceError):
+            domains.si.name = "SI"
+        with self.assertRaises(TypeError):
+            domains.si.spellings["ft"] = base_unit_stems["ft"]
+
+    def test_domain_of_your_own(self):
+        lab = Domain("lab", units=[*domains.si.units, domains.everything.stems["Torr"]])
+        self.assertEqual(Units("mTorr", domain=lab), Units("mTorr"))
+        with self.assertRaises(UnitsError):
+            Units("ft", domain=lab)
+
+
+if __name__ == "__main__":
+    unittest.main()
