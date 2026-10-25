@@ -1,13 +1,27 @@
 """Unit tests for domains: named sets of units used to parse unit strings."""
 
 import dataclasses
+import math
 import unittest
 import warnings
+
+import pytest
 
 from pyqn import Domain, Quantity, Units, domains
 from pyqn.base_unit import base_unit_stems, metric
 from pyqn.dimensions import Dimensions
 from pyqn.units import UnitsError
+
+c = 299792458.0
+
+
+def approx(expected, rel=1.0e-9):
+    """
+    Compare with a relative tolerance only: pytest.approx's default absolute
+    tolerance (1e-12) would accept any two very small factors.
+
+    """
+    return pytest.approx(expected, rel=rel, abs=0)
 
 
 class EverythingCheck(unittest.TestCase):
@@ -117,6 +131,88 @@ class QuantityDomainCheck(unittest.TestCase):
         ):
             with self.assertRaises(UnitsError):
                 make()
+
+
+class FieldDomainsCheck(unittest.TestCase):
+    """Unit tests for the built-in domains of particular fields."""
+
+    def test_field_units(self):
+        field_units = {
+            domains.spectroscopy: ("cm-1", "MHz", "mD", "Å", "Torr", "kcal.mol-1"),
+            domains.atomic_and_molecular_physics: ("E_h", "a0-2", "m_e", "mb"),
+            domains.chemistry: ("mM", "mol.L-1", "kDa", "mmHg", "ppm", "ppt", "%"),
+            domains.astronomy: ("kpc", "Ga", "au", "Jy", "erg.s-1", "mG", "kly"),
+            domains.geology: ("mD", "Ma", "Myr", "mGal", "kpsi", "bbl", "ft", "in"),
+            domains.gaussian_electromagnetism: ("G", "kOe", "Mx", "Fr", "statV", "γ"),
+            domains.radiation_physics: ("mrad", "μCi", "mR", "mrem", "mSv", "kBq"),
+            domains.meteorology: ("hPa", "mbar", "kn", "NM", "ft", "ppb", "%"),
+        }
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            for domain, strings in field_units.items():
+                for s_units in strings:
+                    u1 = Units(s_units, domain=domain)
+                    self.assertEqual(Units(domain.format(u1), domain=domain), u1)
+                    self.assertEqual(Units(str(u1), domain=domain), u1)
+
+    def test_field_spellings(self):
+        # the same string can mean different units in different fields
+        geology_mD = Units("mD", domain=domains.geology)
+        self.assertEqual(geology_mD, Units("mdarcy"))
+        self.assertEqual(str(geology_mD), "mdarcy")
+        self.assertEqual(Units("mD", domain=domains.spectroscopy), Units("mD"))
+        self.assertNotEqual(geology_mD.dims, Units("mD").dims)
+        self.assertEqual(Units("Ma", domain=domains.geology), Units("Myr"))
+        self.assertEqual(Units("Ga", domain=domains.astronomy), Units("Gyr"))
+        self.assertEqual(
+            Units("Fr", domain=domains.gaussian_electromagnetism), Units("statC")
+        )
+        # in radiation physics, rad is the unit of absorbed dose
+        rad = Units("rad", domain=domains.radiation_physics)
+        self.assertEqual(rad, Units("rd"))
+        self.assertEqual(rad, Units("cGy"))
+        self.assertNotEqual(rad.dims, Units("rad").dims)
+        self.assertEqual(Units("sr", domain=domains.radiation_physics), Units("sr"))
+
+    def test_not_in_field(self):
+        for domain, s_units in (
+            (domains.si, "M"),
+            (domains.si, "G"),
+            (domains.si, "ppm"),
+            (domains.chemistry, "ft"),
+            (domains.spectroscopy, "darcy"),
+            (domains.geology, "Å"),
+            (domains.gaussian_electromagnetism, "T"),
+            (domains.radiation_physics, "μrad.s-1"),
+        ):
+            with self.assertRaises(UnitsError, msg=f"{s_units} in {domain.name}"):
+                Units(s_units, domain=domain)
+
+    def test_gaussian_conversions(self):
+        gaussian = domains.gaussian_electromagnetism
+        self.assertEqual(Units("G", domain=gaussian).conversion("T"), approx(1.0e-4))
+        self.assertEqual(
+            Units("Oe", domain=gaussian).conversion("A.m-1"),
+            approx(1.0e3 / (4 * math.pi)),
+        )
+        self.assertEqual(
+            Units("Fr", domain=gaussian).conversion("nC"), approx(0.1 / c * 1e9)
+        )
+        # the gauss and the oersted have different dimensions in SI
+        with self.assertRaises(UnitsError):
+            Units("G", domain=gaussian).conversion(Units("Oe", domain=gaussian))
+
+    def test_ppt(self):
+        # parts per trillion, not the pico-pint of pyqn 2.0
+        self.assertEqual(Units("ppt").to_si(), 1.0e-12)
+        self.assertEqual(
+            Units("ppt", domain=domains.chemistry).conversion("ppb"), approx(1.0e-3)
+        )
+
+    def test_built_in_domains(self):
+        for domain in domains.built_in_domains:
+            self.assertIsInstance(domain, Domain)
+            self.assertEqual(Units("1/s", domain=domain), Units("s-1"))
 
 
 class DomainCheck(unittest.TestCase):

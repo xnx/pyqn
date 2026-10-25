@@ -769,6 +769,223 @@ base_units = (
         ],
     ),
     (
+        "Concentrations and fractions",
+        [
+            BaseUnit(
+                "M",
+                "molar",
+                "concentration",
+                1.0e3,
+                "mol/L",
+                "M",
+                Dimensions(Q=1) / d_volume,
+                prefixes=frozenset("mμnpf"),
+            ),
+            BaseUnit(
+                "ppm",
+                "parts per million",
+                "fraction",
+                1.0e-6,
+                "",
+                "ppm",
+                d_dimensionless,
+                prefixes=no_prefixes,
+            ),
+            BaseUnit(
+                "ppb",
+                "parts per billion",
+                "fraction",
+                1.0e-9,
+                "",
+                "ppb",
+                d_dimensionless,
+                prefixes=no_prefixes,
+            ),
+            # only ever parts per trillion, never parts per thousand
+            BaseUnit(
+                "ppt",
+                "parts per trillion",
+                "fraction",
+                1.0e-12,
+                "",
+                "ppt",
+                d_dimensionless,
+                prefixes=no_prefixes,
+            ),
+            BaseUnit(
+                "%",
+                "percent",
+                "fraction",
+                1.0e-2,
+                "",
+                r"\%",
+                d_dimensionless,
+                prefixes=no_prefixes,
+            ),
+        ],
+    ),
+    (
+        "Geological and petroleum units",
+        [
+            # 1 darcy: 1 cm3/s of a fluid of viscosity 1 cP through 1 cm2
+            # under a pressure gradient of 1 atm/cm
+            BaseUnit(
+                "darcy",
+                "darcy",
+                "permeability",
+                1.0e-11 / 10.1325,
+                "",
+                "D",
+                d_area,
+                prefixes=frozenset("m"),
+            ),
+            BaseUnit(
+                "Gal",
+                "gal (galileo)",
+                "acceleration",
+                1.0e-2,
+                "",
+                "Gal",
+                d_length / d_time**2,
+                prefixes=frozenset({"m", "μ"}),
+            ),
+            BaseUnit(
+                "psi",
+                "pound per square inch",
+                "pressure",
+                0.45359237 * 9.80665 / 0.0254**2,
+                "",
+                "psi",
+                d_pressure,
+                prefixes=frozenset("k"),
+            ),
+            # 42 US gallons
+            BaseUnit(
+                "bbl",
+                "barrel (oil)",
+                "volume",
+                42 * 3.785411784e-3,
+                "",
+                "bbl",
+                d_volume,
+                prefixes=no_prefixes,
+            ),
+        ],
+    ),
+    (
+        "Gaussian electromagnetic units",
+        [
+            # Gaussian units are defined in a system of three base dimensions,
+            # so pyqn defines them by the SI units they correspond to
+            BaseUnit(
+                "G",
+                "gauss",
+                "magnetic field strength",
+                1.0e-4,
+                "",
+                "G",
+                d_magfield_strength,
+                prefixes=frozenset({"m", "k", "μ"}),
+            ),
+            BaseUnit(
+                "Oe",
+                "oersted",
+                "magnetizing field",
+                1.0e3 / (4 * math.pi),
+                "",
+                "Oe",
+                d_current / d_length,
+                prefixes=frozenset("k"),
+            ),
+            BaseUnit(
+                "Mx",
+                "maxwell",
+                "magnetic flux",
+                1.0e-8,
+                "",
+                "Mx",
+                d_magnetic_flux,
+                prefixes=no_prefixes,
+            ),
+            BaseUnit(
+                "statC",
+                "statcoulomb",
+                "charge",
+                0.1 / c,
+                "",
+                r"\mathrm{statC}",
+                d_charge,
+                prefixes=no_prefixes,
+            ),
+            BaseUnit(
+                "statV",
+                "statvolt",
+                "voltage",
+                1.0e-6 * c,
+                "",
+                r"\mathrm{statV}",
+                d_voltage,
+                prefixes=no_prefixes,
+            ),
+            BaseUnit(
+                "γ",
+                "gamma",
+                "magnetic field strength",
+                1.0e-9,
+                "",
+                r"\gamma",
+                d_magfield_strength,
+                prefixes=no_prefixes,
+            ),
+        ],
+    ),
+    (
+        "Radiation units",
+        [
+            BaseUnit(
+                "Ci",
+                "curie",
+                "activity",
+                3.7e10,
+                "",
+                "Ci",
+                d_time**-1,
+                prefixes=frozenset("kmμnp"),
+            ),
+            BaseUnit(
+                "R",
+                "röntgen",
+                "exposure",
+                2.58e-4,
+                "",
+                "R",
+                d_charge / d_mass,
+                prefixes=frozenset({"m", "μ"}),
+            ),
+            BaseUnit(
+                "rem",
+                "rem",
+                "dose equivalent",
+                1.0e-2,
+                "",
+                "rem",
+                d_energy / d_mass,
+                prefixes=frozenset("m"),
+            ),
+            # the rad, the unit of absorbed dose: rd, so as not to be the radian
+            BaseUnit(
+                "rd",
+                "rad (absorbed dose)",
+                "absorbed dose",
+                1.0e-2,
+                "",
+                "rd",
+                d_energy / d_mass,
+                prefixes=frozenset("m"),
+            ),
+        ],
+    ),
+    (
         "Silly units",
         [
             BaseUnit(
@@ -829,4 +1046,9 @@ for base_unit_group in base_units:
 # In pyqn 2.0 every unit took every SI prefix except hecto. Until pyqn 3.0 the
 # units that existed then still take those prefixes where the rules above no
 # longer allow them, but with a DeprecationWarning.
-v2_stems = frozenset(base_unit_stems) - {"lm", "lx", "Bq", "Gy", "Sv", "kat", "t", "ha"}
+units_added_since_v2 = frozenset(
+    {"lm", "lx", "Bq", "Gy", "Sv", "kat", "t", "ha"}
+    | {"M", "ppm", "ppb", "ppt", "%", "darcy", "Gal", "psi", "bbl"}
+    | {"G", "Oe", "Mx", "statC", "statV", "γ", "Ci", "R", "rem", "rd"}
+)
+v2_stems = frozenset(base_unit_stems) - units_added_since_v2

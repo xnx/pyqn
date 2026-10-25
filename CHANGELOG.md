@@ -11,6 +11,18 @@
   units and the non-SI units accepted for use with them. `Domain` makes
   domains of your own, checking that every string they accept reads in only
   one way, and `Domain.format()` writes units with a domain's spellings.
+- Domains for particular fields, each with the units of `si` and those the
+  field uses with them: `spectroscopy`, `atomic_and_molecular_physics`,
+  `chemistry`, `astronomy`, `geology`, `gaussian_electromagnetism`,
+  `radiation_physics` and `meteorology`. Some read a symbol in their field's
+  own way: in geology `mD` is the millidarcy and `Ma` the mega-annum, and in
+  radiation physics `rad` is the unit of absorbed dose.
+- Units for these fields: the molar (`M`); `ppm`, `ppb`, `ppt` (parts per
+  trillion) and `%`; the darcy, gal (`Gal`), `psi` and oil barrel (`bbl`);
+  the Gaussian gauss (`G`), oersted (`Oe`), maxwell (`Mx`), statcoulomb
+  (`statC`), statvolt (`statV`) and gamma (`γ`), defined by the SI units
+  they correspond to; and the curie (`Ci`), röntgen (`R`), rem and rad
+  (`rd`, so as not to be the radian).
 - The standard symbols `in`, `yd` and `d` for the inch, yard and day. pyqn
   still prints these units as `inch`, `yard` and `dy`.
 - The tonne (`t`) and the hectare (`ha`).
@@ -20,6 +32,7 @@
 
 ### Changes
 
+- `ppt` is parts per trillion. pyqn 2.0 read it as the pico-pint.
 - Errors for unrecognised units say why, as in "Unrecognised unit: hJ (the
   joule, J, does not take the prefix h)".
 - Each unit takes only the SI prefixes that make sense for it: all of them

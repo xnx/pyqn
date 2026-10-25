@@ -1,14 +1,21 @@
 # list_base_units.py
-# List the base units, by group, as text, HTML or reStructuredText tables:
-#     python -m pyqn.list_base_units <text|html|rst>
-# The rst output is the table of units in README.rst.
+# List the base units, by group, as text, HTML or reStructuredText tables,
+# or the built-in domains as a reStructuredText table:
+#     python -m pyqn.list_base_units <text|html|rst|domains>
+# The rst and domains outputs are the tables of units and domains in
+# README.rst.
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import sys
 
+from . import domains
 from .base_unit import base_units, metric, metric_and_hecto, no_prefixes
+from .domains import Domain
 from .si import si_prefixes
+
+# the groups of units in the table that make up the SI units
+si_groups = ("Unity", "SI unit stems", "Derived SI units")
 
 
 def describe_prefixes(base_unit):
@@ -75,18 +82,70 @@ def list_units_rst():
     return "\n\n".join(blocks)
 
 
+def list_domains_rst():
+    """Return a reStructuredText table of the built-in domains."""
+
+    names = {id(d): name for name, d in vars(domains).items() if isinstance(d, Domain)}
+    si_units = set(domains.si.units)
+    # the units accepted for use with the SI
+    accepted = [u for u in domains.si.units if u not in domains.units_in(*si_groups)]
+
+    def stems(units):
+        return ", ".join(f"``{u.stem}``" for u in units)
+
+    rows = [("Domain", "Other spellings", "Units")]
+    for domain in domains.built_in_domains:
+        extra = [u for u in domain.units if u not in si_units]
+        missing = [u for u in domains.si.units if u not in domain.units]
+        if domain is domains.everything:
+            s_units = "every unit (see `Units`_)"
+        elif domain is domains.si:
+            s_units = f"the SI units, and {stems(accepted)}"
+        elif not missing:
+            s_units = f"those of ``si``, and {stems(extra)}"
+        elif len(missing) < len(domains.si.units) / 2:
+            s_units = f"those of ``si`` except {stems(missing)}, and {stems(extra)}"
+        else:
+            s_units = stems(domain.units)
+        own_spellings = [
+            (s, u)
+            for s, u in domain.spellings.items()
+            # field domains inherit si's spellings: list only their own
+            if domain in (domains.everything, domains.si)
+            or domains.si.spellings.get(s) != u
+        ]
+        s_spellings = ", ".join(
+            f"``{s}`` ({u.stem})" for s, u in own_spellings if s != u.stem
+        )
+        rows.append(
+            (f"``domains.{names[id(domain)]}``", s_spellings or "none", s_units)
+        )
+    widths = [max(len(row[i]) for row in rows) for i in range(2)]
+    rule = "  ".join("=" * width for width in widths) + "  " + "=" * len("Units")
+    lines = [rule]
+    for i, row in enumerate(rows):
+        lines.append(
+            "  ".join(f"{s:{w}s}" for s, w in zip(row, widths)) + "  " + row[2]
+        )
+        if i == 0:
+            lines.append(rule)
+    lines.append(rule)
+    return "\n".join(lines)
+
+
 if __name__ == "__main__":
     list_units = {
         "text": list_units_text,
         "html": list_units_html,
         "rst": list_units_rst,
+        "domains": list_domains_rst,
     }
     try:
         list_type = sys.argv[1]
         assert list_type in list_units
     except (IndexError, AssertionError):
         print(f"usage:\n{sys.argv[0]} <list_type>")
-        print("where <list_type> is text, html or rst")
+        print("where <list_type> is text, html, rst or domains")
         sys.exit(1)
 
     print(list_units[list_type]())
