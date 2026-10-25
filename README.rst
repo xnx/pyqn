@@ -94,7 +94,8 @@ prints these units with the symbols it used before version 2.1, ``inch``,
 arcsecond is ``asec``, because ``as`` is the attosecond.
 
 Note also that ``b`` is the barn, so ``mb`` is the millibarn: the millibar
-is ``mbar``.
+is ``mbar``. And ``ppt`` is always parts per trillion, never parts per
+thousand.
 
 
 Domains
@@ -139,6 +140,51 @@ every string it accepts reads in only one way:
 >>> lab = Domain("lab", units=[*domains.si.units, domains.everything.stems["Torr"]])
 >>> Units("mTorr", domain=lab)
 mTorr
+
+
+Built-in domains
+----------------
+
+pyqn has domains for several fields. Each has the units of ``si`` and those
+that the field uses with them, and some read a symbol in the field's own
+way. In geology, ``D`` is the darcy, so ``mD`` is the millidarcy, which pyqn
+prints with the darcy's canonical symbol; in radiation physics, ``rad`` is
+the unit of absorbed dose, and there is no radian.
+
+>>> Units("mD", domain=domains.geology)
+mdarcy
+>>> domains.geology.format(Units("mD", domain=domains.geology))
+'mD'
+>>> Units("mD", domain=domains.spectroscopy)
+mD
+
+Gaussian (cgs) units belong to a system with three base dimensions, so pyqn
+defines them by the SI units they correspond to. They convert to those
+units, but the gauss and the oersted, for example, cannot be converted into
+each other, because the tesla and the ampere per metre have different
+dimensions:
+
+>>> Units("G", domain=domains.gaussian_electromagnetism).conversion("T")
+0.0001
+
+.. domains-table-start
+
+========================================  ========================================  =====
+Domain                                    Other spellings                           Units
+========================================  ========================================  =====
+``domains.everything``                    ``in`` (inch), ``yd`` (yard), ``d`` (dy)  every unit (see `Units`_)
+``domains.si``                            ``d`` (dy), ``au`` (AU)                   the SI units, and ``min``, ``h``, ``deg``, ``arcmin``, ``asec``, ``ha``, ``L``, ``l``, ``t``, ``Da``, ``u``, ``eV``, ``dy``, ``AU``
+``domains.spectroscopy``                  none                                      those of ``si``, and ``Å``, ``D``, ``k``, ``Torr``, ``atm``, ``bar``, ``erg``, ``cal``
+``domains.atomic_and_molecular_physics``  none                                      those of ``si``, and ``Å``, ``D``, ``E_h``, ``Ry``, ``a0``, ``m_e``, ``e``, ``hbar``, ``amu``, ``b``
+``domains.chemistry``                     none                                      those of ``si``, and ``M``, ``Å``, ``D``, ``cal``, ``atm``, ``bar``, ``Torr``, ``mmHg``, ``ppm``, ``ppb``, ``ppt``, ``%``
+``domains.astronomy``                     ``a`` (yr)                                those of ``si``, and ``pc``, ``ly``, ``yr``, ``Jy``, ``erg``, ``dyn``, ``Å``, ``G``
+``domains.geology``                       ``a`` (yr), ``D`` (darcy), ``in`` (inch)  those of ``si``, and ``yr``, ``darcy``, ``Gal``, ``psi``, ``bbl``, ``bar``, ``atm``, ``ft``, ``inch``, ``ppm``, ``ppb``, ``ppt``, ``%``
+``domains.gaussian_electromagnetism``     ``Fr`` (statC)                            ``1``, ``m``, ``g``, ``s``, ``dyn``, ``erg``, ``G``, ``Oe``, ``Mx``, ``statC``, ``statV``, ``γ``
+``domains.radiation_physics``             ``rad`` (rd)                              those of ``si`` except ``rad``, and ``Ci``, ``R``, ``rem``, ``rd``
+``domains.meteorology``                   none                                      those of ``si``, and ``bar``, ``atm``, ``kn``, ``NM``, ``ft``, ``%``, ``ppm``, ``ppb``, ``ppt``
+========================================  ========================================  =====
+
+.. domains-table-end
 
 
 Conventions
@@ -383,6 +429,53 @@ Unit    Name           Dimensions  Prefixes
 ``NM``  nautical mile  L           none
 ``kn``  knot           L.T-1       none
 ======  =============  ==========  ========
+
+**Concentrations and fractions**
+
+=======  ==================  ===============  =============
+Unit     Name                Dimensions       Prefixes
+=======  ==================  ===============  =============
+``M``    molar               L-3.Q            f, p, n, μ, m
+``ppm``  parts per million   [dimensionless]  none
+``ppb``  parts per billion   [dimensionless]  none
+``ppt``  parts per trillion  [dimensionless]  none
+``%``    percent             [dimensionless]  none
+=======  ==================  ===============  =============
+
+**Geological and petroleum units**
+
+=========  =====================  ==========  ========
+Unit       Name                   Dimensions  Prefixes
+=========  =====================  ==========  ========
+``darcy``  darcy                  L2          m
+``Gal``    gal (galileo)          L.T-2       μ, m
+``psi``    pound per square inch  L-1.M.T-2   k
+``bbl``    barrel (oil)           L3          none
+=========  =====================  ==========  ========
+
+**Gaussian electromagnetic units**
+
+=========  ===========  ============  ========
+Unit       Name         Dimensions    Prefixes
+=========  ===========  ============  ========
+``G``      gauss        M.T-2.C-1     μ, m, k
+``Oe``     oersted      L-1.C         k
+``Mx``     maxwell      L2.M.T-2.C-1  none
+``statC``  statcoulomb  T.C           none
+``statV``  statvolt     L2.M.T-3.C-1  none
+``γ``      gamma        M.T-2.C-1     none
+=========  ===========  ============  ========
+
+**Radiation units**
+
+=======  ===================  ==========  =============
+Unit     Name                 Dimensions  Prefixes
+=======  ===================  ==========  =============
+``Ci``   curie                T-1         p, n, μ, m, k
+``R``    röntgen              M-1.T.C     μ, m
+``rem``  rem                  L2.T-2      m
+``rd``   rad (absorbed dose)  L2.T-2      m
+=======  ===================  ==========  =============
 
 **Silly units**
 

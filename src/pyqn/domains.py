@@ -106,7 +106,10 @@ class Domain:
             # the unity 'unit' takes no prefix
             return frozenset()
         if self.v2_prefixes and stem in v2_stems:
-            return base_unit.prefixes | metric
+            # deprecated prefixes give way to units added since pyqn 2.0: ppt
+            # is parts per trillion, not the pico-pint
+            deprecated = {p for p in metric if p + stem not in self.stems}
+            return base_unit.prefixes | deprecated
         return base_unit.prefixes
 
     @staticmethod
@@ -201,4 +204,91 @@ si = Domain(
         + ("Da", "u", "eV")
     ],
     spellings={"d": base_unit_stems["dy"], "au": base_unit_stems["AU"]},
+)
+
+
+def field_domain(name, stems, spellings=None, without=()):
+    """
+    Return a domain of the units in si, except those with the stems in
+    without, and the units with the given stems, with si's spellings and any
+    others given as a dict of spelling: stem.
+
+    """
+
+    units = [u for u in si.units if u.stem not in without]
+    units += [base_unit_stems[stem] for stem in stems]
+    spellings = {
+        **si.spellings,
+        **{s: base_unit_stems[stem] for s, stem in (spellings or {}).items()},
+    }
+    return Domain(name, units=units, spellings=spellings)
+
+
+# Field domains: the SI units and those that each field uses with them.
+spectroscopy = field_domain(
+    "spectroscopy", ("Å", "D", "k", "Torr", "atm", "bar", "erg", "cal")
+)
+
+atomic_and_molecular_physics = field_domain(
+    "atomic and molecular physics",
+    ("Å", "D", "E_h", "Ry", "a0", "m_e", "e", "hbar", "amu", "b"),
+)
+
+chemistry = field_domain(
+    "chemistry",
+    ("M", "Å", "D", "cal", "atm", "bar", "Torr", "mmHg") + ("ppm", "ppb", "ppt", "%"),
+)
+
+astronomy = field_domain(
+    "astronomy",
+    ("pc", "ly", "yr", "AU", "Jy", "erg", "dyn", "Å", "G"),
+    # the annum, as in Ma and Ga
+    spellings={"a": "yr"},
+)
+
+geology = field_domain(
+    "geology",
+    ("yr", "darcy", "Gal", "psi", "bbl", "bar", "atm", "ft", "inch")
+    + ("ppm", "ppb", "ppt", "%"),
+    # the annum, as in Ma, and the darcy, as in mD
+    spellings={"a": "yr", "D": "darcy", "in": "inch"},
+)
+
+# The units of the Gaussian (cgs) system: their SI equivalents are in the
+# default domain, so units in this domain can be converted to them.
+gaussian_electromagnetism = Domain(
+    "Gaussian electromagnetism",
+    units=[
+        base_unit_stems[stem]
+        for stem in ("1", "m", "g", "s", "dyn", "erg", "G", "Oe", "Mx")
+        + ("statC", "statV", "γ")
+    ],
+    # statC is written as statC, but read as Fr too
+    spellings={"statC": base_unit_stems["statC"], "Fr": base_unit_stems["statC"]},
+)
+
+radiation_physics = field_domain(
+    "radiation physics",
+    ("Ci", "R", "rem", "rd"),
+    # the rad is the unit of absorbed dose, so this domain has no radian
+    spellings={"rad": "rd"},
+    without=("rad",),
+)
+
+meteorology = field_domain(
+    "meteorology",
+    ("bar", "atm", "kn", "NM", "ft", "%", "ppm", "ppb", "ppt"),
+)
+
+built_in_domains = (
+    everything,
+    si,
+    spectroscopy,
+    atomic_and_molecular_physics,
+    chemistry,
+    astronomy,
+    geology,
+    gaussian_electromagnetism,
+    radiation_physics,
+    meteorology,
 )
