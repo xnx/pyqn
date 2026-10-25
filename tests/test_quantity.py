@@ -76,6 +76,16 @@ class QuantityManipulations(unittest.TestCase):
         self.assertEqual(q5.value, 1)
         self.assertNotEqual(q1.units.dims, q5.units.dims)
 
+    def test_quantity_power_uncertainty(self):
+        q1 = Quantity(value=3, units="m", sd=0.1)
+        self.assertAlmostEqual((q1**2).sd, 0.6)
+        self.assertAlmostEqual((q1**-1).sd, 0.1 / 9)
+        self.assertAlmostEqual((q1**0.5).sd, 0.05 / math.sqrt(3))
+        self.assertEqual((q1**0).sd, 0)
+        self.assertEqual((Quantity(value=0, units="m", sd=0.1) ** 2).sd, 0)
+        self.assertIsNone((Quantity(value=3, units="m") ** 2).sd)
+        self.assertEqual((q1**2).units, Units("m2"))
+
     def test_quantity_conversion(self):
         q1 = Quantity(value=200, units="J", sd=2)
         q2 = q1.convert_units_to("eV")
@@ -167,6 +177,15 @@ class QuantityStringsCheck(unittest.TestCase):
         self.assertAlmostEqual(q1.value, 1.5e-3)
         self.assertAlmostEqual(q1.sd, 2.0e-4)
         self.assertEqual(q1.units, Units("m.s-1"))
+
+    def test_parse_arguments(self):
+        q1 = Quantity.parse("c = 299792458 m.s-1", definition="speed of light")
+        self.assertEqual(q1.definition, "speed of light")
+        self.assertEqual(Quantity.parse("1.5 m", sd=0.1).sd, 0.1)
+        self.assertAlmostEqual(Quantity.parse("1.5(2) m", sd=0.1).sd, 0.2)
+        self.assertEqual(Quantity.parse("1.5", units="s").units, Units("s"))
+        self.assertEqual(Quantity.parse("1.5 m", units="s").units, Units("m"))
+        self.assertEqual(Quantity.parse("x = 1.5", name="y").name, "x")
 
     def test_parse_units_with_space(self):
         with self.assertRaises((QuantityError, UnitsError)):

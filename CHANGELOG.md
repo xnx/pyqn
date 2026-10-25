@@ -32,7 +32,12 @@
 - The knot was 3600 times too large.
 - `1 / Units("s")` and `"m" / Units("s")` work; `u**0` has no units left;
   dimensions with fractional exponents print correctly.
-- `Quantity`: `q * 2` and `2 * q` work; `q / 2` and `2 / q` give the right
+- Arithmetic with `undef` units raised `AttributeError`. Products, ratios and
+  powers involving `undef` are now `undef`; converting `undef` units, or
+  adding or subtracting quantities with them, raises `UnitsError`.
+- `Quantity`: `q ** n` propagates the uncertainty (it was dropped);
+  `Quantity.parse()` uses its `sd` and `definition` arguments (a standard
+  deviation in the string takes precedence); `q * 2` and `2 * q` work; `q / 2` and `2 / q` give the right
   value and uncertainty; products and quotients with negative or zero values
   or exact (`sd=0`) operands propagate the uncertainty correctly;
   `as_str()` and `value_as_str()` show the right number of digits;

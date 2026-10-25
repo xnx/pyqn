@@ -55,7 +55,7 @@ class Units:
         self.dims = self.get_dims()
 
     def has_units(self):
-        if self.atom_units:
+        if self.undef or self.atom_units:
             return True
         return False
 
@@ -66,6 +66,8 @@ class Units:
 
         """
 
+        if self.undef:
+            raise UnitsError("Undefined units have no dimensions")
         dims = Dimensions()
         for atom_unit in self.atom_units:
             dims *= atom_unit.dims
@@ -158,6 +160,9 @@ class Units:
         other = self._as_units(other)
         if other is None:
             return NotImplemented
+        if self.undef or other.undef:
+            # a product involving undefined units is undefined
+            return Units("undef")
 
         product = Units(self.atom_units)
         for other_atom_unit in other.atom_units:
@@ -187,6 +192,9 @@ class Units:
         other = self._as_units(other)
         if other is None:
             return NotImplemented
+        if self.undef or other.undef:
+            # a ratio involving undefined units is undefined
+            return Units("undef")
 
         ratio = Units(self.atom_units)
         for other_atom_unit in other.atom_units:
@@ -211,8 +219,11 @@ class Units:
         return other / self
 
     def __pow__(self, power):
+        # any units, even undefined ones, raised to the power 0 are dimensionless
         if power == 0:
             return Units([])
+        if self.undef:
+            return Units("undef")
         result_atom_units = []
         for atom_unit in self.atom_units:
             result_atom_units.append(atom_unit**power)
@@ -249,6 +260,8 @@ class Units:
 
     def to_si(self):
         """Return the factor needed to convert this Units to SI."""
+        if self.undef:
+            raise UnitsError("Undefined units cannot be converted to SI")
         fac = 1.0
         for atom_unit in self.atom_units:
             fac *= atom_unit.si_fac
@@ -298,6 +311,8 @@ class Units:
 
         if isinstance(other, str):
             other = Units(other)
+        if self.undef or other.undef:
+            raise UnitsError(f"Cannot convert between {self} and {other}")
 
         conversion_method = {
             "spec": self.spec_conversion,
