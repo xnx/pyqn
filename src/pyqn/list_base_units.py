@@ -7,18 +7,28 @@
 
 import sys
 
-from .base_unit import base_units
+from .base_unit import base_units, metric, metric_and_hecto, no_prefixes
+from .si import si_prefixes
+
+
+def describe_prefixes(base_unit):
+    """Return a description of the SI prefixes that base_unit takes."""
+    named = {metric_and_hecto: "all", metric: "all except h", no_prefixes: "none"}
+    if base_unit.prefixes in named:
+        return named[base_unit.prefixes]
+    return ", ".join(p for p in si_prefixes if p in base_unit.prefixes)
 
 
 def list_units_text():
     lines = []
     for group_name, base_unit_group in base_units:
         lines += ["", group_name, "=" * len(group_name)]
-        lines.append(f"{'Unit':6s} {'Name':30s} {'Dimensions':20s}")
-        lines.append(f"{'----':6s} {'----':30s} {'----------':20s}")
+        lines.append(f"{'Unit':6s} {'Name':30s} {'Dimensions':20s} Prefixes")
+        lines.append(f"{'----':6s} {'----':30s} {'----------':20s} --------")
         for base_unit in base_unit_group:
             lines.append(
                 f"{base_unit.stem:6s} {base_unit.name:30s} {str(base_unit.dims):20s}"
+                f" {describe_prefixes(base_unit)}"
             )
     return "\n".join(lines)
 
@@ -28,11 +38,13 @@ def list_units_html():
     for group_name, base_unit_group in base_units:
         lines.append(f"<h4>{group_name}</h4>")
         lines.append('<table class="my-table">')
-        lines.append("<tr><th>Unit</th><th>Name</th><th>Dimensions</th></tr>")
+        lines.append(
+            "<tr><th>Unit</th><th>Name</th><th>Dimensions</th><th>Prefixes</th></tr>"
+        )
         for base_unit in base_unit_group:
             lines.append(
                 f"<tr><td>{base_unit.stem}</td><td>{base_unit.name}</td>"
-                f"<td>{base_unit.dims}</td></tr>"
+                f"<td>{base_unit.dims}</td><td>{describe_prefixes(base_unit)}</td></tr>"
             )
         lines.append("</table>")
     return "\n".join(lines)
@@ -41,10 +53,17 @@ def list_units_html():
 def list_units_rst():
     blocks = []
     for group_name, base_unit_group in base_units:
-        rows = [("Unit", "Name", "Dimensions")]
+        rows = [("Unit", "Name", "Dimensions", "Prefixes")]
         for base_unit in base_unit_group:
-            rows.append((f"``{base_unit.stem}``", base_unit.name, str(base_unit.dims)))
-        widths = [max(len(row[i]) for row in rows) for i in range(3)]
+            rows.append(
+                (
+                    f"``{base_unit.stem}``",
+                    base_unit.name,
+                    str(base_unit.dims),
+                    describe_prefixes(base_unit),
+                )
+            )
+        widths = [max(len(row[i]) for row in rows) for i in range(4)]
         rule = "  ".join("=" * width for width in widths)
         lines = [f"**{group_name}**", "", rule]
         for i, row in enumerate(rows):

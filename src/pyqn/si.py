@@ -34,6 +34,7 @@ si_prefixes = {
     "m": SIPrefix("m", "milli", -3),
     "c": SIPrefix("c", "centi", -2),
     "d": SIPrefix("d", "deci", -1),
+    "h": SIPrefix("h", "hecto", 2),
     "k": SIPrefix("k", "kilo", 3),
     "M": SIPrefix("M", "mega", 6),
     "G": SIPrefix("G", "giga", 9),

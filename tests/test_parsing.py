@@ -1,6 +1,7 @@
 """Unit tests for parsing unit strings: syntax errors, Unicode and round trips."""
 
 import unittest
+import warnings
 
 from pyqn.dimensions import Dimensions
 from pyqn.units import Units, UnitsError
@@ -54,6 +55,60 @@ class ParsingCheck(unittest.TestCase):
             u2 = Units(str(u1))
             self.assertEqual(str(u2), str(u1), msg=s_units)
             self.assertEqual(u2, u1, msg=s_units)
+
+
+class PrefixRulesCheck(unittest.TestCase):
+    """Unit tests for the prefixes that each unit takes."""
+
+    def test_allowed_prefixes(self):
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            for s_units in (
+                "kcal",
+                "mbar",
+                "mTorr",
+                "MeV",
+                "kDa",
+                "Myr",
+                "Mpc",
+                "kly",
+                "mD",
+                "μu",
+                "masec",
+                "mE_h",
+                "fb",
+                "hPa",
+                "hL",
+                "hm",
+                "hg",
+            ):
+                Units(s_units)
+        self.assertEqual(Units("hPa"), Units("mbar"))
+        self.assertEqual(str(Units("hbar")), "hbar")
+        self.assertEqual(Units("hbar").dims, Dimensions(M=1, L=2, T=-1))
+
+    def test_hecto_is_strict(self):
+        # pyqn 2.0 had no hecto, so it is only accepted where the rules allow it
+        for s_units in ("hJ", "hs", "hmin", "hft", "hyr"):
+            with self.assertRaises(UnitsError, msg=s_units):
+                Units(s_units)
+
+    def test_deprecated_prefixes(self):
+        # pyqn 2.0 took these; 2.1 warns, and 3.0 will reject them
+        for s_units in ("kmin", "Mft", "katm", "μÅ", "mdy", "mu", "kD", "Gly"):
+            with self.assertWarns(DeprecationWarning, msg=s_units) as cm:
+                u1 = Units(s_units)
+            self.assertEqual(str(u1), s_units)
+            # the warning points to the caller, not to pyqn
+            self.assertEqual(cm.filename, __file__)
+
+    def test_new_si_units(self):
+        self.assertEqual(Units("lm"), Units("cd.sr"))
+        self.assertEqual(Units("lx"), Units("lm/m2"))
+        self.assertEqual(Units("kBq").dims, Dimensions(T=-1))
+        self.assertEqual(Units("mGy"), Units("mJ/kg"))
+        self.assertEqual(Units("μSv").dims, Dimensions(L=2, T=-2))
+        self.assertEqual(Units("nkat"), Units("nmol/s"))
 
 
 if __name__ == "__main__":

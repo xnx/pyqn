@@ -7,16 +7,31 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import re
+import sys
+import warnings
 from dataclasses import dataclass
 from fractions import Fraction
 
-from .base_unit import BaseUnit, base_unit_stems
+from .base_unit import BaseUnit, base_unit_stems, metric, v2_stems
 from .si import si_prefixes
 
 # A unit atom is a stem, perhaps with an SI prefix, followed by an optional
 # integer or rational exponent, e.g. 'kg', 's-1', 'Pa-1/2'. Exponents can't
 # start with 0, so stems ending in 0, such as 'a0' (bohr), are unambiguous.
 uatom_patt = re.compile(r"(?P<stem>.+?)(?P<exponent>-?[1-9][0-9]*(?:/[1-9][0-9]*)?)?")
+
+
+def caller_stacklevel():
+    """
+    Return the stacklevel, for warnings.warn() in the function calling this
+    one, of the first caller outside pyqn, so that warnings point there.
+
+    """
+
+    frame, stacklevel = sys._getframe(1), 1
+    while frame is not None and frame.f_globals.get("__name__", "").startswith("pyqn"):
+        frame, stacklevel = frame.f_back, stacklevel + 1
+    return stacklevel
 
 
 class UnitsError(Exception):
@@ -89,6 +104,17 @@ class AtomUnit:
             if prefix not in si_prefixes or stem not in base_unit_stems:
                 raise UnitsError(f"Unrecognised unit: {s_unit_atom}")
         base_unit = base_unit_stems[stem]
+        if prefix is not None and prefix not in base_unit.prefixes:
+            if stem not in v2_stems or prefix not in metric:
+                raise UnitsError(
+                    f"The unit {stem} cannot take the prefix {prefix}: {s_unit_atom}"
+                )
+            warnings.warn(
+                f"{s_unit_atom}: the unit {stem} will not take the prefix {prefix}"
+                " in pyqn 3.0",
+                DeprecationWarning,
+                stacklevel=caller_stacklevel(),
+            )
 
         # if there is an exponent, determine what it is (default is 1)
         exponent = 1
