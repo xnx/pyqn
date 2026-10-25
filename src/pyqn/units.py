@@ -14,11 +14,14 @@ from .atom_unit import AtomUnit, UnitsError
 from .constants import NA, c, h, kB
 from .dimensions import (
     Dimensions,
+    d_amount_fraction,
     d_dimensionless,
     d_energy,
     d_length,
+    d_mass_fraction,
     d_temperature,
     d_time,
+    d_volume_fraction,
 )
 
 
@@ -324,7 +327,10 @@ class Units:
             interconverted with E = kB.T;
         force='mol': the Avogadro constant: molar quantities and those per
             entity are interconverted, as between kJ.mol-1 and J; the amount
-            dimension must be added or removed in its entirety.
+            dimension must be added or removed in its entirety;
+        force='mass fraction', 'volume fraction' or 'amount fraction': treats
+            that pseudo-dimension as dimensionless, as between ppmv and
+            umol/mol.
 
         Conventions can be combined, as in force=('mol', 'spec'): the
         constants have independent dimensions, so there is at most one way
@@ -348,8 +354,8 @@ class Units:
             return fac
         if not conventions:
             raise UnitsError(
-                f"Failure in units conversion: units {self}[{self_dims}] and"
-                f" {other}[{other_dims}] have different dimensions"
+                f"Failure in units conversion: units {self} ({self_dims}) and"
+                f" {other} ({other_dims}) have different dimensions"
             )
 
         # find the powers of the constants by which the dimensions differ
@@ -361,7 +367,7 @@ class Units:
         )
         if powers is None:
             raise UnitsConversionError(
-                f"Cannot convert {self}[{self_dims}] to {other}[{other_dims}]"
+                f"Cannot convert {self} ({self_dims}) to {other} ({other_dims})"
                 f" with the conventions {', '.join(conventions)}"
             )
         powers = dict(zip(names, powers))
@@ -388,17 +394,28 @@ class Units:
 
 
 # The conventions for converting between units of different dimensions: each
-# treats some physical constants as 1.
-convention_constants = {"spec": ("h", "c"), "kBT": ("kB",), "mol": ("NA",)}
+# treats some physical constants as 1, or a pseudo-dimension as dimensionless.
+convention_constants = {
+    "spec": ("h", "c"),
+    "kBT": ("kB",),
+    "mol": ("NA",),
+    "mass fraction": ("mass fraction",),
+    "volume fraction": ("volume fraction",),
+    "amount fraction": ("amount fraction",),
+}
 
 # The values (in SI units) and dimensions of these constants, which are
 # independent: each has a power of a dimension that the others lack, or of a
-# combination of them.
+# combination of them. A pseudo-dimension is treated as dimensionless by
+# treating a constant of value 1 with that dimension as 1.
 physical_constants = {
     "h": (h, d_energy * d_time),
     "c": (c, d_length / d_time),
     "kB": (kB, d_energy / d_temperature),
     "NA": (NA, Dimensions(Q=-1)),
+    "mass fraction": (1, d_mass_fraction),
+    "volume fraction": (1, d_volume_fraction),
+    "amount fraction": (1, d_amount_fraction),
 }
 
 
@@ -406,22 +423,29 @@ def powers_of(dims, bases):
     """
     Return the powers p of the independent Dimensions in bases such that
     dims is the product of bases[i]**p[i], or None if there are none. The
-    seven equations, one for each base dimension, are solved exactly by
-    Gaussian elimination; the powers are ints where they are whole numbers.
+    equations, one for each base dimension and pseudo-dimension, are solved
+    exactly by Gaussian elimination; the powers are ints where they are
+    whole numbers.
 
     """
 
     n = len(bases)
-    # one row of the augmented matrix for each base dimension
-    rows = [
-        [Fraction(base.dims[j]) for base in bases] + [Fraction(dims.dims[j])]
-        for j in range(7)
-    ]
+    pseudo_names = sorted({name for d in (dims, *bases) for name, _ in d.pseudo})
+
+    def components(d):
+        pseudo = dict(d.pseudo)
+        return [Fraction(x) for x in d.dims] + [
+            Fraction(pseudo.get(name, 0)) for name in pseudo_names
+        ]
+
+    # one row of the augmented matrix for each dimension
+    columns = [components(base) for base in bases] + [components(dims)]
+    rows = [list(row) for row in zip(*columns)]
     for col in range(n):
-        pivot = next(r for r in range(col, 7) if rows[r][col] != 0)
+        pivot = next(r for r in range(col, len(rows)) if rows[r][col] != 0)
         rows[col], rows[pivot] = rows[pivot], rows[col]
         rows[col] = [x / rows[col][col] for x in rows[col]]
-        for r in range(7):
+        for r in range(len(rows)):
             if r != col and rows[r][col] != 0:
                 rows[r] = [x - rows[r][col] * y for x, y in zip(rows[r], rows[col])]
     if any(row[n] != 0 for row in rows[n:]):

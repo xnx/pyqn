@@ -226,17 +226,19 @@ def field_domain(name, stems, spellings=None, without=()):
 
 # Field domains: the SI units and those that each field uses with them.
 spectroscopy = field_domain(
-    "spectroscopy", ("Å", "D", "k", "Torr", "atm", "bar", "erg", "cal")
+    "spectroscopy", ("Å", "D", "k", "Torr", "atm", "bar", "erg", "cal", "molec")
 )
 
 atomic_and_molecular_physics = field_domain(
     "atomic and molecular physics",
-    ("Å", "D", "E_h", "Ry", "a0", "m_e", "e", "hbar", "amu", "b"),
+    ("Å", "D", "E_h", "Ry", "a0", "m_e", "e", "hbar", "amu", "b", "molec"),
 )
 
 chemistry = field_domain(
     "chemistry",
-    ("M", "Å", "D", "cal", "atm", "bar", "Torr", "mmHg") + ("ppm", "ppb", "ppt", "%"),
+    ("M", "Å", "D", "cal", "atm", "bar", "Torr", "mmHg", "molec")
+    + ("ppm", "ppb", "ppt", "%", "ppmw", "ppbw", "wt%")
+    + ("ppmv", "ppbv", "pptv", "vol%", "mol%"),
 )
 
 astronomy = field_domain(
@@ -249,7 +251,7 @@ astronomy = field_domain(
 geology = field_domain(
     "geology",
     ("yr", "darcy", "Gal", "psi", "bbl", "bar", "atm", "ft", "inch")
-    + ("ppm", "ppb", "ppt", "%"),
+    + ("ppm", "ppb", "ppt", "%", "ppmw", "ppbw", "wt%"),
     # the annum, as in Ma, and the darcy, as in mD
     spellings={"a": "yr", "D": "darcy", "in": "inch"},
 )
@@ -277,7 +279,8 @@ radiation_physics = field_domain(
 
 meteorology = field_domain(
     "meteorology",
-    ("bar", "atm", "kn", "NM", "ft", "%", "ppm", "ppb", "ppt"),
+    ("bar", "atm", "kn", "NM", "ft", "%", "ppm", "ppb", "ppt", "molec")
+    + ("ppmv", "ppbv", "pptv", "vol%"),
 )
 
 built_in_domains = (
