@@ -14,6 +14,10 @@ practice, such as between wavenumbers and energies in spectroscopy.
 PyQn is pure Python with no dependencies. It aims to be convenient within
 particular fields of science rather than to cover every unit in use.
 
+The documentation, with worked examples for spectroscopy, atmospheric
+chemistry, physical chemistry and the validation of data, is at
+https://pyqn.readthedocs.io.
+
 
 Installation
 ============
@@ -589,6 +593,12 @@ formatting and the code::
 
 ``python -m pyqn.list_base_units rst`` prints the table of units above, and
 a test checks that the README has the current version.
+
+The documentation, in ``docs/``, includes this README as its user guide. To
+build it::
+
+    python -m pip install -e . --group docs
+    sphinx-build -W -b html docs docs/_build/html
 
 
 Licence
