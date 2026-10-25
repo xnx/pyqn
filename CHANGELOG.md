@@ -1,6 +1,17 @@
 # Changelog
 
-## 2.0.0 (unreleased)
+## 2.0.1 (25 October 2026)
+
+### Fixes
+
+- Arithmetic with `undef` units raised `AttributeError`. Products, ratios and
+  powers involving `undef` are now `undef`; converting `undef` units, or
+  adding or subtracting quantities with them, raises `UnitsError`.
+- `q ** n` propagates the uncertainty of a `Quantity` (it was dropped).
+- `Quantity.parse()` uses its `sd` and `definition` arguments (a standard
+  deviation in the string takes precedence).
+
+## 2.0.0 (25 October 2026)
 
 ### Breaking changes
 

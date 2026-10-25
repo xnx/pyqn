@@ -205,6 +205,8 @@ class Quantity(Symbol):
             raise TypeError
         if self.value is None or other.value is None:
             raise ValueError
+        if self.units.undef or other.units.undef:
+            raise UnitsError("Can't add quantities with undefined units")
         if self.units != other.units:
             raise UnitsError(
                 "Can't add two quantities with different"
@@ -227,6 +229,8 @@ class Quantity(Symbol):
             raise TypeError
         if self.value is None or other.value is None:
             raise ValueError
+        if self.units.undef or other.units.undef:
+            raise UnitsError("Can't subtract quantities with undefined units")
         if self.units != other.units:
             raise UnitsError(
                 "Can't subtract two quantities with different"
@@ -313,10 +317,31 @@ class Quantity(Symbol):
         return Quantity(value=value, units=self.units**-1, sd=sd)
 
     def __pow__(self, power):
-        return Quantity(value=self.value**power, units=self.units**power)
+        """
+        Raise this quantity to a power, propagating its error to first order:
+        the sd of x**n is |n x**(n-1)| sd(x).
+
+        """
+
+        if self.value is None:
+            raise ValueError
+        if self.sd is None:
+            sd = None
+        elif power == 0:
+            sd = 0.0
+        else:
+            sd = abs(power * self.value ** (power - 1)) * self.sd
+        return Quantity(value=self.value**power, units=self.units**power, sd=sd)
 
     @classmethod
     def parse(self, s_quantity, name=None, units=None, sd=None, definition=None):
+        """
+        Parse a string such as "x = 1.5(2)e-3 m.s-1" into a Quantity. A name,
+        units or standard deviation given in the string takes precedence over
+        the name, units or sd argument.
+
+        """
+
         s_quantity = s_quantity.strip()
         if "=" in s_quantity:
             fields = s_quantity.split("=")
@@ -344,11 +369,12 @@ class Quantity(Symbol):
         s_mantissa, s_sd = m.groups()
         mantissa = float(s_mantissa)
         value = mantissa * 10**exp
-        sd = None
         if s_sd:
             if "." in s_mantissa:
                 ndp = len(s_mantissa) - s_mantissa.index(".") - 1
             else:
                 ndp = 0
             sd = float(s_sd) * 10 ** (exp - ndp)
-        return Quantity(name=name, value=value, units=units, sd=sd)
+        return Quantity(
+            name=name, value=value, units=units, sd=sd, definition=definition
+        )

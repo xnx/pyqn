@@ -77,7 +77,9 @@ an optional exponent:
   ohm and angstrom signs are likewise read as ``Ω`` and ``Å``. A plain ``u``
   is the atomic mass unit, not micro.
 - Symbols are case-sensitive: ``K`` is the kelvin and ``k`` the kayser.
-- ``undef`` stands for undefined units.
+- ``undef`` stands for undefined units. Products, ratios and powers
+  involving ``undef`` are ``undef`` too; ``undef`` units cannot be converted,
+  and quantities with them cannot be added or subtracted.
 
 Every combination of prefix and unit symbol reads in only one way. To make
 that possible, a few units have unusual symbols:

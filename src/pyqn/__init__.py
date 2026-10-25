@@ -6,7 +6,7 @@ from .dimensions import Dimensions
 from .quantity import Quantity, QuantityError
 from .units import Units, UnitsConversionError, UnitsError, convert
 
-__version__ = "2.0.0"
+__version__ = "2.0.1"
 
 __all__ = [
     "Dimensions",
