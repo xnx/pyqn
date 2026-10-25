@@ -6,15 +6,20 @@
 # Copyright (C) 2012-2016 Christian Hill
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+from dataclasses import dataclass
 
+
+@dataclass(frozen=True, slots=True)
 class SIPrefix:
     """A little class describing SI prefixes."""
 
-    def __init__(self, prefix, name, power):
-        self.prefix = prefix
-        self.name = name
-        self.power = power
-        self.fac = 10**power
+    prefix: str
+    name: str
+    power: int
+
+    @property
+    def fac(self):
+        return 10**self.power
 
 
 # Here are the SI prefixes that we recognise.
