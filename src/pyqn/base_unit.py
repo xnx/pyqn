@@ -501,6 +501,9 @@ base_units = (
                 "Da", "dalton", "mass", m_u, "", "Da", d_mass, prefixes=frozenset("kM")
             ),
             BaseUnit(
+                "t", "tonne", "mass", 1.0e3, "", "t", d_mass, prefixes=frozenset("kMG")
+            ),
+            BaseUnit(
                 "m_e",
                 "electron mass",
                 "mass",
@@ -531,6 +534,9 @@ base_units = (
             ),
             # Non-SI area units
             BaseUnit("b", "barn", "area", 1.0e-28, "", "b", d_area, prefixes=metric),
+            BaseUnit(
+                "ha", "hectare", "area", 1.0e4, "", "ha", d_area, prefixes=no_prefixes
+            ),
             # Non-SI volume units
             BaseUnit(
                 "l",
@@ -823,4 +829,4 @@ for base_unit_group in base_units:
 # In pyqn 2.0 every unit took every SI prefix except hecto. Until pyqn 3.0 the
 # units that existed then still take those prefixes where the rules above no
 # longer allow them, but with a DeprecationWarning.
-v2_stems = frozenset(base_unit_stems) - {"lm", "lx", "Bq", "Gy", "Sv", "kat"}
+v2_stems = frozenset(base_unit_stems) - {"lm", "lx", "Bq", "Gy", "Sv", "kat", "t", "ha"}

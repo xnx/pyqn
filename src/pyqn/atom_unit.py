@@ -7,44 +7,18 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import re
-import sys
-import warnings
 from dataclasses import dataclass
 from fractions import Fraction
 
-from .base_unit import BaseUnit, base_unit_stems, metric, v2_stems
+from . import domains
+from .base_unit import BaseUnit
+from .errors import UnitsError
 from .si import si_prefixes
 
 # A unit atom is a stem, perhaps with an SI prefix, followed by an optional
 # integer or rational exponent, e.g. 'kg', 's-1', 'Pa-1/2'. Exponents can't
 # start with 0, so stems ending in 0, such as 'a0' (bohr), are unambiguous.
 uatom_patt = re.compile(r"(?P<stem>.+?)(?P<exponent>-?[1-9][0-9]*(?:/[1-9][0-9]*)?)?")
-
-
-def caller_stacklevel():
-    """
-    Return the stacklevel, for warnings.warn() in the function calling this
-    one, of the first caller outside pyqn, so that warnings point there.
-
-    """
-
-    frame, stacklevel = sys._getframe(1), 1
-    while frame is not None and frame.f_globals.get("__name__", "").startswith("pyqn"):
-        frame, stacklevel = frame.f_back, stacklevel + 1
-    return stacklevel
-
-
-class UnitsError(Exception):
-    """
-    An Exception class for errors that might occur whilst manipulating units.
-
-    """
-
-    def __init__(self, error_str):
-        self.error_str = error_str
-
-    def __str__(self):
-        return self.error_str
 
 
 @dataclass(frozen=True, slots=True)
@@ -84,10 +58,10 @@ class AtomUnit:
         return fac**self.exponent
 
     @classmethod
-    def parse(self, s_unit_atom):
+    def parse(self, s_unit_atom, domain=None):
         """
         Parse the string s_unit_atom into an AtomUnit object and return
-        it.
+        it, using the units of domain (by default, domains.everything).
 
         """
 
@@ -95,26 +69,7 @@ class AtomUnit:
         if not m:
             raise UnitsError(f"Invalid unit atom syntax: {s_unit_atom}")
         stem, s_exponent = m.group("stem", "exponent")
-
-        # look the stem up as a base unit first (e.g. 'mmHg', 'min'), and only
-        # then as a (single-character) SI prefix and a base unit (e.g. 'mm'):
-        prefix = None
-        if stem not in base_unit_stems:
-            prefix, stem = stem[0], stem[1:]
-            if prefix not in si_prefixes or stem not in base_unit_stems:
-                raise UnitsError(f"Unrecognised unit: {s_unit_atom}")
-        base_unit = base_unit_stems[stem]
-        if prefix is not None and prefix not in base_unit.prefixes:
-            if stem not in v2_stems or prefix not in metric:
-                raise UnitsError(
-                    f"The unit {stem} cannot take the prefix {prefix}: {s_unit_atom}"
-                )
-            warnings.warn(
-                f"{s_unit_atom}: the unit {stem} will not take the prefix {prefix}"
-                " in pyqn 3.0",
-                DeprecationWarning,
-                stacklevel=caller_stacklevel(),
-            )
+        prefix, base_unit = (domain or domains.everything).lookup(stem)
 
         # if there is an exponent, determine what it is (default is 1)
         exponent = 1

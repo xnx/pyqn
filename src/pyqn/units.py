@@ -38,10 +38,11 @@ class Units:
     undef: bool
     dims: Dimensions | None
 
-    def __init__(self, units):
+    def __init__(self, units, domain=None):
         """
         Initialize this Units from another Units object, a list or tuple of
-        AtomUnit objects, or by parsing a string representing the units.
+        AtomUnit objects, or by parsing a string representing the units with
+        the units of domain (by default, domains.everything).
 
         """
 
@@ -52,7 +53,7 @@ class Units:
             if units == "undef":
                 atom_units, undef = (), True
             else:
-                atom_units = self.parse(units).atom_units
+                atom_units = self.parse(units, domain=domain).atom_units
         elif isinstance(units, (list, tuple)):
             atom_units = tuple(units)
         else:
@@ -85,10 +86,11 @@ class Units:
         return dims
 
     @classmethod
-    def parse(self, s_compoundunit, no_divided_units=False):
+    def parse(self, s_compoundunit, no_divided_units=False, domain=None):
         """
         Parse the string s_compoundunit and return the corresponding
-        Units object.
+        Units object, using the units of domain (by default,
+        domains.everything).
 
         """
 
@@ -101,7 +103,7 @@ class Units:
         if no_divided_units:
             # s_compoundunit does not consist of any units separated by '/'
             # so parse immediately as a sequence of multiplied units.
-            return Units.parse_mult_units(s_compoundunit)
+            return Units.parse_mult_units(s_compoundunit, domain=domain)
 
         # We need to temporarily identify rational exponents (e.g. "Pa-1/2")
         # and replace the / with : so that we can split up the atomic units
@@ -114,16 +116,18 @@ class Units:
 
         div_fields = s_compoundunit.split("/")
         # don't forget to put back the "/" character in any rational exponents.
-        compound_unit = Units.parse_mult_units(div_fields[0].replace(":", "/"))
+        compound_unit = Units.parse_mult_units(
+            div_fields[0].replace(":", "/"), domain=domain
+        )
         for div_field in div_fields[1:]:
             div_field = div_field.replace(":", "/")
             compound_unit = compound_unit / Units.parse(
-                div_field, no_divided_units=True
+                div_field, no_divided_units=True, domain=domain
             )
         return compound_unit
 
     @classmethod
-    def parse_mult_units(self, munit):
+    def parse_mult_units(self, munit, domain=None):
         """
         Parse a string of units multiplied together (indicated by '.'),
         returning the corresponding Units object.
@@ -131,7 +135,7 @@ class Units:
         """
         atom_units = []
         for s_unit in munit.split("."):
-            atom_unit = AtomUnit.parse(s_unit)
+            atom_unit = AtomUnit.parse(s_unit, domain=domain)
             if atom_unit.base_unit.stem != "1":
                 # the unity 'unit' is not really a unit
                 atom_units.append(atom_unit)

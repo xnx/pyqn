@@ -4,12 +4,24 @@
 
 ### Added
 
+- Domains: named sets of units, used when parsing unit strings, so that
+  strings that make no sense in a field are rejected. `Units`,
+  `Units.parse()`, `Quantity` and `Quantity.parse()` take a `domain`; the
+  default, `domains.everything`, has every unit, and `domains.si` has the SI
+  units and the non-SI units accepted for use with them. `Domain` makes
+  domains of your own, checking that every string they accept reads in only
+  one way, and `Domain.format()` writes units with a domain's spellings.
+- The standard symbols `in`, `yd` and `d` for the inch, yard and day. pyqn
+  still prints these units as `inch`, `yard` and `dy`.
+- The tonne (`t`) and the hectare (`ha`).
 - The hecto prefix, `h`, for `Pa`, `L`, `l`, `m` and `g` (as in `hPa`).
 - The SI derived units lumen (`lm`), lux (`lx`), becquerel (`Bq`), gray
   (`Gy`), sievert (`Sv`) and katal (`kat`).
 
 ### Changes
 
+- Errors for unrecognised units say why, as in "Unrecognised unit: hJ (the
+  joule, J, does not take the prefix h)".
 - Each unit takes only the SI prefixes that make sense for it: all of them
   for the SI units and units such as `eV`, `bar` and `cal`; a few for some
   (`kDa`, `Myr`, `Mpc`, `kly`, `mD`, `μu`); none for units such as `min`,

@@ -5,31 +5,17 @@
 # Version 1.0
 # Check for conflicts amongst derived and base units. For example, inches
 # can't be called "in" if the inch takes prefixes, because the milli-inch,
-# "min", would conflict with the use of "min" for minutes.
+# "min", would conflict with the use of "min" for minutes. The Domain
+# constructor checks for such conflicts in every domain.
 
 import unittest
 import warnings
 
 from pyqn.atom_unit import AtomUnit
-from pyqn.base_unit import base_unit_stems, base_units, metric, v2_stems
+from pyqn.base_unit import base_unit_stems, metric, v2_stems
+from pyqn.domains import Domain, everything
 from pyqn.si import si_prefixes
 from pyqn.units import UnitsError
-
-
-def spellings(base_unit):
-    """
-    Return the (prefix, stem) pairs that parse to base_unit: those its rules
-    allow and, until pyqn 3.0, the deprecated ones that pyqn 2.0 allowed.
-
-    """
-
-    if base_unit.stem == "1":
-        # the unity 'unit' takes no prefix
-        return [(None, "1")]
-    prefixes = set(base_unit.prefixes)
-    if base_unit.stem in v2_stems:
-        prefixes |= metric
-    return [(None, base_unit.stem)] + [(p, base_unit.stem) for p in prefixes]
 
 
 class ConflictsCheck(unittest.TestCase):
@@ -40,15 +26,13 @@ class ConflictsCheck(unittest.TestCase):
     """
 
     def test_units_conflicts(self):
-        seen_units = set()
-        for base_unit_group in base_units:
-            for base_unit in base_unit_group[1]:
-                for si_prefix, stem in spellings(base_unit):
-                    this_unit = f"{si_prefix or ''}{stem}"
-                    self.assertNotIn(
-                        this_unit, seen_units, f"Clash with unit: {this_unit}"
-                    )
-                    seen_units.add(this_unit)
+        # making the default domain again runs the Domain constructor's check
+        Domain(
+            "everything",
+            units=everything.units,
+            spellings=dict(everything.spellings),
+            v2_prefixes=True,
+        )
 
     def test_prefixed_units_parse(self):
         """
