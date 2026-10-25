@@ -8,9 +8,10 @@
 import math
 from dataclasses import dataclass
 
-from .constants import E_h, a0, c, e, hbar, m_e, m_u
+from .constants import NA, E_h, a0, c, e, hbar, m_e, m_u
 from .dimensions import (
     Dimensions,
+    d_amount_fraction,
     d_area,
     d_charge,
     d_current,
@@ -21,10 +22,12 @@ from .dimensions import (
     d_magfield_strength,
     d_magnetic_flux,
     d_mass,
+    d_mass_fraction,
     d_pressure,
     d_time,
     d_voltage,
     d_volume,
+    d_volume_fraction,
 )
 from .si import si_prefixes
 
@@ -769,8 +772,19 @@ base_units = (
         ],
     ),
     (
-        "Concentrations and fractions",
+        "Amounts, concentrations and fractions",
         [
+            # a molecule (or other entity): exactly 1/NA mol
+            BaseUnit(
+                "molec",
+                "molecule",
+                "amount",
+                1 / NA,
+                "",
+                r"\mathrm{molec}",
+                Dimensions(Q=1),
+                prefixes=no_prefixes,
+            ),
             BaseUnit(
                 "M",
                 "molar",
@@ -820,6 +834,87 @@ base_units = (
                 "",
                 r"\%",
                 d_dimensionless,
+                prefixes=no_prefixes,
+            ),
+            # Fractions of a particular kind, which have a pseudo-dimension
+            BaseUnit(
+                "ppmw",
+                "parts per million by mass",
+                "mass fraction",
+                1.0e-6,
+                "",
+                "ppmw",
+                d_mass_fraction,
+                prefixes=no_prefixes,
+            ),
+            BaseUnit(
+                "ppbw",
+                "parts per billion by mass",
+                "mass fraction",
+                1.0e-9,
+                "",
+                "ppbw",
+                d_mass_fraction,
+                prefixes=no_prefixes,
+            ),
+            BaseUnit(
+                "wt%",
+                "percent by mass",
+                "mass fraction",
+                1.0e-2,
+                "",
+                r"\mathrm{wt}\%",
+                d_mass_fraction,
+                prefixes=no_prefixes,
+            ),
+            BaseUnit(
+                "ppmv",
+                "parts per million by volume",
+                "volume fraction",
+                1.0e-6,
+                "",
+                "ppmv",
+                d_volume_fraction,
+                prefixes=no_prefixes,
+            ),
+            BaseUnit(
+                "ppbv",
+                "parts per billion by volume",
+                "volume fraction",
+                1.0e-9,
+                "",
+                "ppbv",
+                d_volume_fraction,
+                prefixes=no_prefixes,
+            ),
+            BaseUnit(
+                "pptv",
+                "parts per trillion by volume",
+                "volume fraction",
+                1.0e-12,
+                "",
+                "pptv",
+                d_volume_fraction,
+                prefixes=no_prefixes,
+            ),
+            BaseUnit(
+                "vol%",
+                "percent by volume",
+                "volume fraction",
+                1.0e-2,
+                "",
+                r"\mathrm{vol}\%",
+                d_volume_fraction,
+                prefixes=no_prefixes,
+            ),
+            BaseUnit(
+                "mol%",
+                "percent by amount",
+                "amount fraction",
+                1.0e-2,
+                "",
+                r"\mathrm{mol}\%",
+                d_amount_fraction,
                 prefixes=no_prefixes,
             ),
         ],
@@ -1050,5 +1145,6 @@ units_added_since_v2 = frozenset(
     {"lm", "lx", "Bq", "Gy", "Sv", "kat", "t", "ha"}
     | {"M", "ppm", "ppb", "ppt", "%", "darcy", "Gal", "psi", "bbl"}
     | {"G", "Oe", "Mx", "statC", "statV", "γ", "Ci", "R", "rem", "rd"}
+    | {"molec", "ppmw", "ppbw", "wt%", "ppmv", "ppbv", "pptv", "vol%", "mol%"}
 )
 v2_stems = frozenset(base_unit_stems) - units_added_since_v2

@@ -138,14 +138,56 @@ class FieldDomainsCheck(unittest.TestCase):
 
     def test_field_units(self):
         field_units = {
-            domains.spectroscopy: ("cm-1", "MHz", "mD", "Å", "Torr", "kcal.mol-1"),
+            domains.spectroscopy: (
+                "cm-1",
+                "MHz",
+                "mD",
+                "Å",
+                "Torr",
+                "kcal.mol-1",
+                "cm-1/molec.cm-2",
+            ),
             domains.atomic_and_molecular_physics: ("E_h", "a0-2", "m_e", "mb"),
-            domains.chemistry: ("mM", "mol.L-1", "kDa", "mmHg", "ppm", "ppt", "%"),
+            domains.chemistry: (
+                "mM",
+                "mol.L-1",
+                "kDa",
+                "mmHg",
+                "ppm",
+                "ppt",
+                "%",
+                "molec.cm-3",
+                "wt%",
+                "ppmv",
+                "mol%",
+            ),
             domains.astronomy: ("kpc", "Ga", "au", "Jy", "erg.s-1", "mG", "kly"),
-            domains.geology: ("mD", "Ma", "Myr", "mGal", "kpsi", "bbl", "ft", "in"),
+            domains.geology: (
+                "mD",
+                "Ma",
+                "Myr",
+                "mGal",
+                "kpsi",
+                "bbl",
+                "ft",
+                "in",
+                "wt%",
+                "ppmw",
+            ),
             domains.gaussian_electromagnetism: ("G", "kOe", "Mx", "Fr", "statV", "γ"),
             domains.radiation_physics: ("mrad", "μCi", "mR", "mrem", "mSv", "kBq"),
-            domains.meteorology: ("hPa", "mbar", "kn", "NM", "ft", "ppb", "%"),
+            domains.meteorology: (
+                "hPa",
+                "mbar",
+                "kn",
+                "NM",
+                "ft",
+                "ppb",
+                "%",
+                "ppbv",
+                "pptv",
+                "molec.cm-3",
+            ),
         }
         with warnings.catch_warnings():
             warnings.simplefilter("error")
@@ -184,6 +226,11 @@ class FieldDomainsCheck(unittest.TestCase):
             (domains.geology, "Å"),
             (domains.gaussian_electromagnetism, "T"),
             (domains.radiation_physics, "μrad.s-1"),
+            (domains.si, "molec"),
+            (domains.astronomy, "molec"),
+            (domains.geology, "ppmv"),
+            (domains.meteorology, "wt%"),
+            (domains.geology, "mol%"),
         ):
             with self.assertRaises(UnitsError, msg=f"{s_units} in {domain.name}"):
                 Units(s_units, domain=domain)

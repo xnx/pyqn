@@ -4,6 +4,17 @@
 
 ### Added
 
+- The molecule, `molec`, a unit of amount (exactly 1/N_A mol), so that
+  HITRAN's `cm-1/molec.cm-2` converts to `cm.mol-1`, or with `force="mol"`
+  to `cm` per molecule.
+- Pseudo-dimensions: named dimensions beyond the seven of the SI, which
+  cancel only against themselves, for the kinds of fraction that the SI gives
+  dimension 1. `ppmw`, `ppbw` and `wt%` are mass fractions; `ppmv`, `ppbv`,
+  `pptv` and `vol%` volume fractions; `mol%` an amount fraction. Fractions of
+  different kinds cannot be converted into each other, unless the conventions
+  `force="mass fraction"`, `"volume fraction"` or `"amount fraction"` treat
+  their pseudo-dimensions as dimensionless. `Dimensions` has a `pseudo`
+  attribute.
 - Conventions can be combined, as in
   `Units("kJ.mol-1").conversion("cm-1", force=("mol", "spec"))`. Each
   convention treats physical constants as 1 (`spec`: h and c; `kBT`: k_B;
@@ -38,6 +49,8 @@
 
 ### Changes
 
+- Errors for conversions between units of different dimensions write the
+  dimensions in parentheses, as in "units J (L2.M.T-2) and K (Theta)".
 - Because `spec` treats c as 1, it also converts lengths to light-travel
   times (`cm` to `s`). An unknown convention name raises `UnitsError`.
 - `ppt` is parts per trillion. pyqn 2.0 read it as the pico-pint.

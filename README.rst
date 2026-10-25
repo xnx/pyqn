@@ -46,7 +46,7 @@ convention is asked for (see `Conventions`_):
 >>> Units("J").conversion("K")
 Traceback (most recent call last):
     ...
-UnitsError: Failure in units conversion: units J[L2.M.T-2] and K[Theta] have different dimensions
+UnitsError: Failure in units conversion: units J (L2.M.T-2) and K (Theta) have different dimensions
 
 
 Unit syntax
@@ -174,14 +174,14 @@ Domain                                    Other spellings                       
 ========================================  ========================================  =====
 ``domains.everything``                    ``in`` (inch), ``yd`` (yard), ``d`` (dy)  every unit (see `Units`_)
 ``domains.si``                            ``d`` (dy), ``au`` (AU)                   the SI units, and ``min``, ``h``, ``deg``, ``arcmin``, ``asec``, ``ha``, ``L``, ``l``, ``t``, ``Da``, ``u``, ``eV``, ``dy``, ``AU``
-``domains.spectroscopy``                  none                                      those of ``si``, and ``Å``, ``D``, ``k``, ``Torr``, ``atm``, ``bar``, ``erg``, ``cal``
-``domains.atomic_and_molecular_physics``  none                                      those of ``si``, and ``Å``, ``D``, ``E_h``, ``Ry``, ``a0``, ``m_e``, ``e``, ``hbar``, ``amu``, ``b``
-``domains.chemistry``                     none                                      those of ``si``, and ``M``, ``Å``, ``D``, ``cal``, ``atm``, ``bar``, ``Torr``, ``mmHg``, ``ppm``, ``ppb``, ``ppt``, ``%``
+``domains.spectroscopy``                  none                                      those of ``si``, and ``Å``, ``D``, ``k``, ``Torr``, ``atm``, ``bar``, ``erg``, ``cal``, ``molec``
+``domains.atomic_and_molecular_physics``  none                                      those of ``si``, and ``Å``, ``D``, ``E_h``, ``Ry``, ``a0``, ``m_e``, ``e``, ``hbar``, ``amu``, ``b``, ``molec``
+``domains.chemistry``                     none                                      those of ``si``, and ``M``, ``Å``, ``D``, ``cal``, ``atm``, ``bar``, ``Torr``, ``mmHg``, ``molec``, ``ppm``, ``ppb``, ``ppt``, ``%``, ``ppmw``, ``ppbw``, ``wt%``, ``ppmv``, ``ppbv``, ``pptv``, ``vol%``, ``mol%``
 ``domains.astronomy``                     ``a`` (yr)                                those of ``si``, and ``pc``, ``ly``, ``yr``, ``Jy``, ``erg``, ``dyn``, ``Å``, ``G``
-``domains.geology``                       ``a`` (yr), ``D`` (darcy), ``in`` (inch)  those of ``si``, and ``yr``, ``darcy``, ``Gal``, ``psi``, ``bbl``, ``bar``, ``atm``, ``ft``, ``inch``, ``ppm``, ``ppb``, ``ppt``, ``%``
+``domains.geology``                       ``a`` (yr), ``D`` (darcy), ``in`` (inch)  those of ``si``, and ``yr``, ``darcy``, ``Gal``, ``psi``, ``bbl``, ``bar``, ``atm``, ``ft``, ``inch``, ``ppm``, ``ppb``, ``ppt``, ``%``, ``ppmw``, ``ppbw``, ``wt%``
 ``domains.gaussian_electromagnetism``     ``Fr`` (statC)                            ``1``, ``m``, ``g``, ``s``, ``dyn``, ``erg``, ``G``, ``Oe``, ``Mx``, ``statC``, ``statV``, ``γ``
 ``domains.radiation_physics``             ``rad`` (rd)                              those of ``si`` except ``rad``, and ``Ci``, ``R``, ``rem``, ``rd``
-``domains.meteorology``                   none                                      those of ``si``, and ``bar``, ``atm``, ``kn``, ``NM``, ``ft``, ``%``, ``ppm``, ``ppb``, ``ppt``
+``domains.meteorology``                   none                                      those of ``si``, and ``bar``, ``atm``, ``kn``, ``NM``, ``ft``, ``%``, ``ppm``, ``ppb``, ``ppt``, ``molec``, ``ppmv``, ``ppbv``, ``pptv``, ``vol%``
 ========================================  ========================================  =====
 
 .. domains-table-end
@@ -235,6 +235,50 @@ to frequency rather than a multiple of it.
 Conversion factors use the exact values of the SI defining constants and the
 CODATA 2022 values of the others (such as the electron mass and the
 hartree).
+
+
+Molecules and fractions
+=======================
+
+A molecule, ``molec``, is a unit of amount: exactly 1/N\ :sub:`A` mol. So
+HITRAN's line intensities, in cm\ :sup:`-1`/(molecule cm\ :sup:`-2`),
+convert to molar units directly, and to units per molecule with
+``force="mol"``:
+
+>>> s = Units("cm-1/molec.cm-2")
+>>> s
+cm.molec-1
+>>> s.conversion("cm.mol-1")
+6.02214076e+23
+>>> s.conversion("cm", force="mol")
+1.0
+
+Mass, volume and amount fractions all have dimension 1 in the SI, but cannot
+be converted into each other without molar masses or densities. So the units
+for a particular kind of fraction have a *pseudo-dimension*, which cancels
+only against itself:
+
+================  ========================================
+Pseudo-dimension  Units
+================  ========================================
+mass fraction     ``ppmw``, ``ppbw``, ``wt%``
+volume fraction   ``ppmv``, ``ppbv``, ``pptv``, ``vol%``
+amount fraction   ``mol%``
+================  ========================================
+
+>>> Units("wt%").conversion("ppmw")
+10000.0
+>>> Units("ppmv").conversion("ppmw")
+Traceback (most recent call last):
+    ...
+UnitsError: Failure in units conversion: units ppmv ([volume fraction]) and ppmw ([mass fraction]) have different dimensions
+
+The plain ``ppm``, ``ppb``, ``ppt`` and ``%`` have dimension 1, and can stand
+for any kind of fraction. A convention named after a pseudo-dimension treats
+it as dimensionless:
+
+>>> Units("ppmv").conversion("μmol/mol", force="volume fraction")
+1.0
 
 
 Quantities
@@ -451,17 +495,26 @@ Unit    Name           Dimensions  Prefixes
 ``kn``  knot           L.T-1       none
 ======  =============  ==========  ========
 
-**Concentrations and fractions**
+**Amounts, concentrations and fractions**
 
-=======  ==================  ===============  =============
-Unit     Name                Dimensions       Prefixes
-=======  ==================  ===============  =============
-``M``    molar               L-3.Q            f, p, n, μ, m
-``ppm``  parts per million   [dimensionless]  none
-``ppb``  parts per billion   [dimensionless]  none
-``ppt``  parts per trillion  [dimensionless]  none
-``%``    percent             [dimensionless]  none
-=======  ==================  ===============  =============
+=========  ============================  =================  =============
+Unit       Name                          Dimensions         Prefixes
+=========  ============================  =================  =============
+``molec``  molecule                      Q                  none
+``M``      molar                         L-3.Q              f, p, n, μ, m
+``ppm``    parts per million             [dimensionless]    none
+``ppb``    parts per billion             [dimensionless]    none
+``ppt``    parts per trillion            [dimensionless]    none
+``%``      percent                       [dimensionless]    none
+``ppmw``   parts per million by mass     [mass fraction]    none
+``ppbw``   parts per billion by mass     [mass fraction]    none
+``wt%``    percent by mass               [mass fraction]    none
+``ppmv``   parts per million by volume   [volume fraction]  none
+``ppbv``   parts per billion by volume   [volume fraction]  none
+``pptv``   parts per trillion by volume  [volume fraction]  none
+``vol%``   percent by volume             [volume fraction]  none
+``mol%``   percent by amount             [amount fraction]  none
+=========  ============================  =================  =============
 
 **Geological and petroleum units**
 
