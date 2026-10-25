@@ -191,16 +191,17 @@ Conventions
 ===========
 
 ``Units.conversion(other, force=...)`` can convert between units of
-different dimensions using one of three conventions:
+different dimensions using conventions, each of which treats some physical
+constants as 1:
 
 ``force="spec"``
-    Spectroscopy: energy, wavenumber and frequency are interconverted with
-    E = hν = hcν̃.
+    Spectroscopy, with h and c: energy, wavenumber and frequency are
+    interconverted with E = hν = hcν̃.
 ``force="mol"``
-    Molar quantities: the amount dimension is added or removed with the
-    Avogadro constant, as between kJ.mol-1 and J (per molecule).
+    Molar quantities, with the Avogadro constant: the amount dimension is
+    added or removed, as between kJ.mol-1 and J (per molecule).
 ``force="kBT"``
-    Energy and temperature are interconverted with E = k\ :sub:`B`\ T.
+    Energy and temperature, with the Boltzmann constant: E = k\ :sub:`B`\ T.
 
 >>> Units("J").conversion("cm-1", force="spec")
 5.0341165675427096e+22
@@ -209,7 +210,27 @@ different dimensions using one of three conventions:
 >>> Units("K").conversion("J", force="kBT")
 1.380649e-23
 
-Only one convention can be used in each conversion.
+Conventions can be combined:
+
+>>> Units("kJ.mol-1").conversion("cm-1", force=("mol", "spec"))
+83.59347229111778
+>>> Units("K").conversion("cm-1", force=("kBT", "spec"))
+0.6950348004861274
+
+pyqn finds the powers of the constants by which the dimensions of the two
+units differ. The constants have independent dimensions, so there is at most
+one way to use them, and a conversion that needs any other change of
+dimensions is an error. The units can have any dimensions, so pressure
+broadening coefficients, for example, convert too:
+
+>>> Units("cm-1.atm-1").conversion("MHz.Torr-1", force="spec")
+39.44637605263158
+
+Two consequences: because ``spec`` treats c as 1, it also converts lengths to
+light-travel times (``cm`` to ``s``); and ``mol`` only adds or removes the
+amount dimension entirely, so ``mol`` cannot be converted to ``mol2``.
+Wavelengths are not covered, because a wavelength is inversely proportional
+to frequency rather than a multiple of it.
 
 Conversion factors use the exact values of the SI defining constants and the
 CODATA 2022 values of the others (such as the electron mass and the

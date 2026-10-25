@@ -8,6 +8,7 @@ import dataclasses
 import math
 import re
 import unicodedata
+from fractions import Fraction
 
 from .atom_unit import AtomUnit, UnitsError
 from .constants import NA, c, h, kB
@@ -311,12 +312,23 @@ class Units:
 
     def conversion(self, other, force=None):
         """
-        Return the factor required to convert this Units to
-        another. Their dimensions have to match, unless force is set
-        to allow special cases:
-        force='spec':   spectroscopic units: conversions between [L-1],
-        [M,L2,T-2], [T-1] are allowed (i.e. cm-1, s-1, and J can be
-        interconverted through factors of h, hc).
+        Return the factor required to convert this Units to another. Their
+        dimensions have to match, unless force names one or more conventions,
+        each of which treats some physical constants as 1, so that units of
+        different dimensions can be interconverted:
+
+        force='spec': h and c, for spectroscopy: energy, frequency and
+            wavenumber are interconverted with E = h.nu = hc.nu~ (and so
+            are lengths and light-travel times, as c is 1);
+        force='kBT': the Boltzmann constant: energy and temperature are
+            interconverted with E = kB.T;
+        force='mol': the Avogadro constant: molar quantities and those per
+            entity are interconverted, as between kJ.mol-1 and J; the amount
+            dimension must be added or removed in its entirety.
+
+        Conventions can be combined, as in force=('mol', 'spec'): the
+        constants have independent dimensions, so there is at most one way
+        to use them in a conversion.
 
         """
 
@@ -325,88 +337,105 @@ class Units:
         if self.undef or other.undef:
             raise UnitsError(f"Cannot convert between {self} and {other}")
 
-        conversion_method = {
-            "spec": self.spec_conversion,
-            "mol": self.mol_conversion,
-            "kBT": self.kBT_conversion,
-        }
+        conventions = (force,) if isinstance(force, str) else tuple(force or ())
+        for convention in conventions:
+            if convention not in convention_constants:
+                raise UnitsError(f"Unknown units conversion convention: {convention}")
 
+        fac = self.to_si() / other.to_si()
         self_dims, other_dims = self.get_dims(), other.get_dims()
-        if self_dims != other_dims:
-            try:
-                return conversion_method[force](other)
-            except KeyError:
-                raise UnitsError(
-                    f"Failure in units conversion: units {self}[{self.get_dims()}] and"
-                    f" {other}[{other.get_dims()}] have different dimensions"
-                )
-        return self.to_si() / other.to_si()
-
-    def kBT_conversion(self, other):
-        from_dims = self.get_dims()
-        to_dims = other.get_dims()
-        fac = self.to_si()
-
-        if from_dims == d_energy and to_dims == d_temperature:
-            fac = fac / kB
-        elif from_dims == d_temperature and to_dims == d_energy:
-            fac = fac * kB
-        else:
+        if self_dims == other_dims:
+            return fac
+        if not conventions:
             raise UnitsError(
-                "Failure in conversion of units: was expecting to "
-                "convert between energy and temperature"
+                f"Failure in units conversion: units {self}[{self_dims}] and"
+                f" {other}[{other_dims}] have different dimensions"
             )
-        return fac / other.to_si()
 
-    def mol_conversion(self, other):
-        from_dims, to_dims = self.get_dims(), other.get_dims()
-        from_dims_Q, to_dims_Q = from_dims.dims[4], to_dims.dims[4]
-
-        # We can only remove or add the amount dimension in its entirety, and
-        # the other dimensions must match.
-        if (from_dims_Q and to_dims_Q) or (
-            from_dims / Dimensions(Q=from_dims_Q) != to_dims / Dimensions(Q=to_dims_Q)
-        ):
+        # find the powers of the constants by which the dimensions differ
+        names = list(
+            dict.fromkeys(name for c in conventions for name in convention_constants[c])
+        )
+        powers = powers_of(
+            self_dims / other_dims, [physical_constants[name][1] for name in names]
+        )
+        if powers is None:
+            raise UnitsConversionError(
+                f"Cannot convert {self}[{self_dims}] to {other}[{other_dims}]"
+                f" with the conventions {', '.join(conventions)}"
+            )
+        powers = dict(zip(names, powers))
+        if powers.get("NA") and self_dims.dims[4] and other_dims.dims[4]:
+            # the amount dimension can only be added or removed in its entirety
             raise UnitsConversionError(
                 f"Cannot force molar conversion between {self} and {other}"
             )
+        for name, power in powers.items():
+            fac /= physical_constants[name][0] ** power
+        return fac
 
-        fac = self.to_si()
-        if from_dims_Q:
-            fac = fac * NA**from_dims_Q
-        else:
-            fac = fac * NA**-to_dims_Q
-        return fac / other.to_si()
+    def kBT_conversion(self, other):
+        """Return the factor to convert this Units to other with force='kBT'."""
+        return self.conversion(other, force="kBT")
+
+    def mol_conversion(self, other):
+        """Return the factor to convert this Units to other with force='mol'."""
+        return self.conversion(other, force="mol")
 
     def spec_conversion(self, other):
-        d_wavenumber = d_length**-1
-        d_frequency = d_time**-1
-
-        from_dims = self.get_dims()
-        to_dims = other.get_dims()
-        fac = self.to_si()
-        if from_dims == d_wavenumber:
-            fac *= h * c
-        elif from_dims == d_frequency:
-            fac *= h
-        elif from_dims != d_energy:
-            raise UnitsError(
-                "Failure in conversion of spectroscopic units:"
-                " I only recognise from-units of wavenumber, energy and"
-                f" frequency but got {self}"
-            )
-        if to_dims == d_wavenumber:
-            fac /= h * c
-        elif to_dims == d_frequency:
-            fac /= h
-        elif to_dims != d_energy:
-            raise UnitsError(
-                "Failure in conversion of spectroscopic units:"
-                " I only recognise to-units of wavenumber, energy and"
-                f" frequency but got {other}"
-            )
-        return fac / other.to_si()
+        """Return the factor to convert this Units to other with force='spec'."""
+        return self.conversion(other, force="spec")
 
 
-def convert(from_units, to_units):
-    return Units(from_units).conversion(to_units)
+# The conventions for converting between units of different dimensions: each
+# treats some physical constants as 1.
+convention_constants = {"spec": ("h", "c"), "kBT": ("kB",), "mol": ("NA",)}
+
+# The values (in SI units) and dimensions of these constants, which are
+# independent: each has a power of a dimension that the others lack, or of a
+# combination of them.
+physical_constants = {
+    "h": (h, d_energy * d_time),
+    "c": (c, d_length / d_time),
+    "kB": (kB, d_energy / d_temperature),
+    "NA": (NA, Dimensions(Q=-1)),
+}
+
+
+def powers_of(dims, bases):
+    """
+    Return the powers p of the independent Dimensions in bases such that
+    dims is the product of bases[i]**p[i], or None if there are none. The
+    seven equations, one for each base dimension, are solved exactly by
+    Gaussian elimination; the powers are ints where they are whole numbers.
+
+    """
+
+    n = len(bases)
+    # one row of the augmented matrix for each base dimension
+    rows = [
+        [Fraction(base.dims[j]) for base in bases] + [Fraction(dims.dims[j])]
+        for j in range(7)
+    ]
+    for col in range(n):
+        pivot = next(r for r in range(col, 7) if rows[r][col] != 0)
+        rows[col], rows[pivot] = rows[pivot], rows[col]
+        rows[col] = [x / rows[col][col] for x in rows[col]]
+        for r in range(7):
+            if r != col and rows[r][col] != 0:
+                rows[r] = [x - rows[r][col] * y for x, y in zip(rows[r], rows[col])]
+    if any(row[n] != 0 for row in rows[n:]):
+        # dims is not a product of powers of the bases
+        return None
+    return [int(p) if p.denominator == 1 else p for p in (row[n] for row in rows[:n])]
+
+
+def convert(from_units, to_units, force=None):
+    """
+    Return the factor required to convert from_units to to_units (Units
+    objects or strings), with the conventions in force, as for
+    Units.conversion().
+
+    """
+
+    return Units(from_units).conversion(to_units, force=force)
