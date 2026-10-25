@@ -4,6 +4,12 @@
 
 ### Added
 
+- Conventions can be combined, as in
+  `Units("kJ.mol-1").conversion("cm-1", force=("mol", "spec"))`. Each
+  convention treats physical constants as 1 (`spec`: h and c; `kBT`: k_B;
+  `mol`: N_A), and pyqn finds the powers of them by which the units'
+  dimensions differ, so conventions apply to units of any dimensions, such as
+  `cm-1.atm-1` and `MHz.Torr-1`. `convert()` takes `force` too.
 - Domains: named sets of units, used when parsing unit strings, so that
   strings that make no sense in a field are rejected. `Units`,
   `Units.parse()`, `Quantity` and `Quantity.parse()` take a `domain`; the
@@ -32,6 +38,8 @@
 
 ### Changes
 
+- Because `spec` treats c as 1, it also converts lengths to light-travel
+  times (`cm` to `s`). An unknown convention name raises `UnitsError`.
 - `ppt` is parts per trillion. pyqn 2.0 read it as the pico-pint.
 - Errors for unrecognised units say why, as in "Unrecognised unit: hJ (the
   joule, J, does not take the prefix h)".

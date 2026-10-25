@@ -9,7 +9,8 @@ import unittest
 
 import pytest
 
-from pyqn.units import Units, UnitsError
+from pyqn.quantity import Quantity
+from pyqn.units import Units, UnitsError, convert
 
 # Exact values of the SI defining constants.
 h, c, kB, NA = 6.62607015e-34, 299792458.0, 1.380649e-23, 6.02214076e23
@@ -118,6 +119,74 @@ class UnitsConversionCheck(unittest.TestCase):
         u3 = Units("m-3/2")
         u4 = Units("inch-3/2")
         self.assertEqual(u3.conversion(u4), approx(0.0254**1.5))
+
+
+class ComposedConventionsCheck(unittest.TestCase):
+    """Unit tests for conversions with several conventions at once."""
+
+    def test_composed_conventions(self):
+        for from_units, to_units, force, fac in (
+            ("kJ.mol-1", "cm-1", ("mol", "spec"), 1.0e3 / NA / (h * c * 100)),
+            ("K", "cm-1", ("kBT", "spec"), kB / (h * c * 100)),
+            ("MHz", "K", ("spec", "kBT"), h * 1.0e6 / kB),
+            ("kcal.mol-1", "K", ("mol", "kBT"), 4184 / (NA * kB)),
+            ("eV", "K", ("kBT",), e / kB),
+        ):
+            u1, u2 = Units(from_units), Units(to_units)
+            self.assertEqual(u1.conversion(u2, force=force), approx(fac))
+            # and back again, with the conventions in any order
+            self.assertEqual(u2.conversion(u1, force=force[::-1]), approx(1 / fac))
+
+    def test_force_types(self):
+        fac = Units("kJ.mol-1").conversion("cm-1", force=("mol", "spec"))
+        for force in (["spec", "mol"], {"mol", "spec"}, ("mol", "spec", "mol")):
+            self.assertEqual(Units("kJ.mol-1").conversion("cm-1", force=force), fac)
+
+    def test_other_dimensions(self):
+        # conventions apply to any units whose dimensions differ by powers of
+        # the constants, such as pressure-broadening coefficients
+        self.assertEqual(
+            Units("cm-1.atm-1").conversion("MHz.Torr-1", force="spec"),
+            approx(c * 100 / 1.0e6 / 760),
+        )
+        # an entropy in units of R, and one in units of kB
+        self.assertEqual(
+            Units("J.K-1.mol-1").conversion("1", force=("mol", "kBT")),
+            approx(1 / (NA * kB)),
+        )
+        self.assertEqual(Units("J.K-1").conversion("1", force="kBT"), approx(1 / kB))
+
+    def test_light_travel_time(self):
+        # spec treats c as 1, so it converts lengths to light-travel times
+        self.assertEqual(Units("cm").conversion("s", force="spec"), approx(0.01 / c))
+        self.assertEqual(Units("m.s-1").conversion("1", force="spec"), approx(1 / c))
+
+    def test_convention_errors(self):
+        for from_units, to_units, force in (
+            ("cm", "MHz", "spec"),
+            ("J", "m", ("mol", "spec", "kBT")),
+            ("mol", "mol2", "mol"),
+            ("mol.K", "J.mol-1", ("mol", "kBT")),
+            ("J", "cm-1", None),
+            ("J", "cm-1", ()),
+            ("J", "cm-1", "spect"),
+            ("J", "J", "spect"),
+        ):
+            with self.assertRaises(UnitsError, msg=(from_units, to_units, force)):
+                Units(from_units).conversion(to_units, force=force)
+
+    def test_conversion_methods(self):
+        self.assertEqual(Units("J").spec_conversion("cm-1"), approx(1 / (100 * h * c)))
+        self.assertEqual(Units("K").kBT_conversion("J"), approx(kB))
+        self.assertEqual(Units("mol").mol_conversion("1"), approx(NA))
+        self.assertEqual(
+            convert("kJ.mol-1", "cm-1", force=("mol", "spec")),
+            approx(1.0e3 / NA / (h * c * 100)),
+        )
+        q1 = Quantity(value=2.0, units="kJ.mol-1", sd=0.1)
+        q2 = q1.convert_units_to("cm-1", force=("mol", "spec"))
+        self.assertEqual(q2.value, approx(2.0e3 / NA / (h * c * 100)))
+        self.assertEqual(q2.sd, approx(0.1e3 / NA / (h * c * 100)))
 
 
 if __name__ == "__main__":
