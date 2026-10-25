@@ -98,11 +98,11 @@ class Quantity(Symbol):
         """
         Return a string representation of the parameter and its
         standard deviation in the conventional format used in
-        the spectroscopic literature:
-        Examples:
-        0.04857623(71) for 4.857623e-2 +/- 7.1e-7
-        -0.412(40) for -0.412 +/- 0.04
-        1.732400(38)e7 for 17324000 +/- 380
+        the spectroscopic literature. Examples::
+
+            0.04857623(71) for 4.857623e-2 +/- 7.1e-7
+            -0.412(40) for -0.412 +/- 0.04
+            1.732400(38)e7 for 17324000 +/- 380
 
         Notes:
         This routine has not been rigorously tested, because I wrote
@@ -111,12 +111,15 @@ class Quantity(Symbol):
         well as using the output from this routine...
 
         Arguments:
-        nsd_digits: the number of digits in the standard deviation
-            (the default is 2)
-        small: parameter values smaller than small are output in
-            scientific notation (<mantissa>e<power>)
-        large: parameter values larger than large are output in
-            scientific notation (<mantissa>e-<power>)
+
+        nsd_digits
+            the number of digits in the standard deviation (the default is 2)
+        small
+            parameter values smaller than small are output in scientific
+            notation (<mantissa>e<power>)
+        large
+            parameter values larger than large are output in scientific
+            notation (<mantissa>e<power>)
 
         """
         N, sd = self.value, self.sd

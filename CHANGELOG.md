@@ -4,6 +4,10 @@
 
 ### Added
 
+- Documentation at https://pyqn.readthedocs.io: the user guide (the README),
+  worked examples for spectroscopy (HITRAN line data), atmospheric
+  chemistry, physical chemistry and validating the units in data files, and
+  an API reference. Its examples are tested with the rest of the code.
 - The molecule, `molec`, a unit of amount (exactly 1/N_A mol), so that
   HITRAN's `cm-1/molec.cm-2` converts to `cm.mol-1`, or with `force="mol"`
   to `cm` per molecule.

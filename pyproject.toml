@@ -31,19 +31,21 @@ classifiers = [
 
 [project.urls]
 Homepage = "https://github.com/xnx/pyqn"
+Documentation = "https://pyqn.readthedocs.io"
 Issues = "https://github.com/xnx/pyqn/issues"
 Changelog = "https://github.com/xnx/pyqn/blob/main/CHANGELOG.md"
 
 [dependency-groups]
 dev = ["pytest", "pytest-cov", "ruff==0.17.2"]
+docs = ["sphinx~=9.2", "furo>=2025.12.19"]
 
 [tool.setuptools.dynamic]
 version = { attr = "pyqn.__version__" }
 
 [tool.pytest.ini_options]
-# The examples in the README are tested too.
-testpaths = ["tests", "README.rst"]
-addopts = ["--doctest-glob=README.rst"]
+# The examples in the README and the documentation are tested too.
+testpaths = ["tests", "README.rst", "docs"]
+addopts = ["--doctest-glob=*.rst"]
 # Compare only the type of exceptions, not their module or message.
 doctest_optionflags = ["IGNORE_EXCEPTION_DETAIL"]
 
