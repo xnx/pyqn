@@ -70,9 +70,14 @@ an optional exponent:
   ``J/mol.K`` is J mol⁻¹ K⁻¹, and ``kg/m2/s`` is kg m⁻² s⁻¹.
 - Spaces are not allowed: ``kg m-2`` is an error, not kg m⁻².
 - ``1`` is the unit of a dimensionless quantity, as in ``1/s``.
-- The SI prefixes are ``y z a f p n μ m c d k M G T P E Z Y``. Deca and
-  hecto (``da``, ``h``) and the prefixes added in 2022 (ronna, quetta, ronto
-  and quecto) are not supported.
+- The SI prefixes are ``y z a f p n μ m c d h k M G T P E Z Y``, but each
+  unit takes only some of them: see the *Prefixes* column in the table of
+  `Units`_. Hecto (``h``) goes only with ``Pa``, ``L``, ``l``, ``m`` and
+  ``g``, as in ``hPa``. Deca (``da``) and the prefixes added in 2022 (ronna,
+  quetta, ronto and quecto) are not supported.
+- pyqn 2.0 allowed every prefix but hecto on every unit. Prefixes that a unit
+  no longer takes, as in ``kmin`` or ``μÅ``, still work in pyqn 2.1 but give
+  a ``DeprecationWarning``; pyqn 3.0 will reject them.
 - ``μ`` may be typed as the Greek letter mu or as the micro sign ``µ``; the
   ohm and angstrom signs are likewise read as ``Ω`` and ``Å``. A plain ``u``
   is the atomic mass unit, not micro.
@@ -160,189 +165,196 @@ Limitations
 Units
 =====
 
-These are the units that PyQn recognises; each can take any SI prefix.
+These are the units that PyQn recognises, with the SI prefixes that each
+takes ("all except h" is every SI prefix except hecto).
 
 .. units-table-start
 
 **Unity**
 
-=====  =====  ===============
-Unit   Name   Dimensions
-=====  =====  ===============
-``1``  unity  [dimensionless]
-=====  =====  ===============
+=====  =====  ===============  ========
+Unit   Name   Dimensions       Prefixes
+=====  =====  ===============  ========
+``1``  unity  [dimensionless]  none
+=====  =====  ===============  ========
 
 **SI unit stems**
 
-=======  =======  ==========
-Unit     Name     Dimensions
-=======  =======  ==========
-``m``    metre    L
-``s``    second   T
-``g``    gram     M
-``K``    kelvin   Theta
-``mol``  mole     Q
-``A``    amp      C
-``cd``   candela  I
-=======  =======  ==========
+=======  =======  ==========  ============
+Unit     Name     Dimensions  Prefixes
+=======  =======  ==========  ============
+``m``    metre    L           all
+``s``    second   T           all except h
+``g``    gram     M           all
+``K``    kelvin   Theta       all except h
+``mol``  mole     Q           all except h
+``A``    amp      C           all except h
+``cd``   candela  I           all except h
+=======  =======  ==========  ============
 
 **Derived SI units**
 
-=======  =========  ===============
-Unit     Name       Dimensions
-=======  =========  ===============
-``N``    newton     L.M.T-2
-``J``    joule      L2.M.T-2
-``W``    watt       L2.M.T-3
-``Pa``   pascal     L-1.M.T-2
-``C``    coulomb    T.C
-``V``    volt       L2.M.T-3.C-1
-``Ω``    ohm        L2.M.T-3.C-2
-``F``    farad      L-2.M-1.T4.C2
-``Wb``   weber      L2.M.T-2.C-1
-``H``    henry      L2.M.T-2.C-2
-``S``    siemens    L-2.M-1.T3.C2
-``T``    tesla      M.T-2.C-1
-``Hz``   hertz      T-1
-``rad``  radian     [dimensionless]
-``sr``   steradian  [dimensionless]
-=======  =========  ===============
+=======  =========  ===============  ============
+Unit     Name       Dimensions       Prefixes
+=======  =========  ===============  ============
+``N``    newton     L.M.T-2          all except h
+``J``    joule      L2.M.T-2         all except h
+``W``    watt       L2.M.T-3         all except h
+``Pa``   pascal     L-1.M.T-2        all
+``C``    coulomb    T.C              all except h
+``V``    volt       L2.M.T-3.C-1     all except h
+``Ω``    ohm        L2.M.T-3.C-2     all except h
+``F``    farad      L-2.M-1.T4.C2    all except h
+``Wb``   weber      L2.M.T-2.C-1     all except h
+``H``    henry      L2.M.T-2.C-2     all except h
+``S``    siemens    L-2.M-1.T3.C2    all except h
+``T``    tesla      M.T-2.C-1        all except h
+``Hz``   hertz      T-1              all except h
+``rad``  radian     [dimensionless]  all except h
+``sr``   steradian  [dimensionless]  all except h
+``lm``   lumen      I                all except h
+``lx``   lux        L-2.I            all except h
+``Bq``   becquerel  T-1              all except h
+``Gy``   gray       L2.T-2           all except h
+``Sv``   sievert    L2.T-2           all except h
+``kat``  katal      T-1.Q            all except h
+=======  =========  ===============  ============
 
 **Non-SI pressure units**
 
-========  ======================  ==========
-Unit      Name                    Dimensions
-========  ======================  ==========
-``bar``   bar                     L-1.M.T-2
-``atm``   atmosphere              L-1.M.T-2
-``Torr``  torr                    L-1.M.T-2
-``mmHg``  millimetres of mercury  L-1.M.T-2
-========  ======================  ==========
+========  ======================  ==========  ============
+Unit      Name                    Dimensions  Prefixes
+========  ======================  ==========  ============
+``bar``   bar                     L-1.M.T-2   all except h
+``atm``   atmosphere              L-1.M.T-2   none
+``Torr``  torr                    L-1.M.T-2   all except h
+``mmHg``  millimetres of mercury  L-1.M.T-2   none
+========  ======================  ==========  ============
 
 **cgs units**
 
-========  ===============  ==========
-Unit      Name             Dimensions
-========  ===============  ==========
-``dyn``   dyne             L.M.T-2
-``erg``   erg              L2.M.T-2
-``k``     kayser           L-1
-``D``     debye            L.T.C
-``hbar``  hbar             L2.M.T-1
-``e``     electron charge  T.C
-========  ===============  ==========
+========  ===============  ==========  ============
+Unit      Name             Dimensions  Prefixes
+========  ===============  ==========  ============
+``dyn``   dyne             L.M.T-2     all except h
+``erg``   erg              L2.M.T-2    all except h
+``k``     kayser           L-1         none
+``D``     debye            L.T.C       m
+``hbar``  hbar             L2.M.T-1    none
+``e``     electron charge  T.C         none
+========  ===============  ==========  ============
 
 **Angular units**
 
-==========  =========  ===============
-Unit        Name       Dimensions
-==========  =========  ===============
-``deg``     degree     [dimensionless]
-``arcmin``  arcminute  [dimensionless]
-``asec``    arcsecond  [dimensionless]
-==========  =========  ===============
+==========  =========  ===============  ========
+Unit        Name       Dimensions       Prefixes
+==========  =========  ===============  ========
+``deg``     degree     [dimensionless]  none
+``arcmin``  arcminute  [dimensionless]  none
+``asec``    arcsecond  [dimensionless]  μ, m
+==========  =========  ===============  ========
 
 **Non-SI energy units**
 
-=======  ======================  ==========
-Unit     Name                    Dimensions
-=======  ======================  ==========
-``eV``   electron volt           L2.M.T-2
-``E_h``  hartree                 L2.M.T-2
-``cal``  thermochemical calorie  L2.M.T-2
-``Ry``   rydberg                 L2.M.T-2
-=======  ======================  ==========
+=======  ======================  ==========  ============
+Unit     Name                    Dimensions  Prefixes
+=======  ======================  ==========  ============
+``eV``   electron volt           L2.M.T-2    all except h
+``E_h``  hartree                 L2.M.T-2    m
+``cal``  thermochemical calorie  L2.M.T-2    all except h
+``Ry``   rydberg                 L2.M.T-2    m
+=======  ======================  ==========  ============
 
 **Non-SI mass units**
 
-=======  ================  ==========
-Unit     Name              Dimensions
-=======  ================  ==========
-``u``    atomic mass unit  M
-``amu``  atomic mass unit  M
-``Da``   dalton            M
-``m_e``  electron mass     M
-=======  ================  ==========
+=======  ================  ==========  ========
+Unit     Name              Dimensions  Prefixes
+=======  ================  ==========  ========
+``u``    atomic mass unit  M           μ
+``amu``  atomic mass unit  M           none
+``Da``   dalton            M           k, M
+``m_e``  electron mass     M           none
+=======  ================  ==========  ========
 
 **Non-SI units of length, area and volume**
 
-======  ========  ==========
-Unit    Name      Dimensions
-======  ========  ==========
-``Å``   angstrom  L
-``a0``  bohr      L
-``b``   barn      L2
-``l``   litre     L3
-``L``   litre     L3
-======  ========  ==========
+======  ========  ==========  ============
+Unit    Name      Dimensions  Prefixes
+======  ========  ==========  ============
+``Å``   angstrom  L           none
+``a0``  bohr      L           none
+``b``   barn      L2          all except h
+``l``   litre     L3          all
+``L``   litre     L3          all
+======  ========  ==========  ============
 
 **Non-SI time units**
 
-=======  ======  ==========
-Unit     Name    Dimensions
-=======  ======  ==========
-``min``  minute  T
-``hr``   hour    T
-``h``    hour    T
-``dy``   day     T
-``yr``   year    T
-=======  ======  ==========
+=======  ======  ==========  ========
+Unit     Name    Dimensions  Prefixes
+=======  ======  ==========  ========
+``min``  minute  T           none
+``hr``   hour    T           none
+``h``    hour    T           none
+``dy``   day     T           none
+``yr``   year    T           k, M, G
+=======  ======  ==========  ========
 
 **Astronomical units**
 
-======  =================  ==========
-Unit    Name               Dimensions
-======  =================  ==========
-``AU``  astronomical unit  L
-``pc``  parsec             L
-``ly``  light-year         L
-======  =================  ==========
+======  =================  ==========  ========
+Unit    Name               Dimensions  Prefixes
+======  =================  ==========  ========
+``AU``  astronomical unit  L           none
+``pc``  parsec             L           k, M, G
+``ly``  light-year         L           k
+======  =================  ==========  ========
 
 **Imperial, customary and US units**
 
-=========  ====================  ==========
-Unit       Name                  Dimensions
-=========  ====================  ==========
-``inch``   inch                  L
-``ft``     foot                  L
-``yard``   yard                  L
-``fur``    furlong               L
-``mi``     mile                  L
-``gal``    Imperial (UK) gallon  L3
-``pt``     Imperial (UK) pint    L3
-``USgal``  US liquid gallon      L3
-``USpt``   US liquid pint        L3
-``st``     stone                 M
-``lb``     pound                 M
-``oz``     ounce                 M
-=========  ====================  ==========
+=========  ====================  ==========  ========
+Unit       Name                  Dimensions  Prefixes
+=========  ====================  ==========  ========
+``inch``   inch                  L           none
+``ft``     foot                  L           none
+``yard``   yard                  L           none
+``fur``    furlong               L           none
+``mi``     mile                  L           none
+``gal``    Imperial (UK) gallon  L3          none
+``pt``     Imperial (UK) pint    L3          none
+``USgal``  US liquid gallon      L3          none
+``USpt``   US liquid pint        L3          none
+``st``     stone                 M           none
+``lb``     pound                 M           none
+``oz``     ounce                 M           none
+=========  ====================  ==========  ========
 
 **Maritime units**
 
-======  =============  ==========
-Unit    Name           Dimensions
-======  =============  ==========
-``NM``  nautical mile  L
-``kn``  knot           L.T-1
-======  =============  ==========
+======  =============  ==========  ========
+Unit    Name           Dimensions  Prefixes
+======  =============  ==========  ========
+``NM``  nautical mile  L           none
+``kn``  knot           L.T-1       none
+======  =============  ==========  ========
 
 **Silly units**
 
-=======  =========  ==========
-Unit     Name       Dimensions
-=======  =========  ==========
-``fir``  firkin     M
-``ftn``  fortnight  T
-=======  =========  ==========
+=======  =========  ==========  ========
+Unit     Name       Dimensions  Prefixes
+=======  =========  ==========  ========
+``fir``  firkin     M           none
+``ftn``  fortnight  T           none
+=======  =========  ==========  ========
 
 **Miscellaneous units**
 
-======  ========  ============
-Unit    Name      Dimensions
-======  ========  ============
-``Td``  townsend  L4.M.T-3.C-1
-``Jy``  jansky    M.T-2
-======  ========  ============
+======  ========  ============  ============
+Unit    Name      Dimensions    Prefixes
+======  ========  ============  ============
+``Td``  townsend  L4.M.T-3.C-1  none
+``Jy``  jansky    M.T-2         all except h
+======  ========  ============  ============
 
 .. units-table-end
 

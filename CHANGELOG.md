@@ -2,8 +2,20 @@
 
 ## 2.1.0 (unreleased)
 
+### Added
+
+- The hecto prefix, `h`, for `Pa`, `L`, `l`, `m` and `g` (as in `hPa`).
+- The SI derived units lumen (`lm`), lux (`lx`), becquerel (`Bq`), gray
+  (`Gy`), sievert (`Sv`) and katal (`kat`).
+
 ### Changes
 
+- Each unit takes only the SI prefixes that make sense for it: all of them
+  for the SI units and units such as `eV`, `bar` and `cal`; a few for some
+  (`kDa`, `Myr`, `Mpc`, `kly`, `mD`, `μu`); none for units such as `min`,
+  `ft`, `atm` and `Å`. The README lists the prefixes for each unit. Prefixes
+  that pyqn 2.0 accepted but a unit no longer takes, as in `kmin` or `μÅ`,
+  still work but give a `DeprecationWarning`; pyqn 3.0 will reject them.
 - `Units`, `Dimensions` and the objects they are built from (`AtomUnit`,
   `BaseUnit` and `SIPrefix`) are immutable: assigning to their attributes
   raises `dataclasses.FrozenInstanceError`, a kind of `AttributeError`.
