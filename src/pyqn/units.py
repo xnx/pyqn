@@ -23,6 +23,7 @@ from .dimensions import (
     d_time,
     d_volume_fraction,
 )
+from .pickling import reads_old_pickles
 
 
 class UnitsConversionError(UnitsError):
@@ -31,6 +32,7 @@ class UnitsConversionError(UnitsError):
 
 # Units objects are immutable; __init__, __eq__, __hash__ and __repr__ are
 # defined below.
+@reads_old_pickles(atom_units=(), undef=False)
 @dataclasses.dataclass(frozen=True, slots=True, init=False, eq=False, repr=False)
 class Units:
     """

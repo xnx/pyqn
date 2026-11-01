@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.1.0 (unreleased)
+## 2.1.0 (1 November 2026)
 
 ### Added
 
@@ -69,7 +69,8 @@
 - `Units`, `Dimensions` and the objects they are built from (`AtomUnit`,
   `BaseUnit` and `SIPrefix`) are immutable: assigning to their attributes
   raises `dataclasses.FrozenInstanceError`, a kind of `AttributeError`.
-  `Units.atom_units` is a tuple rather than a list.
+  `Units.atom_units` is a tuple rather than a list. Pickles from earlier
+  versions can still be read.
 - `Units` and `Dimensions` are hashable, so they can be used in sets and as
   dictionary keys; equal units, such as `J` and `kg.m2.s-2`, hash equal.
 - Parsing units, and arithmetic with units and quantities, are about five

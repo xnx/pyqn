@@ -29,6 +29,7 @@ from .dimensions import (
     d_volume,
     d_volume_fraction,
 )
+from .pickling import reads_old_pickles
 from .si import si_prefixes
 
 # The prefixes that a BaseUnit can take: every SI prefix except hecto (only a
@@ -39,6 +40,7 @@ metric_and_hecto = frozenset(si_prefixes)
 no_prefixes = frozenset()
 
 
+@reads_old_pickles()
 @dataclass(frozen=True, slots=True)
 class BaseUnit:
     """
