@@ -8,7 +8,10 @@
 
 from dataclasses import dataclass
 
+from .pickling import reads_old_pickles
 
+
+@reads_old_pickles(pseudo=())
 @dataclass(frozen=True, slots=True, init=False)
 class Dimensions:
     """

@@ -8,7 +8,10 @@
 
 from dataclasses import dataclass
 
+from .pickling import reads_old_pickles
 
+
+@reads_old_pickles()
 @dataclass(frozen=True, slots=True)
 class SIPrefix:
     """A little class describing SI prefixes."""

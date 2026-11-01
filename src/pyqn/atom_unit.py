@@ -13,6 +13,7 @@ from fractions import Fraction
 from . import domains
 from .base_unit import BaseUnit
 from .errors import UnitsError
+from .pickling import reads_old_pickles
 from .si import si_prefixes
 
 # A unit atom is a stem, perhaps with an SI prefix, followed by an optional
@@ -21,6 +22,7 @@ from .si import si_prefixes
 uatom_patt = re.compile(r"(?P<stem>.+?)(?P<exponent>-?[1-9][0-9]*(?:/[1-9][0-9]*)?)?")
 
 
+@reads_old_pickles()
 @dataclass(frozen=True, slots=True)
 class AtomUnit:
     """

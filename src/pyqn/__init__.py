@@ -8,7 +8,7 @@ from .domains import Domain
 from .quantity import Quantity, QuantityError
 from .units import Units, UnitsConversionError, UnitsError, convert
 
-__version__ = "2.1.0.dev0"
+__version__ = "2.1.0"
 
 __all__ = [
     "Dimensions",
